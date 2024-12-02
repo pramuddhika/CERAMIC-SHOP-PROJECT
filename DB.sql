@@ -169,3 +169,10 @@ CREATE TABLE payment (
    FOREIGN KEY (PAYMENT_STATUS) REFERENCES payment_status(PAYMENT_TAG)
 );
 -- ######### OREDER DATA TABLE END #######################
+
+-- ######### Contact us table ######################
+CREATE TABLE conatactUs (
+  FULL_NAME VARCHAR(30) NOT NULL,
+  EMAIL VARCHAR(30) NOT NULL,
+  MESSAGE VARCHAR(200) NOT NULL
+)
