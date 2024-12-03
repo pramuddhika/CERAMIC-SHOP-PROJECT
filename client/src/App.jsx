@@ -3,7 +3,7 @@ import PrivateRoutes from "./routers/privateRoutes"
 function App() {
   
   return (
-    <div className="mt-10">
+    <div>
       <PrivateRoutes/>
     </div>
   )
