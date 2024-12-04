@@ -59,6 +59,7 @@ const About_us = () => {
             </p>
           </div>
         </div>
+        <p>hi</p>
       </div>
     </div>
   );
