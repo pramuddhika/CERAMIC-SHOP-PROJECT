@@ -2,6 +2,7 @@ import React from "react";
 import hero5 from "../assets/hero5.png";
 import hero7 from "../assets/hero7.png";
 import hero8 from "../assets/hero8.png";
+import axios from "axios";
 
 import { Formik, Form } from "formik";
 import * as Yup from "yup";
@@ -12,10 +13,22 @@ const Contact_us = () => {
     email: "",
     message: "",
   };
-
-  const onSubmit = (values, { resetForm }) => {
-    console.log("Form data:", values);
-    alert("Your message has been sent!");
+  const validationSchema = Yup.object().shape({
+    fullname: Yup.string().required("Required"),
+    email: Yup.string().email("Invalid email").required("Required"),
+    message: Yup.string().required("Required").max(200, "Message is too long"),
+  });
+  const onSubmit = async (values, { resetForm }) => {
+    try {
+      const response = await axios.post("/api/contactus/add", {
+        fullname: values.fullname,
+        email: values.email,
+        message: values.message,
+      });
+      resetForm();
+    } catch (error) {
+      console.error(" failed:", error.response?.data || error.message);
+    }
     resetForm();
   };
 
@@ -27,8 +40,12 @@ const Contact_us = () => {
           <h2 className="text-4xl font-bold text-teal-600 mb-5 text-center">
             CONTACT US
           </h2>
-          <Formik initialValues={initialvalues} onSubmit={onSubmit}>
-            {({ getFieldProps, touched, errors }) => (
+          <Formik
+            initialValues={initialvalues}
+            validationSchema={validationSchema}
+            onSubmit={onSubmit}
+          >
+            {({ getFieldProps, touched, errors, handleSubmit }) => (
               <Form>
                 <div className="mb-4">
                   <input
@@ -40,7 +57,7 @@ const Contact_us = () => {
                     className="bg-gray-100 border rounded-lg w-full h-12 p-3"
                   />
                   {touched.fullname && errors.fullname && (
-                    <div className="text-red-500 text-sm mt-1">
+                    <div className="text-red-500 text-sm mt-1 pl-3">
                       {errors.fullname}
                     </div>
                   )}
@@ -55,7 +72,7 @@ const Contact_us = () => {
                     className="bg-gray-100 border rounded-lg w-full h-12 p-3"
                   />
                   {touched.email && errors.email && (
-                    <div className="text-red-500 text-sm mt-1">
+                    <div className="text-red-500 text-sm mt-1 pl-3">
                       {errors.email}
                     </div>
                   )}
@@ -69,7 +86,7 @@ const Contact_us = () => {
                     className="bg-gray-100 border rounded-lg w-full p-3"
                   />
                   {touched.message && errors.message && (
-                    <div className="text-red-500 text-sm mt-1">
+                    <div className="text-red-500 text-sm mt-1 pl-3">
                       {errors.message}
                     </div>
                   )}
@@ -77,6 +94,8 @@ const Contact_us = () => {
                 <div className="text-left">
                   <button
                     type="submit"
+                    name="submit"
+                    onClick={handleSubmit}
                     className="bg-teal-600 text-white rounded-lg w-full h-12 hover:bg-teal-700 transition-all"
                   >
                     Get in Touch
