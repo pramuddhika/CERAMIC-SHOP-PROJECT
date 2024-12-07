@@ -3,9 +3,10 @@ import hero5 from "../assets/hero5.png";
 import hero7 from "../assets/hero7.png";
 import hero8 from "../assets/hero8.png";
 import axios from "axios";
-
 import { Formik, Form } from "formik";
 import * as Yup from "yup";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const Contact_us = () => {
   const initialvalues = {
@@ -18,18 +19,27 @@ const Contact_us = () => {
     email: Yup.string().email("Invalid email").required("Required"),
     message: Yup.string().required("Required").max(200, "Message is too long"),
   });
-  const onSubmit = async (values, { resetForm }) => {
+  const onSubmit = async (values, { resetForm, setErrors }) => {
     try {
-      const response = await axios.post("/api/contactus/add", {
-        fullname: values.fullname,
-        email: values.email,
-        message: values.message,
-      });
+      // Send the POST request
+      const response = await axios.post(
+        "http://localhost:8080/api/contactus/add",
+        {
+          fullName: values.fullname,
+          email: values.email,
+          message: values.message,
+        }
+      );
+
       resetForm();
+      toast.success(response.data.message || "Message sent successfully!");
     } catch (error) {
-      console.error(" failed:", error.response?.data || error.message);
+      console.error("Failed:", error.response?.data || error.message);
+
+      setErrors({});
+
+      toast.error("Failed to send message. Please try again.");
     }
-    resetForm();
   };
 
   return (
