@@ -44,7 +44,6 @@ export const addMasterDataController = async (req, res) => {
 export const updateMasterDataController = async (req, res) => {
   const { tname } = req.params;
   const { tag, description, status } = req.body;
-  console.log(tname, tag, description, status);
 
   if (!tname || !tag || !description) {
     return res.status(400).json({ error: "Missing required data!" });
