@@ -1,9 +1,8 @@
-import React from "react";
 import About_us from "./About_us";
 import Contact_us from "./Contact_us";
 import LandingPart from "./LandingPart";
 import Navbarcomponent from "./Navbar";
-import { ToastContainer, toast } from "react-toastify";
+import { ToastContainer} from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 const WebLayout = () => {

@@ -27,7 +27,7 @@ const Signup = () => {
         <img
           src={hero6}
           alt="Signup Visual"
-          className="w-full h-full object-cover"
+          className="w-full h-screen object-cover"
         />
       </div>
 
@@ -39,7 +39,7 @@ const Signup = () => {
               className="text-teal-600 cursor-pointer"
               onClick={() => (window.location.href = "/")}
             />
-            <h2 className="text-4xl font-bold text-teal-600">
+            <h2 className="text-4xl font-bold text-main">
               Get Started Now
             </h2>
           </div>
@@ -101,7 +101,7 @@ const Signup = () => {
                 <div>
                   <button
                     type="submit"
-                    className="bg-teal-600 text-white font-semibold rounded-lg w-full h-14 hover:bg-teal-700 transition duration-300"
+                    className="bg-main text-white font-semibold rounded-lg w-full h-14 hover:bg-teal-700 transition duration-300"
                   >
                     Sign Up
                   </button>
@@ -113,7 +113,7 @@ const Signup = () => {
           <div className="text-center mt-8">
             <p className="text-gray-500">
               Already have an account?{" "}
-              <a href="/login" className="text-teal-600 font-medium">
+              <a href="/login" className="text-main font-medium">
                 Log In
               </a>
             </p>

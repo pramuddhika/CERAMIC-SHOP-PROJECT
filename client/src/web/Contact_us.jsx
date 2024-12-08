@@ -1,11 +1,10 @@
-import React from "react";
 import hero5 from "../assets/hero5.png";
 import hero7 from "../assets/hero7.png";
 import hero8 from "../assets/hero8.png";
 import axios from "axios";
 import { Formik, Form } from "formik";
 import * as Yup from "yup";
-import { ToastContainer, toast } from "react-toastify";
+import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 const Contact_us = () => {
@@ -22,14 +21,11 @@ const Contact_us = () => {
   const onSubmit = async (values, { resetForm, setErrors }) => {
     try {
       // Send the POST request
-      const response = await axios.post(
-        "http://localhost:8080/api/contactus/add",
-        {
-          fullName: values.fullname,
-          email: values.email,
-          message: values.message,
-        }
-      );
+      const response = await axios.post("/api/contactus/add", {
+        fullName: values.fullname,
+        email: values.email,
+        message: values.message,
+      });
 
       resetForm();
       toast.success(response.data.message || "Message sent successfully!");
@@ -47,7 +43,7 @@ const Contact_us = () => {
       <div className="grid sm:grid-cols-2 bg-gray-100 h-full">
         {/* Left Column: Form */}
         <div className="bg-white shadow flex flex-col justify-center p-8 h-full">
-          <h2 className="text-4xl font-bold text-teal-600 mb-5 text-center">
+          <h2 className="text-4xl font-bold text-main mb-5 text-center">
             CONTACT US
           </h2>
           <Formik
@@ -106,7 +102,7 @@ const Contact_us = () => {
                     type="submit"
                     name="submit"
                     onClick={handleSubmit}
-                    className="bg-teal-600 text-white rounded-lg w-full h-12 hover:bg-teal-700 transition-all"
+                    className="bg-main text-white rounded-lg w-full h-12 hover:bg-teal-700 transition-all"
                   >
                     Get in Touch
                   </button>
@@ -143,7 +139,7 @@ const Contact_us = () => {
           <img
             src={hero5}
             alt="Contact Us"
-            className="w-full h-full object-cover"
+            className="w-full h-full"
           />
         </div>
       </div>
