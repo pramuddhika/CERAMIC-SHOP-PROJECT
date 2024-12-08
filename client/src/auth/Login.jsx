@@ -1,7 +1,7 @@
-import React from "react";
 import hero6 from "../assets/hero6.png";
 import { Formik, Form } from "formik";
 import { FaChevronLeft } from "react-icons/fa";
+import axios from "axios";
 
 const Login = () => {
   const initialValues = {
@@ -34,7 +34,7 @@ const Login = () => {
         <img
           src={hero6}
           alt="About Us"
-          className="w-full h-full object-cover"
+          className="w-full h-screen object-cover"
         />
       </div>
 
@@ -43,10 +43,10 @@ const Login = () => {
         <div className="w-full max-w-lg mx-auto">
           <div className="text-center  flex items-center justify-center space-x-2">
             <FaChevronLeft
-              className="text-teal-600 cursor-pointer"
+              className="text-main cursor-pointer"
               onClick={() => (window.location.href = "/")}
             />
-            <h2 className="text-4xl font-bold text-teal-600">Welcome Back</h2>
+            <h2 className="text-4xl font-bold text-main">Welcome Back</h2>
           </div>
           <p className="text-gray-500 text-center mb-8">
             Please log in to your account.
@@ -90,7 +90,7 @@ const Login = () => {
                 <div>
                   <button
                     type="submit"
-                    className="bg-teal-600 text-white font-semibold rounded-lg w-full h-14 hover:bg-teal-700 transition duration-300"
+                    className="bg-main text-white font-semibold rounded-lg w-full h-14 hover:bg-teal-700 transition duration-300"
                   >
                     Sign In
                   </button>
@@ -101,8 +101,8 @@ const Login = () => {
 
           <div className="text-center mt-8">
             <p className="text-gray-500">
-              Don't have an account?{" "}
-              <a href="/signup" className="text-teal-600 font-medium">
+              Don&apos;t have an account?{" "}
+              <a href="/signup" className="text-main font-medium">
                 Sign Up
               </a>
             </p>

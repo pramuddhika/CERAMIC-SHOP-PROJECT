@@ -1,4 +1,3 @@
-import React from "react";
 import { Navbar, Nav, Container } from "react-bootstrap";
 import Button from "react-bootstrap/Button";
 import { NavLink } from "react-router-dom";
@@ -28,6 +27,18 @@ const NavbarComponent = () => {
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
         <Navbar.Collapse id="basic-navbar-nav">
           <Nav className="ms-auto">
+          <Nav.Link
+              href="#About-us"
+              className={({ isActive }) =>
+                `nav-link-custom ${isActive ? "active" : ""}`
+              }
+              style={{
+                color: "#FFFFFF",
+                transition: "color 0.3s ease",
+              }}
+            >
+              About Us
+            </Nav.Link>
             <Nav.Link
               href="#contact-us"
               className={({ isActive }) =>
@@ -39,18 +50,6 @@ const NavbarComponent = () => {
               }}
             >
               Contact Us
-            </Nav.Link>
-            <Nav.Link
-              href="#About-us"
-              className={({ isActive }) =>
-                `nav-link-custom ${isActive ? "active" : ""}`
-              }
-              style={{
-                color: "#FFFFFF",
-                transition: "color 0.3s ease",
-              }}
-            >
-              About Us
             </Nav.Link>
           </Nav>
         </Navbar.Collapse>

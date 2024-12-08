@@ -1,4 +1,3 @@
-import React from "react";
 import hero4 from "../assets/hero4.png";
 
 const About_us = () => {
@@ -7,7 +6,7 @@ const About_us = () => {
       <div className="grid sm:grid-cols-2 bg-gray-100">
         {/* Left Side */}
         <div className="min-h-[600px] bg-slate-500 shadow flex items-center justify-center">
-          <img src={hero4} alt="About Us" className="w-full h-auto" />
+          <img src={hero4} alt="About Us" className="w-full h-screen" />
         </div>
 
         {/* Right Side */}
