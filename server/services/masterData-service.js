@@ -55,3 +55,29 @@ export const addMasterDataService = async (tname, tag, description, status) => {
     });
   });
 };
+
+//update data in db
+export const updateMasterDataService = async (tname, tag, description, status) => {
+  return new Promise((resolve, reject) => {
+    let query;
+    switch (tname) {
+      case "payment":
+        query = `UPDATE payment_status SET DESCRIPTION='${description}', STATUS='${status}' WHERE PAYMENT_TAG='${tag}'`;
+        break;
+      case "order":
+        query = `UPDATE order_type SET DESCRIPTION='${description}', STATUS='${status}' WHERE ORDER_TYPE_TAG='${tag}'`;
+        break;
+      case "stock":
+        query = `UPDATE stock_stages SET DESCRIPTION='${description}', STATUS='${status}' WHERE STOCK_STAGE_TAG='${tag}'`;
+        break;
+    }
+
+    db.query(query, (err, result) => {
+      if (err) {
+        reject({ message: "Something went wrong, Please try again!" });
+      } else {
+        resolve({ message: "Data updated successfully!" });
+      }
+    });
+  });
+};
