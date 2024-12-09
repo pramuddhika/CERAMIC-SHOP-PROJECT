@@ -1,10 +1,10 @@
 import { Link, useLocation } from "react-router-dom";
 import PropTypes from "prop-types";
 
-const SideNav = ({setActiveTopic}) => {
+const SideNav = ({ setActiveTopic }) => {
   const location = useLocation();
 
-  const NavItem = ({ to, Icon,topic, label }) => {
+  const NavItem = ({ to, Icon, topic, label }) => {
     const isActive = location.pathname === to;
     NavItem.propTypes = {
       to: PropTypes.string.isRequired,
@@ -41,8 +41,8 @@ const SideNav = ({setActiveTopic}) => {
         <NavItem
           to="/app/Member_Management"
           Icon={() => <i className="bi bi-person-lines-fill"></i>}
-          label="Members"
-          topic="Member Management"
+          label="Product"
+          topic="Product"
         />
       </div>
     </div>
