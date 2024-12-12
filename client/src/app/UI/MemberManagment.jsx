@@ -6,7 +6,7 @@ import { useFormik } from "formik";
 const MemberManagement = () => {
   const [activeTab, setActiveTab] = useState(1);
   const [currentPage, setCurrentPage] = useState(1);
-  const [isModalOpen, setIsModalOpen] = useState(false); // State for modal visibility
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const itemsPerPage = 5;
 
   const handleTabClick = (num) => setActiveTab(num);
@@ -25,15 +25,15 @@ const MemberManagement = () => {
   const startIndex = (currentPage - 1) * itemsPerPage;
   const currentData = data.slice(startIndex, startIndex + itemsPerPage);
   const totalPages = Math.ceil(data.length / itemsPerPage);
-  const [image, setImage] = useState(null); // To store the uploaded image
+  const [image, setImage] = useState(null);
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setImage(reader.result); // Set the uploaded image as base64 string
+        setImage(reader.result);
       };
-      reader.readAsDataURL(file); // Read file as base64 string
+      reader.readAsDataURL(file);
     }
   };
   const formik = useFormik({
