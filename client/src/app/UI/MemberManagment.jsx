@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { FaEdit } from "react-icons/fa";
 import { AiOutlinePlus } from "react-icons/ai";
 import { useFormik } from "formik";
@@ -144,7 +144,7 @@ const MemberManagement = () => {
                 <div className="flex justify-between items-center mb-4">
                   <h2 className="text-lg font-bold">Add Details</h2>
                   <button
-                    className="text-gray-500 hover:text-gray-800"
+                    className="text-main hover:text-main"
                     onClick={() => {
                       handleModalToggle();
                       formik.resetForm();
@@ -174,7 +174,7 @@ const MemberManagement = () => {
                         </label>
                       </div>
                       <button
-                        className="px-4 py-2 bg-blue-500 text-white text-sm rounded hover:bg-blue-600"
+                        className="px-4 py-2 bg-main text-white text-sm rounded hover:bg-{#2E4374}"
                         onClick={() => console.log("Upload Image")}
                       >
                         Upload Image
