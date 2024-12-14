@@ -75,8 +75,8 @@ const MemberManagement = () => {
             Add New
           </button>
         </div>
-        <div className="card-body">
-          <table className="border text-sm table-fixed w-full">
+        <div className="card-body overflow-auto">
+          <table className="border text-sm table-fixed w-full overflow-auto">
             <thead className="bg-slate-400">
               <tr className="text-center">
                 <th className="border py-2 min-w-[200px]">Code</th>
@@ -105,9 +105,9 @@ const MemberManagement = () => {
               ))}
             </tbody>
           </table>
-
-          {/* Pagination */}
-          <div className="mt-3 flex justify-end items-center space-x-2">
+        </div>
+        {/* Pagination */}
+        <div className="mt-3 flex justify-end items-center space-x-2 p-2">
             {Array.from({ length: totalPages }, (_, index) => (
               <button
                 key={index}
@@ -122,7 +122,6 @@ const MemberManagement = () => {
               </button>
             ))}
           </div>
-        </div>
       </div>
 
       {isModalOpen && (
