@@ -25,7 +25,7 @@ const MemberManagement = () => {
   const startIndex = (currentPage - 1) * itemsPerPage;
   const currentData = data.slice(startIndex, startIndex + itemsPerPage);
   const totalPages = Math.ceil(data.length / itemsPerPage);
-  const [image, setImage] = useState(null);
+  const [setImage] = useState(null);
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -48,8 +48,8 @@ const MemberManagement = () => {
     },
   });
   return (
-    <div className="p-4">
-      <div className="card shadow-lg rounded-lg h-full w-full">
+    <div>
+      <div className="card rounded-lg h-full w-full">
         <div className="card-header flex justify-between items-center border-b py-2 bg-gray-100">
           <ul className="flex space-x-4">
             {["Category", "Subcategory", "Product"].map((tabName, index) => (
@@ -75,49 +75,39 @@ const MemberManagement = () => {
             Add New
           </button>
         </div>
-        <div className="card-body flex-grow p-4 flex flex-col">
-          <div
-            className="overflow-auto p-4"
-            style={{
-              margin: "0 auto",
-              maxWidth: "1960px",
-              minWidth: "1100px",
-              minHeight: "400px",
-            }}
-          >
-            <table className="table-auto border border-amber-900 w-full text-sm">
-              <thead className="bg-cyan-500">
-                <tr>
-                  <th className="border px-6 py-2 w-1/5">Code</th>
-                  <th className="border px-6 py-2 w-1/5">Name</th>
-                  <th className="border px-6 py-2 w-2/5">Description</th>
-                  <th className="border px-6 py-2 w-1/5">Status</th>
-                  <th className="border px-6 py-2 w-1/5">
-                    <div className="flex justify-center">Actions</div>
-                  </th>
+        <div className="card-body">
+          <table className="border text-sm table-fixed w-full">
+            <thead className="bg-slate-400">
+              <tr className="text-center">
+                <th className="border py-2 min-w-[200px]">Code</th>
+                <th className="border py-2 min-w-[200px]">Name</th>
+                <th className="border py-2 min-w-[500px]">Description</th>
+                <th className="border py-2 min-w-[180px]">Status</th>
+                <th className="border py-2 min-w-[180px]">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="text-gray-800">
+              {currentData.map((row, index) => (
+                <tr key={index}>
+                  <td className="border px-6 py-2 w-64">{row.code}</td>
+                  <td className="border px-6 py-2">{row.name}</td>
+                  <td className="border px-6 py-2">{row.description}</td>
+                  <td className="border px-6 py-2">{row.status}</td>
+                  <td className="border px-6 py-4 flex justify-center items-center">
+                    <button
+                      className="text-blue-600 hover:text-blue-800"
+                      onClick={handleModalToggle}
+                    >
+                      <FaEdit />
+                    </button>
+                  </td>
                 </tr>
-              </thead>
-              <tbody className="divide-y">
-                {currentData.map((row, index) => (
-                  <tr key={index}>
-                    <td className="border px-6 py-2">{row.code}</td>
-                    <td className="border px-6 py-2">{row.name}</td>
-                    <td className="border px-6 py-2">{row.description}</td>
-                    <td className="border px-6 py-2">{row.status}</td>
-                    <td className="border px-6 py-2 flex justify-center items-center">
-                      <button
-                        className="text-blue-600 hover:text-blue-800"
-                        onClick={handleModalToggle}
-                      >
-                        <FaEdit />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          <div className="mt-4 flex justify-center items-center space-x-2">
+              ))}
+            </tbody>
+          </table>
+
+          {/* Pagination */}
+          <div className="mt-3 flex justify-end items-center space-x-2">
             {Array.from({ length: totalPages }, (_, index) => (
               <button
                 key={index}
@@ -138,7 +128,6 @@ const MemberManagement = () => {
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white rounded-lg shadow-lg w-1/3 p-6">
-            <h2 className="text-lg font-bold mb-4">Add New Item</h2>
             <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
               <div className="bg-white rounded-lg shadow-lg w-2/3 p-6">
                 <div className="flex justify-between items-center mb-4">
@@ -159,11 +148,10 @@ const MemberManagement = () => {
                     <div className="w-1/3 p-4 flex flex-col items-center">
                       <div className="mb-4">
                         <label className="block">
-                          <div className="w-32 h-32 rounded-full border border-gray-300 overflow-hidden flex items-center justify-center bg-gray-100">
+                          <div className="size-32 rounded-full border border-gray-300 overflow-hidden flex items-center justify-center bg-gray-100">
                             <img
-                              src="https://via.placeholder.com/"
-                              alt="Upload"
                               className="object-cover w-full h-full"
+                              placeholder="Upload Image"
                             />
                           </div>
                           <input
@@ -174,23 +162,29 @@ const MemberManagement = () => {
                         </label>
                       </div>
                       <button
-                        className="px-4 py-2 bg-main text-white text-sm rounded hover:bg-{#2E4374}"
+                        className="px-4 py-2 bg-slate-500 text-white text-sm rounded hover:bg-blue-800"
                         onClick={() => console.log("Upload Image")}
                       >
                         Upload Image
                       </button>
-
-                      <input
+                      <div>
+                        <label className="block text-sm font-semibold mb-1 mt-4">
+                          ID
+                        </label>
+                        <input
                         type="text"
                         name="code"
-                        className="w-full border rounded px-3 py-2 mt-4"
+                        readOnly
+                        className="w-full border rounded px-3 py-2 focus:outline-none"
                         placeholder="Code"
                         value={formik.values.code}
                         onChange={formik.handleChange}
                       />
+                      </div>
+                     
                     </div>
 
-                    <div className="w-2/3 p-4">
+                    <div className="flex flex-col w-2/3 p-4">
                       <input
                         type="text"
                         name="name"
@@ -202,7 +196,7 @@ const MemberManagement = () => {
 
                       <textarea
                         name="description"
-                        className="w-full border rounded px-3 py-2 mb-4"
+                        className="w-full min-w-[300px] border rounded px-3 py-2 mb-4"
                         placeholder="Description"
                         rows={4}
                         value={formik.values.description}
@@ -258,11 +252,12 @@ const MemberManagement = () => {
                         </button>
                         <button
                           type="submit"
-                          className="px-4 py-2 bg-blue-500 text-white text-sm rounded hover:bg-blue-600"
+                          className="px-4 py-2 bg-slate-500 text-white text-sm rounded hover:bg-blue-800"
                         >
                           Submit
                         </button>
                       </div>
+
                     </div>
                   </div>
                 </form>

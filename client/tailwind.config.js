@@ -10,6 +10,9 @@ export default {
         main: "#4B527E",
       }
     },
+    width: {
+      'calc': 'calc(100% - 180px)',
+    },
   },
   plugins: [],
 }
