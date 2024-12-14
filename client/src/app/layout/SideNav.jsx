@@ -39,10 +39,10 @@ const SideNav = ({ setActiveTopic }) => {
           topic="Dashboard"
         />
         <NavItem
-          to="/app/Member_Management"
+          to="/app/Product_Management"
           Icon={() => <i className="bi bi-person-lines-fill"></i>}
           label="Product"
-          topic="Product"
+          topic="Product Maganement"
         />
       </div>
     </div>

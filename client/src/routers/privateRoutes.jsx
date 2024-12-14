@@ -12,11 +12,12 @@ const router = createBrowserRouter([
   { path: "/login", element: <Login /> },
   { path: "/signup", element: <Signup /> },
   {
-    path: "/app", element: <Layout />,
+    path: "/app",
+    element: <Layout />,
     children: [
       { path: "dashboard", element: <DashBoard /> },
-      { path: "Member_Management", element: <MemberManagemnet/> },
-    ]
+      { path: "Product_Management", element: <MemberManagemnet /> },
+    ],
   },
 ]);
 const PrivateRoutes = () => {
