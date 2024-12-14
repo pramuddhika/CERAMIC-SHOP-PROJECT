@@ -128,7 +128,6 @@ const MemberManagement = () => {
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white rounded-lg shadow-lg w-1/3 p-6">
-            <h2 className="text-lg font-bold mb-4">Add New Item</h2>
             <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
               <div className="bg-white rounded-lg shadow-lg w-2/3 p-6">
                 <div className="flex justify-between items-center mb-4">
@@ -149,11 +148,10 @@ const MemberManagement = () => {
                     <div className="w-1/3 p-4 flex flex-col items-center">
                       <div className="mb-4">
                         <label className="block">
-                          <div className="w-32 h-32 rounded-full border border-gray-300 overflow-hidden flex items-center justify-center bg-gray-100">
+                          <div className="size-32 rounded-full border border-gray-300 overflow-hidden flex items-center justify-center bg-gray-100">
                             <img
-                              src="https://via.placeholder.com/"
-                              alt="Upload"
                               className="object-cover w-full h-full"
+                              placeholder="Upload Image"
                             />
                           </div>
                           <input
@@ -164,23 +162,29 @@ const MemberManagement = () => {
                         </label>
                       </div>
                       <button
-                        className="px-4 py-2 bg-main text-white text-sm rounded hover:bg-{#2E4374}"
+                        className="px-4 py-2 bg-slate-500 text-white text-sm rounded hover:bg-blue-800"
                         onClick={() => console.log("Upload Image")}
                       >
                         Upload Image
                       </button>
-
-                      <input
+                      <div>
+                        <label className="block text-sm font-semibold mb-1 mt-4">
+                          ID
+                        </label>
+                        <input
                         type="text"
                         name="code"
-                        className="w-full border rounded px-3 py-2 mt-4"
+                        readOnly
+                        className="w-full border rounded px-3 py-2 focus:outline-none"
                         placeholder="Code"
                         value={formik.values.code}
                         onChange={formik.handleChange}
                       />
+                      </div>
+                     
                     </div>
 
-                    <div className="w-2/3 p-4">
+                    <div className="flex flex-col w-2/3 p-4">
                       <input
                         type="text"
                         name="name"
@@ -192,7 +196,7 @@ const MemberManagement = () => {
 
                       <textarea
                         name="description"
-                        className="w-full border rounded px-3 py-2 mb-4"
+                        className="w-full min-w-[300px] border rounded px-3 py-2 mb-4"
                         placeholder="Description"
                         rows={4}
                         value={formik.values.description}
@@ -248,11 +252,12 @@ const MemberManagement = () => {
                         </button>
                         <button
                           type="submit"
-                          className="px-4 py-2 bg-blue-500 text-white text-sm rounded hover:bg-blue-600"
+                          className="px-4 py-2 bg-slate-500 text-white text-sm rounded hover:bg-blue-800"
                         >
                           Submit
                         </button>
                       </div>
+
                     </div>
                   </div>
                 </form>
