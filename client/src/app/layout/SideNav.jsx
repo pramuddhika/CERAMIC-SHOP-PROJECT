@@ -17,7 +17,9 @@ const SideNav = ({ setActiveTopic }) => {
       <Link to={to} onClick={() => setActiveTopic(topic)}>
         <div
           className={`flex pl-7 gap-2 items-center hover:text-white hover:bg-text-primary rounded-lg p-2 cursor-pointer
-            ${isActive ? "text-white bg-slate-900 font-bold" : "text-gray-300"}`}
+            ${
+              isActive ? "text-white bg-slate-900 font-bold" : "text-gray-300"
+            }`}
         >
           <Icon className="h-6 w-6" />
           <p className="flex items-center">{label}</p>
@@ -43,6 +45,12 @@ const SideNav = ({ setActiveTopic }) => {
           Icon={() => <i className="bi bi-person-lines-fill"></i>}
           label="Product"
           topic="Product Maganement"
+        />
+        <NavItem
+          to="/app/MasterData"
+          Icon={() => <i className="bi bi-card-text"></i>}
+          label="Master Data"
+          topic="Master Data"
         />
       </div>
     </div>
