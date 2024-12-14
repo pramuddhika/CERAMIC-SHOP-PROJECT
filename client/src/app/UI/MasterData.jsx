@@ -5,6 +5,7 @@ import { useEffect } from "react";
 import axios from "axios";
 import { Formik, Form } from "formik";
 import * as Yup from "yup";
+import { FaRegFrown } from "react-icons/fa";
 
 const Masterdata = () => {
   const [activeTab, setActiveTab] = useState(1);
@@ -48,7 +49,9 @@ const Masterdata = () => {
   };
   const validationSchema = Yup.object().shape({
     tag: Yup.string().required("Required").max(10, "Tag is too long"),
-    description: Yup.string(),
+    description: Yup.string()
+      .required("Required")
+      .max(40, "Description too long"),
   });
   const [formValues, setFormValues] = useState(initialvalues);
 
@@ -142,36 +145,47 @@ const Masterdata = () => {
                 </tr>
               </thead>
               <tbody className="divide-y">
-                {currentData.map((row, index) => (
-                  <tr key={index}>
-                    <td className="border px-6 py-2">
-                      {activeTab === 1
-                        ? row.PAYMENT_TAG
-                        : activeTab === 2
-                        ? row.ORDER_TYPE_TAG
-                        : row.STOCK_STAGE_TAG}
-                    </td>
-                    <td className="border px-6 py-2">{row.DESCRIPTION}</td>
-                    {row.STATUS === 1 ? (
-                      <td className="border px-6 py-2">
-                        <span className="text-green-600">Active</span>
-                      </td>
-                    ) : (
-                      <td className="border px-6 py-2">
-                        <span className="text-red-600">Inactive</span>
-                      </td>
-                    )}
-
-                    <td className="border px-6 py-2 flex justify-center items-center">
-                      <button
-                        className="text-blue-600 hover:text-blue-800"
-                        onClick={() => handleEdit(row)}
-                      >
-                        <FaEdit />
-                      </button>
+                {currentData.length === 0 ? (
+                  <tr>
+                    <td colSpan="4" className="text-center py-4">
+                      <span className="text-gray-500">
+                        <FaRegFrown className="inline mr-2" />
+                        No Data Available
+                      </span>
                     </td>
                   </tr>
-                ))}
+                ) : (
+                  currentData.map((row, index) => (
+                    <tr key={index}>
+                      <td className="border px-6 py-2">
+                        {activeTab === 1
+                          ? row.PAYMENT_TAG
+                          : activeTab === 2
+                          ? row.ORDER_TYPE_TAG
+                          : row.STOCK_STAGE_TAG}
+                      </td>
+                      <td className="border px-6 py-2">{row.DESCRIPTION}</td>
+                      {row.STATUS === 1 ? (
+                        <td className="border px-6 py-2">
+                          <span className="text-green-600">Active</span>
+                        </td>
+                      ) : (
+                        <td className="border px-6 py-2">
+                          <span className="text-red-600">Inactive</span>
+                        </td>
+                      )}
+
+                      <td className="border px-6 py-2 flex justify-center items-center">
+                        <button
+                          className="text-blue-600 hover:text-blue-800"
+                          onClick={() => handleEdit(row)}
+                        >
+                          <FaEdit />
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>
