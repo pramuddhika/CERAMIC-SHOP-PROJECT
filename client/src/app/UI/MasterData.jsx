@@ -35,8 +35,6 @@ const Masterdata = () => {
     }
   };
 
-  console.log("loading", isLaoding);
-
   useEffect(() => {
     fetchMasterData();
   }, [activeTab]);
@@ -142,7 +140,7 @@ const Masterdata = () => {
               </tr>
             </thead>
             <tbody className="divide-y">
-              {currentData.message === "No data found!" ? (
+              {(currentData.message === "No data found!" || currentData.length === 0) ? (
                 <tr>
                   <td colSpan="4" className="text-center py-4">
                     <span className="text-gray-500">No Data Available</span>

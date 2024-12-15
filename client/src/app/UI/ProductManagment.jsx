@@ -1,17 +1,34 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FaEdit } from "react-icons/fa";
 import { AiOutlinePlus } from "react-icons/ai";
 import { useFormik } from "formik";
+import axios from "axios";
 
-const MemberManagement = () => {
+const ProductManagement = () => {
   const [activeTab, setActiveTab] = useState(1);
   const [currentPage, setCurrentPage] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isEdit, setIsEdit] = useState(false);
+  const [newId, setNewId] = useState("");
   const itemsPerPage = 5;
 
   const handleTabClick = (num) => setActiveTab(num);
   const handlePageChange = (page) => setCurrentPage(page);
   const handleModalToggle = () => setIsModalOpen(!isModalOpen);
+
+  const getNewId = async () => {
+    const tabname = activeTab === 1 ? "category" : activeTab === 2 ? "subcategory" : "product";
+    try {
+      const Idresponse = await axios.get(`/api/productdata/get/${tabname}`);
+      setNewId(Idresponse?.data?.newid);
+    } catch (error) {
+      console.log("Error:", error);
+    }
+  }
+
+  useEffect(() => { 
+    getNewId();
+  }, [activeTab]);
 
   const data = Array(20)
     .fill(null)
@@ -19,12 +36,14 @@ const MemberManagement = () => {
       code: `Code-${index + 1}`,
       name: `Name-${index + 1}`,
       description: `description-${index + 1}`,
-      status: "Active",
+      status: "1",
     }));
 
   const startIndex = (currentPage - 1) * itemsPerPage;
   const currentData = data.slice(startIndex, startIndex + itemsPerPage);
   const totalPages = Math.ceil(data.length / itemsPerPage);
+
+
   const [setImage] = useState(null);
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -41,12 +60,22 @@ const MemberManagement = () => {
       code: "",
       name: "",
       description: "",
-      status: "active",
+      status: "1",
     },
     onSubmit: (values) => {
       console.log("Form Values:", values);
     },
   });
+
+  const handleEdit = (row) => {
+    console.log("Edit Row:", row);
+    setIsEdit(true);
+    formik.setValues(row);
+    handleModalToggle();
+  }
+
+
+
   return (
     <div>
       <div className="card rounded-lg h-full w-full">
@@ -67,15 +96,18 @@ const MemberManagement = () => {
               </li>
             ))}
           </ul>
+          <div>
           <button
             className="text-white bg-cyan-950 hover:bg-cyan-900 px-3 py-1 rounded-lg flex items-center"
             onClick={handleModalToggle}
           >
             <AiOutlinePlus className="mr-1" />
             Add New
-          </button>
+            </button>
+            
+          </div>
         </div>
-        <div className="card-body overflow-auto">
+        <div className="card-body overflow-auto flex justify-center">
           <table className="border text-sm table-fixed w-full overflow-auto">
             <thead className="bg-slate-400">
               <tr className="text-center">
@@ -92,11 +124,23 @@ const MemberManagement = () => {
                   <td className="border px-6 py-2 w-64">{row.code}</td>
                   <td className="border px-6 py-2">{row.name}</td>
                   <td className="border px-6 py-2">{row.description}</td>
-                  <td className="border px-6 py-2">{row.status}</td>
+                  {row.status === "1" ? (
+                      <td className="border px-6 text-center">
+                        <span className="text-white bg-green-600 py-2 px-4 rounded-2xl">
+                          Active
+                        </span>
+                      </td>
+                    ) : (
+                      <td className="border px-6 py-2 text-center">
+                        <span className="text-white bg-red-600 py-2  px-4 rounded-2xl">
+                          Inactive
+                        </span>
+                      </td>
+                    )}
                   <td className="border px-6 py-4 flex justify-center items-center">
                     <button
                       className="text-blue-600 hover:text-blue-800"
-                      onClick={handleModalToggle}
+                      onClick={() => handleEdit(row)}
                     >
                       <FaEdit />
                     </button>
@@ -130,12 +174,16 @@ const MemberManagement = () => {
             <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
               <div className="bg-white rounded-lg shadow-lg w-2/3 p-6">
                 <div className="flex justify-between items-center mb-4">
-                  <h2 className="text-lg font-bold">Add Details</h2>
+                  <h2 className="text-lg font-bold">
+                    {isEdit ? "Edit Selected " : "Add New "}
+                    {activeTab === 1 ? "Category" : activeTab === 2 ? "Subcategory" : "Product"}
+                  </h2>
                   <button
                     className="text-main hover:text-main"
                     onClick={() => {
                       handleModalToggle();
                       formik.resetForm();
+                      setIsEdit(false);
                     }}
                   >
                     ✖
@@ -161,14 +209,14 @@ const MemberManagement = () => {
                         </label>
                       </div>
                       <button
-                        className="px-4 py-2 bg-slate-500 text-white text-sm rounded hover:bg-blue-800"
+                        className="px-4 py-2 bg-slate-500 text-white text-sm rounded hover:bg-slate-800"
                         onClick={() => console.log("Upload Image")}
                       >
                         Upload Image
                       </button>
                       <div>
                         <label className="block text-sm font-semibold mb-1 mt-4">
-                          ID
+                          {activeTab === 1 ? "Category" : activeTab === 2 ? "Subcategory" : "Product"} Code
                         </label>
                         <input
                         type="text"
@@ -176,7 +224,7 @@ const MemberManagement = () => {
                         readOnly
                         className="w-full border rounded px-3 py-2 focus:outline-none"
                         placeholder="Code"
-                        value={formik.values.code}
+                        value={formik.values.code ? formik.values.code : formik.values.code = newId }
                         onChange={formik.handleChange}
                       />
                       </div>
@@ -184,6 +232,7 @@ const MemberManagement = () => {
                     </div>
 
                     <div className="flex flex-col w-2/3 p-4">
+                   
                       <input
                         type="text"
                         name="name"
@@ -212,8 +261,8 @@ const MemberManagement = () => {
                               type="radio"
                               id="active"
                               name="status"
-                              value="active"
-                              checked={formik.values.status === "active"}
+                              value= "1"
+                              checked={formik.values.status === "1"}
                               onChange={formik.handleChange}
                               className="mr-2"
                             />
@@ -226,8 +275,8 @@ const MemberManagement = () => {
                               type="radio"
                               id="inactive"
                               name="status"
-                              value="inactive"
-                              checked={formik.values.status === "inactive"}
+                              value= "0"
+                              checked={formik.values.status === "0"}
                               onChange={formik.handleChange}
                               className="mr-2"
                             />
@@ -245,13 +294,14 @@ const MemberManagement = () => {
                           onClick={() => {
                             handleModalToggle();
                             formik.resetForm();
+                            setIsEdit(false);
                           }}
                         >
                           Cancel
                         </button>
                         <button
                           type="submit"
-                          className="px-4 py-2 bg-slate-500 text-white text-sm rounded hover:bg-blue-800"
+                          className="px-4 py-2 bg-slate-500 text-white text-sm rounded hover:bg-slate-800"
                         >
                           Submit
                         </button>
@@ -269,4 +319,4 @@ const MemberManagement = () => {
   );
 };
 
-export default MemberManagement;
+export default ProductManagement;

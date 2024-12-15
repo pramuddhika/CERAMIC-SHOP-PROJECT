@@ -32,7 +32,7 @@ export const getLastIDService = async (tname) => {
         } else {
           id = `PRO-000001`;
         }
-        resolve({ productcode: id });
+        resolve({ newid: id });
       }
       if (tname == "category") {
         const category_code = result[0].CATAGORY_CODE;
@@ -44,7 +44,7 @@ export const getLastIDService = async (tname) => {
         } else {
           id = `CAT-000001`;
         }
-        resolve({ categorycode: id });
+        resolve({ newid: id });
       }
       if (tname == "subcategory") {
         const subcategory_code = result[0].SUB_CATAGORY_CODE;
@@ -56,7 +56,7 @@ export const getLastIDService = async (tname) => {
         } else {
           id = `SUB-000001`;
         }
-        resolve({ subcategorycode: id });
+        resolve({ newid: id });
       }
     });
   });
