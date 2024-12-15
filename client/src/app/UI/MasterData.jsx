@@ -1,46 +1,38 @@
 import { useState } from "react";
+import { toast } from "react-toastify";
+import 'react-toastify/dist/ReactToastify.css';
 import { FaEdit } from "react-icons/fa";
 import { AiOutlinePlus } from "react-icons/ai";
 import { useEffect } from "react";
 import axios from "axios";
 import { Formik, Form } from "formik";
 import * as Yup from "yup";
-import { FaRegFrown } from "react-icons/fa";
 
 const Masterdata = () => {
   const [activeTab, setActiveTab] = useState(1);
-  const [currentPage, setCurrentPage] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentData, setCurrentData] = useState([]);
   const [isEditing, setIsEditing] = useState(false);
-  const itemsPerPage = 5;
 
   const handleTabClick = (num) => {
     setActiveTab(num);
   };
-  const handlePageChange = (page) => setCurrentPage(page);
   const handleModalToggle = () => setIsModalOpen(!isModalOpen);
-  useEffect(() => {
+
+  const fetchMasterData = async () => {
     const tabname =
       activeTab === 1 ? "payment" : activeTab === 2 ? "order" : "stock";
+    try {
+      const response = await axios.get(`/api/masterdata/get/${tabname}`);
+      setCurrentData(response.data);
+    } catch (error) {
+      console.error("Failed:", error.response?.data || error.message);
+    }
+  };
 
-    axios
-      .get(`/api/masterdata/get/${tabname}`)
-      .then((res) => setCurrentData(res.data));
+  useEffect(() => {
+    fetchMasterData();
   }, [activeTab]);
-  // const data = Array(20)
-  //   .fill(null)
-  //   .map((_, index) => ({
-  //     code: `Code-${index + 1}`,
-  //     name: `Name-${index + 1}`,
-  //     description: `description-${index + 1}`,
-  //     status: "Active",
-  //   }));
-
-  // const startIndex = (currentPage - 1) * itemsPerPage;
-  //const currentData = data.slice(startIndex, startIndex + itemsPerPage);
-
-  // const totalPages = Math.ceil(data.length / itemsPerPage);
 
   const initialvalues = {
     tag: "",
@@ -69,40 +61,36 @@ const Masterdata = () => {
       status: rowData.STATUS === 1 ? "1" : "0",
     });
   };
-  const onSubmit = async (values, { resetForm, setErrors }) => {
+
+  const onSubmit = async (values, { setErrors }) => {
     try {
-      // Send the POST request
-      const tabname =
-        activeTab === 1 ? "payment" : activeTab === 2 ? "order" : "stock";
-      if (isEditing) {
-        await axios.put(`/api/masterdata/update/${tabname}`, {
+      if(isEditing){
+        const tabname = activeTab === 1 ? "payment" : activeTab === 2 ? "order" : "stock";
+        const response = await axios.put(`/api/masterdata/update/${tabname}`, {
           tag: values.tag,
           description: values.description,
           status: values.status === "1" ? 1 : 0,
         });
+        toast.success(response.data.message || "Data updated successfully!");
       } else {
-        await axios.post(`/api/masterdata/add/${tabname}`, {
+        const tabname = activeTab === 1 ? "payment" : activeTab === 2 ? "order" : "stock";
+        const response = await axios.post(`/api/masterdata/add/${tabname}`, {
           tag: values.tag,
           description: values.description,
           status: values.status === "1" ? 1 : 0,
         });
+        toast.success(response.data.message || "Data added successfully!");
       }
       setIsEditing(false);
       setFormValues(initialvalues);
       handleModalToggle();
-      await axios
-        .get(`/api/masterdata/get/${tabname}`)
-        .then((res) => setCurrentData(res.data));
-
-      toast.success(response.data.message || "Master data added successfully!");
-    } catch (error) {
+      fetchMasterData();
+    } catch (error) { 
       console.error("Failed:", error.response?.data || error.message);
-
       setErrors({});
-
-      toast.error("Failed to send message. Please try again.");
     }
   };
+
   return (
     <>
       <div className="card rounded-lg h-full w-full">
@@ -131,229 +119,209 @@ const Masterdata = () => {
             Add New
           </button>
         </div>
-        <div className=" flex-grow p-4 flex flex-col h-full">
-          <div className="card-body">
-            <table className="border text-sm table-fixed w-full">
-              <thead className="bg-slate-400">
-                <tr className="pl-2">
-                  <th className="border py-2 min-w-[200px]">Tag</th>
-                  <th className="border py-2 min-w-[200px]">Description</th>
-                  <th className="border py-2 min-w-[200px]">Status</th>
-                  <th className="border py-2 min-w-[200px]">
-                    <div className="flex justify-center">Actions</div>
-                  </th>
+
+        <div className="card-body overflow-auto">
+          <table className="border text-sm table-fixed w-full overflow-auto">
+            <thead className="bg-slate-400">
+              <tr className="pl-2 text-center">
+                <th className="border py-2 min-w-[300px]">Tag</th>
+                <th className="border py-2 min-w-[540px]">Description</th>
+                <th className="border py-2 min-w-[200px]">Status</th>
+                <th className="border py-2 min-w-[200px]">
+                  <div className="flex justify-center">Actions</div>
+                </th>
+              </tr>
+            </thead>
+            <tbody className="divide-y">
+              {currentData.message === "No data found!" ? (
+                <tr>
+                  <td colSpan="4" className="text-center py-4">
+                    <span className="text-gray-500">No Data Available</span>
+                  </td>
                 </tr>
-              </thead>
-              <tbody className="divide-y">
-                {currentData.length === 0 ? (
-                  <tr>
-                    <td colSpan="4" className="text-center py-4">
-                      <span className="text-gray-500">
-                        <FaRegFrown className="inline mr-2" />
-                        No Data Available
-                      </span>
+              ) : (
+                Array.isArray(currentData) &&
+                currentData.map((row, index) => (
+                  <tr key={index}>
+                    <td className="border px-6 py-2 text-center">
+                      {activeTab === 1
+                        ? row.PAYMENT_TAG
+                        : activeTab === 2
+                        ? row.ORDER_TYPE_TAG
+                        : row.STOCK_STAGE_TAG}
+                    </td>
+                    <td className="border px-6 py-2">{row.DESCRIPTION}</td>
+                    {row.STATUS === 1 ? (
+                      <td className="border px-6 text-center">
+                        <span className="text-white bg-green-600 py-2 px-4 rounded-2xl">
+                          Active
+                        </span>
+                      </td>
+                    ) : (
+                      <td className="border px-6 py-2 text-center">
+                        <span className="text-white bg-red-600 py-2  px-4 rounded-2xl">
+                          Inactive
+                        </span>
+                      </td>
+                    )}
+                    <td className="border px-6 py-4 flex justify-center items-center">
+                      <button
+                        className="text-slate-500 hover:text-slate-800 border-none"
+                        onClick={() => handleEdit(row)}
+                      >
+                        <FaEdit />
+                      </button>
                     </td>
                   </tr>
-                ) : (
-                  currentData.map((row, index) => (
-                    <tr key={index}>
-                      <td className="border px-6 py-2">
-                        {activeTab === 1
-                          ? row.PAYMENT_TAG
-                          : activeTab === 2
-                          ? row.ORDER_TYPE_TAG
-                          : row.STOCK_STAGE_TAG}
-                      </td>
-                      <td className="border px-6 py-2">{row.DESCRIPTION}</td>
-                      {row.STATUS === 1 ? (
-                        <td className="border px-6 py-2">
-                          <span className="text-green-600">Active</span>
-                        </td>
-                      ) : (
-                        <td className="border px-6 py-2">
-                          <span className="text-red-600">Inactive</span>
-                        </td>
-                      )}
-
-                      <td className="border px-6 py-2 flex justify-center items-center">
-                        <button
-                          className="text-blue-600 hover:text-blue-800"
-                          onClick={() => handleEdit(row)}
-                        >
-                          <FaEdit />
-                        </button>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
-          <div className="mt-4 flex justify-center items-center space-x-2">
-            {/* {Array.from({ length: totalPages }, (_, index) => (
-              <button
-                key={index}
-                className={`px-2 py-1 text-sm rounded ${
-                  currentPage === index + 1
-                    ? "bg-amber-500 text-white"
-                    : "bg-gray-200 text-gray-700"
-                }`}
-                onClick={() => handlePageChange(index + 1)}
-              >
-                {index + 1}
-              </button>
-            ))} */}
-          </div>
+                ))
+              )}
+            </tbody>
+          </table>
         </div>
       </div>
 
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white rounded-lg shadow-lg w-1/4 p-6">
-            <h2 className="text-lg font-bold mb-4">Add New Item</h2>
-            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-              <div className="bg-white rounded-lg shadow-lg w-1/4 p-6">
-                <div className="flex justify-between items-center mb-4">
-                  <h2 className="text-lg font-bold">
-                    Add{" "}
-                    {activeTab === 1
-                      ? "Payment"
-                      : activeTab === 2
-                      ? "Order"
-                      : "Stock"}
-                  </h2>
-                  <button
-                    className="text-main hover:text-main"
-                    onClick={() => {
-                      handleModalToggle();
-                      setFormValues(initialvalues);
-                    }}
-                  >
-                    ✖
-                  </button>
-                </div>
+          <div className="bg-white rounded-lg shadow-lg p-6" style={{ width: "400px" }}>
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-lg font-bold">
+                {isEditing ? "Edit" : "Add"}{" "}
+                {activeTab === 1
+                  ? "Payment"
+                  : activeTab === 2
+                  ? "Order"
+                  : "Stock"}
+              </h2>
+              <button
+                className="text-slate-600 hover:text-main"
+                onClick={() => {
+                  handleModalToggle();
+                  setFormValues(initialvalues);
+                  setIsEditing(false);
+                }}
+              >
+                ✖
+              </button>
+            </div>
 
-                <Formik
-                  enableReinitialize
-                  initialValues={formValues}
-                  validationSchema={validationSchema}
-                  onSubmit={onSubmit}
-                >
-                  {({
-                    getFieldProps,
-                    touched,
-                    errors,
-                    handleSubmit,
-                    setFieldValue,
-                    values,
-                    handleChange,
-                  }) => (
-                    <Form>
-                      <div className="flex divide-x divide-gray-200">
-                        <div>
-                          <div>
+            <Formik
+              enableReinitialize
+              initialValues={formValues}
+              validationSchema={validationSchema}
+              onSubmit={onSubmit}
+            >
+              {({
+                getFieldProps,
+                touched,
+                errors,
+                handleSubmit,
+                setFieldValue,
+                values,
+              }) => (
+                <Form>
+                  <div className="flex divide-x divide-gray-200">
+                    <div style={{ width: "480px" }} className="pr-4">
+                      <div className="mb-3">
+                        <input
+                          type="text"
+                          name="tag"
+                          {...getFieldProps("tag")}
+                          className="border rounded px-1 py-2"
+                          style={{ width: "100%" }}
+                          placeholder="Tag"
+                          value={values.tag}
+                          onChange={(e) => setFieldValue("tag", e.target.value)}
+                          disabled={isEditing}
+                        />
+
+                        {touched.tag && errors.tag && (
+                          <div className="text-red-500 text-sm mb-3">
+                            {errors.tag}
+                          </div>
+                        )}
+                      </div>
+                      <div className="mb-3">
+                        <textarea
+                          name="description"
+                          {...getFieldProps("description")}
+                          className="w-32 border rounded px-1 py-2"
+                          placeholder="Description"
+                          style={{ width: "100%" }}
+                          rows={4}
+                          value={values.description}
+                          onChange={(e) =>
+                            setFieldValue("description", e.target.value)
+                          }
+                          disabled={isEditing}
+                        ></textarea>
+                        {touched.description && errors.description && (
+                          <div className="text-red-500 text-sm mb-3">
+                            {errors.description}
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="mb-4">
+                        <label className="block text-sm font-semibold mb-2">
+                          Status
+                        </label>
+                        <div className="flex items-center gap-24 space-x-4">
+                          <div className="flex items-center px-2">
                             <input
-                              type="text"
-                              name="tag"
-                              {...getFieldProps("tag")}
-                              className="w-32 border rounded px-3 py-2 mb-3"
-                              placeholder="Tag"
-                              value={values.tag}
-                              onChange={(e) =>
-                                setFieldValue("tag", e.target.value)
-                              }
-                              disabled={isEditing}
+                              type="radio"
+                              id="active"
+                              name="status"
+                              value="1"
+                              checked={values.status === "1"}
+                              onChange={() => setFieldValue("status", "1")}
+                              className="mr-2"
                             />
-
-                            {touched.tag && errors.tag && (
-                              <div className="text-red-500 text-sm mb-1 pl-3">
-                                {errors.tag}
-                              </div>
-                            )}
-                          </div>
-                          <div>
-                            <textarea
-                              name="description"
-                              {...getFieldProps("description")}
-                              className="w-72 h-20 border rounded px-3 py-2 mb-4"
-                              placeholder="Description"
-                              rows={4}
-                              value={values.description}
-                              onChange={(e) =>
-                                setFieldValue("description", e.target.value)
-                              }
-                              disabled={isEditing}
-                            ></textarea>
-                            {touched.description && errors.description && (
-                              <div className="text-red-500 text-sm mb-1 pl-3">
-                                {errors.description}
-                              </div>
-                            )}
-                          </div>
-
-                          <div className="mb-4">
-                            <label className="block text-sm font-semibold mb-2">
-                              Status
+                            <label htmlFor="active" className="text-sm">
+                              Active
                             </label>
-                            <div className="flex items-center space-x-4">
-                              <div>
-                                <input
-                                  type="radio"
-                                  id="active"
-                                  name="status"
-                                  value="1"
-                                  checked={values.status === "1"}
-                                  onChange={() => setFieldValue("status", "1")}
-                                  className="mr-2"
-                                />
-                                <label htmlFor="active" className="text-sm">
-                                  Active
-                                </label>
-                              </div>
-                              <div>
-                                <input
-                                  type="radio"
-                                  id="inactive"
-                                  name="status"
-                                  value="0"
-                                  checked={values.status === "0"}
-                                  onChange={() => setFieldValue("status", "0")}
-                                  className="mr-2"
-                                />
-                                <label htmlFor="inactive" className="text-sm">
-                                  Inactive
-                                </label>
-                              </div>
-                            </div>
                           </div>
-
-                          <div className="flex  ">
-                            <button
-                              type="button"
-                              className="px-4 py-2 bg-gray-200 text-gray-700 text-sm rounded hover:bg-gray-300"
-                              onClick={() => {
-                                handleModalToggle();
-                                setFormValues(initialvalues);
-                              }}
-                            >
-                              Cancel
-                            </button>
-
-                            <button
-                              type="submit"
-                              className="px-4 py-2 ml-3 bg-blue-500 text-white text-sm rounded hover:bg-blue-600"
-                              onClick={handleSubmit}
-                            >
-                              Submit
-                            </button>
+                          <div className="flex items-center px-2">
+                            <input
+                              type="radio"
+                              id="inactive"
+                              name="status"
+                              value="0"
+                              checked={values.status === "0"}
+                              onChange={() => setFieldValue("status", "0")}
+                              className="mr-2"
+                            />
+                            <label htmlFor="inactive" className="text-sm">
+                              Inactive
+                            </label>
                           </div>
                         </div>
                       </div>
-                    </Form>
-                  )}
-                </Formik>
-              </div>
-            </div>
+
+                      <div className="flex justify-between">
+                        <button
+                          type="button"
+                          className="px-4 py-2 bg-gray-200 text-gray-700 text-sm rounded hover:bg-gray-300"
+                          onClick={() => {
+                            handleModalToggle();
+                            setFormValues(initialvalues);
+                            setIsEditing(false);
+                          }}
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          type="submit"
+                          className="px-4 py-2 ml-3 bg-slate-500 text-white text-sm rounded hover:bg-slate-800"
+                          onClick={handleSubmit}
+                        >
+                          Submit
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </Form>
+              )}
+            </Formik>
           </div>
         </div>
       )}
