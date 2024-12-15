@@ -1,18 +1,20 @@
 import { useState } from "react";
 import { toast } from "react-toastify";
-import 'react-toastify/dist/ReactToastify.css';
+import "react-toastify/dist/ReactToastify.css";
 import { FaEdit } from "react-icons/fa";
 import { AiOutlinePlus } from "react-icons/ai";
 import { useEffect } from "react";
 import axios from "axios";
 import { Formik, Form } from "formik";
 import * as Yup from "yup";
+import CommonLoading from "../../utils/CommonLoading";
 
 const Masterdata = () => {
   const [activeTab, setActiveTab] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentData, setCurrentData] = useState([]);
   const [isEditing, setIsEditing] = useState(false);
+  const [isLaoding, setIsLoading] = useState(false);
 
   const handleTabClick = (num) => {
     setActiveTab(num);
@@ -20,6 +22,7 @@ const Masterdata = () => {
   const handleModalToggle = () => setIsModalOpen(!isModalOpen);
 
   const fetchMasterData = async () => {
+    setIsLoading(true);
     const tabname =
       activeTab === 1 ? "payment" : activeTab === 2 ? "order" : "stock";
     try {
@@ -27,8 +30,12 @@ const Masterdata = () => {
       setCurrentData(response.data);
     } catch (error) {
       console.error("Failed:", error.response?.data || error.message);
+    } finally {
+      setTimeout(() => setIsLoading(false), 1000);
     }
   };
+
+  console.log("loading", isLaoding);
 
   useEffect(() => {
     fetchMasterData();
@@ -64,8 +71,9 @@ const Masterdata = () => {
 
   const onSubmit = async (values, { setErrors }) => {
     try {
-      if(isEditing){
-        const tabname = activeTab === 1 ? "payment" : activeTab === 2 ? "order" : "stock";
+      if (isEditing) {
+        const tabname =
+          activeTab === 1 ? "payment" : activeTab === 2 ? "order" : "stock";
         const response = await axios.put(`/api/masterdata/update/${tabname}`, {
           tag: values.tag,
           description: values.description,
@@ -73,7 +81,8 @@ const Masterdata = () => {
         });
         toast.success(response.data.message || "Data updated successfully!");
       } else {
-        const tabname = activeTab === 1 ? "payment" : activeTab === 2 ? "order" : "stock";
+        const tabname =
+          activeTab === 1 ? "payment" : activeTab === 2 ? "order" : "stock";
         const response = await axios.post(`/api/masterdata/add/${tabname}`, {
           tag: values.tag,
           description: values.description,
@@ -85,7 +94,7 @@ const Masterdata = () => {
       setFormValues(initialvalues);
       handleModalToggle();
       fetchMasterData();
-    } catch (error) { 
+    } catch (error) {
       console.error("Failed:", error.response?.data || error.message);
       setErrors({});
     }
@@ -182,7 +191,10 @@ const Masterdata = () => {
 
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white rounded-lg shadow-lg p-6" style={{ width: "400px" }}>
+          <div
+            className="bg-white rounded-lg shadow-lg p-6"
+            style={{ width: "400px" }}
+          >
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-lg font-bold">
                 {isEditing ? "Edit" : "Add"}{" "}
@@ -325,6 +337,8 @@ const Masterdata = () => {
           </div>
         </div>
       )}
+
+      {isLaoding && <CommonLoading />}
     </>
   );
 };
