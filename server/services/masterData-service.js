@@ -45,10 +45,12 @@ export const addMasterDataService = async (tname, tag, description, status) => {
     }
 
     db.query(query, (err, result) => {
-      if (err.code === "ER_DUP_ENTRY") {
-        reject({message:"Data already exists!"});
-      } else if (err) {
+      if (err) {
+        if (err.code === "ER_DUP_ENTRY") {
+          reject({ message: "Data already exists!" });
+        } else {
           reject({ message: "Something went wrong, Please try again!" });
+        }
       } else {
         resolve({ message: "Data added successfully!" });
       }
