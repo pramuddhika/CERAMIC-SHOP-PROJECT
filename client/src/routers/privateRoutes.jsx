@@ -6,6 +6,7 @@ import Signup from "../auth/Signup";
 import Layout from "../app/layout/Layout";
 import DashBoard from "../app/UI/DashBoard";
 import MemberManagemnet from "../app/UI/MemberManagment";
+import Masterdata from "../app/UI/MasterData";
 
 const router = createBrowserRouter([
   { path: "/", element: <WebLayout /> },
@@ -17,6 +18,7 @@ const router = createBrowserRouter([
     children: [
       { path: "dashboard", element: <DashBoard /> },
       { path: "Product_Management", element: <MemberManagemnet /> },
+      { path: "Masterdata", element: <Masterdata /> },
     ],
   },
 ]);
