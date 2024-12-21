@@ -19,6 +19,12 @@ const ProductManagement = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(5);
   const [isLoading, setIsLoading] = useState(false);
+  const [initialValues, setInitialValues] = useState({
+    code: "",
+    name: "",
+    description: "",
+    status: "1",
+  });
 
   const handleTabClick = (num) => setActiveTab(num);
   const handlePageChange = (page) => setCurrentPage(page);
@@ -26,57 +32,53 @@ const ProductManagement = () => {
     setItemsPerPage(items);
     setCurrentPage(1);
   };
-  const handleModalToggle = () => setIsModalOpen(!isModalOpen);
+  const handleModalToggle = () => {
+    setIsModalOpen(!isModalOpen);
+    if (!isModalOpen) {
+      formik.resetForm();
+      setIsEdit(false);
+      setSelectedImage(null);
+      setSelectedFile(null);
+    }
+  };
 
   const getNewId = async () => {
-    setIsLoading(true);
-    const tabname =
-      activeTab === 1
-        ? "category"
-        : activeTab === 2
-        ? "subcategory"
-        : "product";
+    const tabname = activeTab === 1 ? "category" : activeTab === 2 ? "subcategory" : "product";
     try {
       const Idresponse = await axios.get(`/api/productdata/get/${tabname}`);
       setNewId(Idresponse?.data?.newid);
     } catch (error) {
       console.log("Error:", error);
-    } finally {
-      setTimeout(() => setIsLoading(false), 1000);
     }
-  };
+  }
 
   const fetchCategoryData = async (page, limit) => {
-    const tabname =
-      activeTab === 1
-        ? "category"
-        : activeTab === 2
-        ? "subcategory"
-        : "product";
+    setIsLoading(true);
+    const tabname = activeTab === 1 ? "category" : activeTab === 2 ? "subcategory" : "product";
     try {
-      const response = await axios.get(
-        `/api/productdata/get/tableData/${tabname}?page=${page}&limit=${limit}`
-      );
+      const response = await axios.get(`/api/productdata/get/tableData/${tabname}?page=${page}&limit=${limit}`);
       setCategoryData(response.data.data);
       setTotalPages(response.data.totalPages);
     } catch (error) {
       console.log("Error:", error);
+    } finally {
+      setTimeout(() => setIsLoading(false), 1000);
     }
-  };
+  }
 
-  useEffect(() => {
+  useEffect(() => { 
     getNewId();
     fetchCategoryData(currentPage, itemsPerPage);
   }, [activeTab, currentPage, itemsPerPage]);
 
   const formik = useFormik({
-    initialValues: {
-      code: "",
-      name: "",
-      description: "",
-      status: "1",
-    },
+    initialValues: initialValues,
     onSubmit: async (values) => {
+      if (JSON.stringify(values) === JSON.stringify(initialValues) && !selectedFile) {
+        toast.info("No changes to update");
+        return;
+      }
+
       const formData = new FormData();
       formData.append("code", values.code);
       formData.append("name", values.name);
@@ -84,12 +86,9 @@ const ProductManagement = () => {
       formData.append("image", selectedFile ?? null);
       formData.append("status", values.status);
 
-      if (activeTab === 1) {
+      if (activeTab === 1 && !isEdit) {
         try {
-          const newCategory = await axios.post(
-            "/api/productdata/add/category",
-            formData
-          );
+          const newCategory = await axios.post("/api/productdata/add/category", formData);
           toast.success(newCategory.data.message);
           formik.resetForm();
           setSelectedImage(null);
@@ -101,21 +100,39 @@ const ProductManagement = () => {
           toast.error(error.response.data.error);
         }
       }
+      if (activeTab === 1 && isEdit) {
+        try {
+          const updateCategory = await axios.put(`/api/productdata/update/category/${values.code}`, formData);
+          toast.success(updateCategory.data.message);
+          formik.resetForm();
+          setSelectedImage(null);
+          handleModalToggle();
+          fetchCategoryData(currentPage, itemsPerPage);
+        } catch (error) {
+          console.log("Error:", error.response.data);
+          toast.error(error.response.data.error);
+        }
+      }
     },
   });
 
   const handleEdit = (row) => {
-    console.log("Edit Row:", row);
     setIsEdit(true);
+    setInitialValues({
+      code: row.CATAGORY_CODE,
+      name: row.NAME,
+      description: row.DESCRIPTION,
+      status: row.STATUS === 1 ? "1" : "0",
+    });
     formik.setValues({
       code: row.CATAGORY_CODE,
       name: row.NAME,
       description: row.DESCRIPTION,
       status: row.STATUS === 1 ? "1" : "0",
     });
-    setSelectedImage(`/images/${row.IMAGE}`);
-    handleModalToggle();
-  };
+    setSelectedImage(`http://localhost:8080/images/${row.IMAGE}`);
+    setIsModalOpen(true);
+  }
 
   const handleImageChange = (event) => {
     const file = event.target.files[0];
@@ -123,7 +140,7 @@ const ProductManagement = () => {
       setSelectedImage(URL.createObjectURL(file));
       setSelectedFile(file);
     }
-  };
+  }
 
   return (
     <div>
@@ -233,11 +250,7 @@ const ProductManagement = () => {
                 <div className="flex justify-between items-center mb-4">
                   <h2 className="text-lg font-bold">
                     {isEdit ? "Edit Selected " : "Add New "}
-                    {activeTab === 1
-                      ? "Category"
-                      : activeTab === 2
-                      ? "Subcategory"
-                      : "Product"}
+                    {activeTab === 1 ? "Category" : activeTab === 2 ? "Subcategory" : "Product"}
                   </h2>
                   <button
                     className="text-main hover:text-main"
@@ -261,7 +274,7 @@ const ProductManagement = () => {
                           <div className="size-32 rounded-full border border-gray-300 overflow-hidden flex items-center justify-center bg-gray-100">
                             {selectedImage ? (
                               <img
-                                src={`http://localhost:8080${selectedImage}`}
+                                src={selectedImage.startsWith("http") ? selectedImage : selectedImage}
                                 alt="Selected"
                                 className="object-cover w-full h-full"
                               />
@@ -282,20 +295,13 @@ const ProductManagement = () => {
                       <button
                         type="button"
                         className="px-4 py-2 bg-slate-500 text-white text-sm rounded hover:bg-slate-800"
-                        onClick={() =>
-                          document.querySelector('input[type="file"]').click()
-                        }
+                        onClick={() => document.querySelector('input[type="file"]').click()}
                       >
                         Upload Image
                       </button>
                       <div>
                         <label className="block text-sm font-semibold mb-1 mt-4">
-                          {activeTab === 1
-                            ? "Category"
-                            : activeTab === 2
-                            ? "Subcategory"
-                            : "Product"}{" "}
-                          Code
+                          {activeTab === 1 ? "Category" : activeTab === 2 ? "Subcategory" : "Product"} Code
                         </label>
                         <input
                           type="text"
@@ -303,11 +309,7 @@ const ProductManagement = () => {
                           readOnly
                           className="w-full border rounded px-3 py-2 focus:outline-none"
                           placeholder="Code"
-                          value={
-                            formik.values.code
-                              ? formik.values.code
-                              : (formik.values.code = newId)
-                          }
+                          value={formik.values.code ? formik.values.code : formik.values.code = newId }
                           onChange={formik.handleChange}
                         />
                       </div>

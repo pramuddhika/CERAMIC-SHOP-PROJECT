@@ -2,6 +2,7 @@ import {
   getLastIDService,
   addNewCategoryService,
   getCategoryDataService,
+  updateCategoryService,
 } from "../services/productdata-service.js";
 
 //generate categoty-subcategory-product id
@@ -41,6 +42,22 @@ export const getCategoryDataController = async (req, res) => {
   try {
     const categoryData = await getCategoryDataService(tname,page,limit);
     res.status(200).json(categoryData);
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
+
+//edit category
+export const updateCategoryController = async (req, res) => {
+  const { code } = req.params;
+  const { name, description, status } = req.body;
+  const image = req.file ? req.file.filename : null;
+  if (!code || !name || !description || !status) {
+    return res.status(400).json({ error: "All data required!" });
+  }
+  try {
+    const updateCategoryResponse = await updateCategoryService(code, name, description, image, status);
+    res.status(200).json(updateCategoryResponse);
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }
