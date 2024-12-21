@@ -77,3 +77,54 @@ export const addNewCategoryService = async (code, name, description, image, stat
     } );
   });
 };
+
+//get paginated product data
+export const getCategoryDataService = async ( tname, page = 1, limit = 10) => {
+  return new Promise((resolve, reject) => {
+    const offset = (page - 1) * limit;
+    let query;
+    switch (tname) {
+      case "category":
+        query = `SELECT * FROM category LIMIT ? OFFSET ?`;
+        break;
+      case "subcategory":
+        query = `SELECT * FROM sub_category LIMIT ? OFFSET ?`;
+        break;
+      case "product":
+        query = `SELECT * FROM product LIMIT ? OFFSET ?`;
+        break;
+    }
+    db.query(query, [parseInt(limit), parseInt(offset)], (err, result) => {
+      if (err) {
+        reject({ message: "Something went wrong, Please try again!" });
+        return;
+      }
+      let countQuery;
+      switch (tname) {
+        case "category":
+          countQuery = `SELECT COUNT(*) AS total FROM category`;
+          break;
+        case "subcategory":
+          countQuery = `SELECT COUNT(*) AS total FROM sub_category`;
+          break;
+        case "product":
+          countQuery = `SELECT COUNT(*) AS total FROM product`;
+          break;
+      }
+      db.query(countQuery, (err, countResult) => {
+        if (err) {
+          reject({ message: "Something went wrong, Please try again!" });
+          return;
+        }
+        const total = countResult[0].total;
+        resolve({
+          data: result,
+          total,
+          page: parseInt(page),
+          limit: parseInt(limit),
+          totalPages: Math.ceil(total / limit),
+        });
+      });
+    });
+  });
+};

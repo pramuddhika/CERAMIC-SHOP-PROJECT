@@ -11,6 +11,8 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// Serve static files from the 'images' directory
+app.use('/images', express.static('images'));
 //parth - conatct us
 app.use('/api/contactus', contactUsRouter);
 //parth for master data

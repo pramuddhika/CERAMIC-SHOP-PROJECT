@@ -6,6 +6,7 @@ import fs from "fs";
 import {
   generateIDController,
   addNewCategoryController,
+  getCategoryDataController,
 } from "../controllers/productdata-controller.js";
 
 const router = express.Router();
@@ -32,5 +33,7 @@ const upload = multer({
 router.get("/get/:tname", generateIDController);
 //add new category
 router.post("/add/category", upload.single('image'), addNewCategoryController);
+//get paginated product data
+router.get("/get/tableData/:tname", getCategoryDataController);
 
 export default router;
