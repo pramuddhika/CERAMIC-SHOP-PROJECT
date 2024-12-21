@@ -3,6 +3,9 @@ import { FaEdit } from "react-icons/fa";
 import { AiOutlinePlus } from "react-icons/ai";
 import { useFormik } from "formik";
 import axios from "axios";
+import { toast } from "react-toastify";
+import CommonPagination from "../../utils/CommonPagination";
+import CommonLoading from "../../utils/CommonLoading";
 
 const ProductManagement = () => {
   const [activeTab, setActiveTab] = useState(1);
@@ -12,38 +15,59 @@ const ProductManagement = () => {
   const [newId, setNewId] = useState("");
   const [selectedImage, setSelectedImage] = useState(null);
   const [selectedFile, setSelectedFile] = useState(null);
-  const itemsPerPage = 5;
+  const [categoryData, setCategoryData] = useState([]);
+  const [totalPages, setTotalPages] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(5);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleTabClick = (num) => setActiveTab(num);
   const handlePageChange = (page) => setCurrentPage(page);
+  const handleItemsPerPageChange = (items) => {
+    setItemsPerPage(items);
+    setCurrentPage(1);
+  };
   const handleModalToggle = () => setIsModalOpen(!isModalOpen);
 
   const getNewId = async () => {
-    const tabname = activeTab === 1 ? "category" : activeTab === 2 ? "subcategory" : "product";
+    setIsLoading(true);
+    const tabname =
+      activeTab === 1
+        ? "category"
+        : activeTab === 2
+        ? "subcategory"
+        : "product";
     try {
       const Idresponse = await axios.get(`/api/productdata/get/${tabname}`);
       setNewId(Idresponse?.data?.newid);
     } catch (error) {
       console.log("Error:", error);
+    } finally {
+      setTimeout(() => setIsLoading(false), 1000);
     }
-  }
+  };
 
-  useEffect(() => { 
+  const fetchCategoryData = async (page, limit) => {
+    const tabname =
+      activeTab === 1
+        ? "category"
+        : activeTab === 2
+        ? "subcategory"
+        : "product";
+    try {
+      const response = await axios.get(
+        `/api/productdata/get/tableData/${tabname}?page=${page}&limit=${limit}`
+      );
+      setCategoryData(response.data.data);
+      setTotalPages(response.data.totalPages);
+    } catch (error) {
+      console.log("Error:", error);
+    }
+  };
+
+  useEffect(() => {
     getNewId();
-  }, [activeTab]);
-
-  const data = Array(20)
-    .fill(null)
-    .map((_, index) => ({
-      code: `Code-${index + 1}`,
-      name: `Name-${index + 1}`,
-      description: `description-${index + 1}`,
-      status: "1",
-    }));
-
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const currentData = data.slice(startIndex, startIndex + itemsPerPage);
-  const totalPages = Math.ceil(data.length / itemsPerPage);
+    fetchCategoryData(currentPage, itemsPerPage);
+  }, [activeTab, currentPage, itemsPerPage]);
 
   const formik = useFormik({
     initialValues: {
@@ -60,14 +84,22 @@ const ProductManagement = () => {
       formData.append("image", selectedFile ?? null);
       formData.append("status", values.status);
 
-      if (activeTab === 1) { 
-        const newCategory = await axios.post("/api/productdata/add/category", formData, {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        });
-        console.log("formData:", formData);
-        console.log("New Category:", newCategory);
+      if (activeTab === 1) {
+        try {
+          const newCategory = await axios.post(
+            "/api/productdata/add/category",
+            formData
+          );
+          toast.success(newCategory.data.message);
+          formik.resetForm();
+          setSelectedImage(null);
+          getNewId();
+          handleModalToggle();
+          fetchCategoryData(currentPage, itemsPerPage);
+        } catch (error) {
+          console.log("Error:", error.response.data);
+          toast.error(error.response.data.error);
+        }
       }
     },
   });
@@ -75,9 +107,15 @@ const ProductManagement = () => {
   const handleEdit = (row) => {
     console.log("Edit Row:", row);
     setIsEdit(true);
-    formik.setValues(row);
+    formik.setValues({
+      code: row.CATAGORY_CODE,
+      name: row.NAME,
+      description: row.DESCRIPTION,
+      status: row.STATUS === 1 ? "1" : "0",
+    });
+    setSelectedImage(`/images/${row.IMAGE}`);
     handleModalToggle();
-  }
+  };
 
   const handleImageChange = (event) => {
     const file = event.target.files[0];
@@ -85,7 +123,7 @@ const ProductManagement = () => {
       setSelectedImage(URL.createObjectURL(file));
       setSelectedFile(file);
     }
-  }
+  };
 
   return (
     <div>
@@ -108,20 +146,20 @@ const ProductManagement = () => {
             ))}
           </ul>
           <div>
-          <button
-            className="text-white bg-cyan-950 hover:bg-cyan-900 px-3 py-1 rounded-lg flex items-center"
-            onClick={handleModalToggle}
-          >
-            <AiOutlinePlus className="mr-1" />
-            Add New
+            <button
+              className="text-white bg-cyan-950 hover:bg-cyan-900 px-3 py-1 rounded-lg flex items-center"
+              onClick={handleModalToggle}
+            >
+              <AiOutlinePlus className="mr-1" />
+              Add New
             </button>
-            
           </div>
         </div>
         <div className="card-body overflow-auto flex justify-center">
           <table className="border text-sm table-fixed w-full overflow-auto">
             <thead className="bg-slate-400">
               <tr className="text-center">
+                <th className="border py-2 min-w-[100px]">Image</th>
                 <th className="border py-2 min-w-[200px]">Code</th>
                 <th className="border py-2 min-w-[200px]">Name</th>
                 <th className="border py-2 min-w-[500px]">Description</th>
@@ -130,24 +168,40 @@ const ProductManagement = () => {
               </tr>
             </thead>
             <tbody className="text-gray-800">
-              {currentData.map((row, index) => (
+              {categoryData.length === 0 && (
+                <tr>
+                  <td colSpan="6" className="text-center py-4">
+                    No data found!
+                  </td>
+                </tr>
+              )}
+              {categoryData.map((row, index) => (
                 <tr key={index}>
-                  <td className="border px-6 py-2 w-64">{row.code}</td>
-                  <td className="border px-6 py-2">{row.name}</td>
-                  <td className="border px-6 py-2">{row.description}</td>
-                  {row.status === "1" ? (
-                      <td className="border px-6 text-center">
-                        <span className="text-white bg-green-600 py-2 px-4 rounded-2xl">
-                          Active
-                        </span>
-                      </td>
-                    ) : (
-                      <td className="border px-6 py-2 text-center">
-                        <span className="text-white bg-red-600 py-2  px-4 rounded-2xl">
-                          Inactive
-                        </span>
-                      </td>
-                    )}
+                  <td className="border px-6 py-2 w-24">
+                    <img
+                      src={`http://localhost:8080/images/${row.IMAGE}`}
+                      alt="Preview"
+                      className="w-12 h-12 rounded-full object-cover"
+                    />
+                  </td>
+                  <td className="border px-6 py-2 w-64 text-center">
+                    {row.CATAGORY_CODE}
+                  </td>
+                  <td className="border px-6 py-2 text-center">{row.NAME}</td>
+                  <td className="border px-6 py-2">{row.DESCRIPTION}</td>
+                  {row.STATUS === 1 ? (
+                    <td className="border px-6 text-center">
+                      <span className="text-white bg-green-600 py-2 px-4 rounded-2xl">
+                        Active
+                      </span>
+                    </td>
+                  ) : (
+                    <td className="border px-6 py-2 text-center">
+                      <span className="text-white bg-red-600 py-2  px-4 rounded-2xl">
+                        Inactive
+                      </span>
+                    </td>
+                  )}
                   <td className="border px-6 py-4 flex justify-center items-center">
                     <button
                       className="text-blue-600 hover:text-blue-800"
@@ -162,21 +216,13 @@ const ProductManagement = () => {
           </table>
         </div>
         {/* Pagination */}
-        <div className="mt-3 flex justify-end items-center space-x-2 p-2">
-            {Array.from({ length: totalPages }, (_, index) => (
-              <button
-                key={index}
-                className={`px-2 py-1 text-sm rounded ${
-                  currentPage === index + 1
-                    ? "bg-amber-500 text-white"
-                    : "bg-gray-200 text-gray-700"
-                }`}
-                onClick={() => handlePageChange(index + 1)}
-              >
-                {index + 1}
-              </button>
-            ))}
-          </div>
+        <CommonPagination
+          totalPages={totalPages}
+          currentPage={currentPage}
+          onPageChange={handlePageChange}
+          itemsPerPage={itemsPerPage}
+          onItemsPerPageChange={handleItemsPerPageChange}
+        />
       </div>
 
       {isModalOpen && (
@@ -187,7 +233,11 @@ const ProductManagement = () => {
                 <div className="flex justify-between items-center mb-4">
                   <h2 className="text-lg font-bold">
                     {isEdit ? "Edit Selected " : "Add New "}
-                    {activeTab === 1 ? "Category" : activeTab === 2 ? "Subcategory" : "Product"}
+                    {activeTab === 1
+                      ? "Category"
+                      : activeTab === 2
+                      ? "Subcategory"
+                      : "Product"}
                   </h2>
                   <button
                     className="text-main hover:text-main"
@@ -211,12 +261,14 @@ const ProductManagement = () => {
                           <div className="size-32 rounded-full border border-gray-300 overflow-hidden flex items-center justify-center bg-gray-100">
                             {selectedImage ? (
                               <img
-                                src={selectedImage}
+                                src={`http://localhost:8080${selectedImage}`}
                                 alt="Selected"
                                 className="object-cover w-full h-full"
                               />
                             ) : (
-                              <span className="text-gray-500">Upload Image</span>
+                              <span className="text-gray-500">
+                                Upload Image
+                              </span>
                             )}
                           </div>
                           <input
@@ -230,29 +282,38 @@ const ProductManagement = () => {
                       <button
                         type="button"
                         className="px-4 py-2 bg-slate-500 text-white text-sm rounded hover:bg-slate-800"
-                        onClick={() => document.querySelector('input[type="file"]').click()}
+                        onClick={() =>
+                          document.querySelector('input[type="file"]').click()
+                        }
                       >
                         Upload Image
                       </button>
                       <div>
                         <label className="block text-sm font-semibold mb-1 mt-4">
-                          {activeTab === 1 ? "Category" : activeTab === 2 ? "Subcategory" : "Product"} Code
+                          {activeTab === 1
+                            ? "Category"
+                            : activeTab === 2
+                            ? "Subcategory"
+                            : "Product"}{" "}
+                          Code
                         </label>
                         <input
-                        type="text"
-                        name="code"
-                        readOnly
-                        className="w-full border rounded px-3 py-2 focus:outline-none"
-                        placeholder="Code"
-                        value={formik.values.code ? formik.values.code : formik.values.code = newId }
-                        onChange={formik.handleChange}
-                      />
+                          type="text"
+                          name="code"
+                          readOnly
+                          className="w-full border rounded px-3 py-2 focus:outline-none"
+                          placeholder="Code"
+                          value={
+                            formik.values.code
+                              ? formik.values.code
+                              : (formik.values.code = newId)
+                          }
+                          onChange={formik.handleChange}
+                        />
                       </div>
-                     
                     </div>
 
                     <div className="flex flex-col w-2/3 p-4">
-                   
                       <input
                         type="text"
                         name="name"
@@ -281,7 +342,7 @@ const ProductManagement = () => {
                               type="radio"
                               id="active"
                               name="status"
-                              value= "1"
+                              value="1"
                               checked={formik.values.status === "1"}
                               onChange={formik.handleChange}
                               className="mr-2"
@@ -295,7 +356,7 @@ const ProductManagement = () => {
                               type="radio"
                               id="inactive"
                               name="status"
-                              value= "0"
+                              value="0"
                               checked={formik.values.status === "0"}
                               onChange={formik.handleChange}
                               className="mr-2"
@@ -328,7 +389,6 @@ const ProductManagement = () => {
                           Submit
                         </button>
                       </div>
-
                     </div>
                   </div>
                 </form>
@@ -337,6 +397,7 @@ const ProductManagement = () => {
           </div>
         </div>
       )}
+      {isLoading && <CommonLoading />}
     </div>
   );
 };
