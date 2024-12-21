@@ -1,4 +1,3 @@
-import { query } from "express";
 import { db } from "../env.js";
 
 //get category-subcategory-product last id
@@ -26,38 +25,55 @@ export const getLastIDService = async (tname) => {
         const product_code = result[0].PRODUCT_CODE;
         let id;
         if (product_code) {
-          const numberpart = parseInt(maxId.split("-")[1], 10);
+          const numberpart = parseInt(product_code.split("-")[1], 10);
           const newnumberpart = String(numberpart + 1).padStart(6, "0");
           id = `PRO-${newnumberpart}`;
         } else {
           id = `PRO-000001`;
         }
-        resolve({ productcode: id });
+        resolve({ newid: id });
       }
       if (tname == "category") {
         const category_code = result[0].CATAGORY_CODE;
         let id;
         if (category_code) {
-          const numberpart = parseInt(maxId.split("-")[1], 10);
+          const numberpart = parseInt(category_code.split("-")[1], 10);
           const newnumberpart = String(numberpart + 1).padStart(6, "0");
           id = `CAT-${newnumberpart}`;
         } else {
           id = `CAT-000001`;
         }
-        resolve({ categorycode: id });
+        resolve({ newid: id });
       }
       if (tname == "subcategory") {
         const subcategory_code = result[0].SUB_CATAGORY_CODE;
         let id;
         if (subcategory_code) {
-          const numberpart = parseInt(maxId.split("-")[1], 10);
+          const numberpart = parseInt(subcategory_code.split("-")[1], 10);
           const newnumberpart = String(numberpart + 1).padStart(6, "0");
           id = `SUBCAT-${newnumberpart}`;
         } else {
           id = `SUB-000001`;
         }
-        resolve({ subcategorycode: id });
+        resolve({ newid: id });
       }
     });
+  });
+};
+
+//add new category
+export const addNewCategoryService = async (code, name, description, image, status) => {
+  return new Promise((resolve, reject) => {
+    const query = `INSERT INTO category (CATAGORY_CODE, NAME, DESCRIPTION, IMAGE, STATUS) VALUES (?,?,?,?,?)`;
+    db.query(query, [code, name, description, image, status], (err, result) => {
+      if (err) {
+        if (err.code === "ER_DUP_ENTRY") {
+          reject({ message: "Data already exists!" });
+        } else {
+          reject({ message: "Something went wrong, Please try again!" });
+        }
+      }
+      resolve({ message: "Category added successfully" });
+    } );
   });
 };
