@@ -1,3 +1,4 @@
+import e from "express";
 import { db } from "../env.js";
 
 //get category-subcategory-product last id
@@ -62,7 +63,13 @@ export const getLastIDService = async (tname) => {
 };
 
 //add new category
-export const addNewCategoryService = async (code, name, description, image, status) => {
+export const addNewCategoryService = async (
+  code,
+  name,
+  description,
+  image,
+  status
+) => {
   return new Promise((resolve, reject) => {
     const query = `INSERT INTO category (CATAGORY_CODE, NAME, DESCRIPTION, IMAGE, STATUS) VALUES (?,?,?,?,?)`;
     db.query(query, [code, name, description, image, status], (err, result) => {
@@ -74,12 +81,12 @@ export const addNewCategoryService = async (code, name, description, image, stat
         }
       }
       resolve({ message: "Category added successfully" });
-    } );
+    });
   });
 };
 
 //get paginated product data
-export const getCategoryDataService = async ( tname, page = 1, limit = 10) => {
+export const getCategoryDataService = async (tname, page = 1, limit = 10) => {
   return new Promise((resolve, reject) => {
     const offset = (page - 1) * limit;
     let query;
@@ -126,5 +133,40 @@ export const getCategoryDataService = async ( tname, page = 1, limit = 10) => {
         });
       });
     });
+  });
+};
+
+//edit category
+export const updateCategoryService = async (
+  code,
+  name,
+  description,
+  image,
+  status
+) => {
+  return new Promise((resolve, reject) => {
+    if (image === null) {
+      const query = `UPDATE category SET NAME = ?, DESCRIPTION = ?, STATUS = ? WHERE CATAGORY_CODE = ?`;
+      db.query(query, [name, description, status, code], (err, result) => {
+        if (err) {
+          reject({ message: "Something went wrong, Please try again!" });
+          return;
+        }
+        resolve({ message: "Category updated successfully" });
+      });
+    } else {
+      const query = `UPDATE category SET NAME = ?, DESCRIPTION = ?, IMAGE = ?, STATUS = ? WHERE CATAGORY_CODE = ?`;
+      db.query(
+        query,
+        [name, description, image, status, code],
+        (err, result) => {
+          if (err) {
+            reject({ message: "Something went wrong, Please try again!" });
+            return;
+          }
+          resolve({ message: "Category updated successfully" });
+        }
+      );
+    }
   });
 };

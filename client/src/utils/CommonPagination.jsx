@@ -43,7 +43,7 @@ const CommonPagination = ({ totalPages, currentPage, onPageChange, itemsPerPage,
           id="itemsPerPage"
           value={itemsPerPage}
           onChange={(e) => onItemsPerPageChange(parseInt(e.target.value))}
-          className="px-2 py-1 border rounded"
+          className="px-2 py-1 border rounded focus:outline-none"
         >
           <option value={5}>5</option>
           <option value={10}>10</option>

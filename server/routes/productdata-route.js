@@ -7,6 +7,7 @@ import {
   generateIDController,
   addNewCategoryController,
   getCategoryDataController,
+  updateCategoryController,
 } from "../controllers/productdata-controller.js";
 
 const router = express.Router();
@@ -35,5 +36,7 @@ router.get("/get/:tname", generateIDController);
 router.post("/add/category", upload.single('image'), addNewCategoryController);
 //get paginated product data
 router.get("/get/tableData/:tname", getCategoryDataController);
+//edit category
+router.put("/update/category/:code", upload.single('image'), updateCategoryController);
 
 export default router;
