@@ -22,7 +22,7 @@ export const generateIDController = async (req, res) => {
 //add new category
 export const addNewCategoryController = async (req, res) => {
   const { code, name, description, status } = req.body;
-  const image = req.file.filename;
+  const image = req.file ? req.file.filename : null;
   if (!code || !name || !description || !status || !image) {
     return res.status(400).json({ error: "All data required!" });
   }
