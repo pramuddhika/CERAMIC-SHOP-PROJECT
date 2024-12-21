@@ -10,6 +10,8 @@ const ProductManagement = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
   const [newId, setNewId] = useState("");
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [selectedFile, setSelectedFile] = useState(null);
   const itemsPerPage = 5;
 
   const handleTabClick = (num) => setActiveTab(num);
@@ -43,18 +45,6 @@ const ProductManagement = () => {
   const currentData = data.slice(startIndex, startIndex + itemsPerPage);
   const totalPages = Math.ceil(data.length / itemsPerPage);
 
-
-  const [setImage] = useState(null);
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImage(reader.result);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
   const formik = useFormik({
     initialValues: {
       code: "",
@@ -62,8 +52,23 @@ const ProductManagement = () => {
       description: "",
       status: "1",
     },
-    onSubmit: (values) => {
-      console.log("Form Values:", values);
+    onSubmit: async (values) => {
+      const formData = new FormData();
+      formData.append("code", values.code);
+      formData.append("name", values.name);
+      formData.append("description", values.description);
+      formData.append("image", selectedFile ?? null);
+      formData.append("status", values.status);
+
+      if (activeTab === 1) { 
+        const newCategory = await axios.post("/api/productdata/add/category", formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        });
+        console.log("formData:", formData);
+        console.log("New Category:", newCategory);
+      }
     },
   });
 
@@ -74,7 +79,13 @@ const ProductManagement = () => {
     handleModalToggle();
   }
 
-
+  const handleImageChange = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      setSelectedImage(URL.createObjectURL(file));
+      setSelectedFile(file);
+    }
+  }
 
   return (
     <div>
@@ -184,6 +195,8 @@ const ProductManagement = () => {
                       handleModalToggle();
                       formik.resetForm();
                       setIsEdit(false);
+                      setSelectedImage(null);
+                      setSelectedFile(null);
                     }}
                   >
                     ✖
@@ -196,21 +209,28 @@ const ProductManagement = () => {
                       <div className="mb-4">
                         <label className="block">
                           <div className="size-32 rounded-full border border-gray-300 overflow-hidden flex items-center justify-center bg-gray-100">
-                            <img
-                              className="object-cover w-full h-full"
-                              placeholder="Upload Image"
-                            />
+                            {selectedImage ? (
+                              <img
+                                src={selectedImage}
+                                alt="Selected"
+                                className="object-cover w-full h-full"
+                              />
+                            ) : (
+                              <span className="text-gray-500">Upload Image</span>
+                            )}
                           </div>
                           <input
                             type="file"
+                            name="image"
                             className="hidden"
                             onChange={handleImageChange}
                           />
                         </label>
                       </div>
                       <button
+                        type="button"
                         className="px-4 py-2 bg-slate-500 text-white text-sm rounded hover:bg-slate-800"
-                        onClick={() => console.log("Upload Image")}
+                        onClick={() => document.querySelector('input[type="file"]').click()}
                       >
                         Upload Image
                       </button>
@@ -295,6 +315,8 @@ const ProductManagement = () => {
                             handleModalToggle();
                             formik.resetForm();
                             setIsEdit(false);
+                            setSelectedImage(null);
+                            setSelectedFile(null);
                           }}
                         >
                           Cancel
