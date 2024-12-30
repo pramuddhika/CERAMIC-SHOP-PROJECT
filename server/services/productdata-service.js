@@ -52,7 +52,7 @@ export const getLastIDService = async (tname) => {
         if (subcategory_code) {
           const numberpart = parseInt(subcategory_code.split("-")[1], 10);
           const newnumberpart = String(numberpart + 1).padStart(6, "0");
-          id = `SUBCAT-${newnumberpart}`;
+          id = `SUB-${newnumberpart}`;
         } else {
           id = `SUB-000001`;
         }
@@ -165,6 +165,86 @@ export const updateCategoryService = async (
             return;
           }
           resolve({ message: "Category updated successfully" });
+        }
+      );
+    }
+  });
+};
+
+//get category data list
+export const getCategoryDataListService = async () => {
+  return new Promise((resolve, reject) => {
+    const query = 'SELECT CATAGORY_CODE, NAME, IMAGE FROM category WHERE STATUS = 1';
+    db.query(query, (err, result) => {
+      if (err) {
+        console.log("hi")
+        reject({ message: "Something went wrong, Please try again!" });
+        return;
+      }
+      const list = result.map(element => ({
+        value: element.CATAGORY_CODE,
+        label: element.NAME,
+        image: element.IMAGE,
+      }));
+      resolve(list);
+    });
+  });
+};
+
+//add new subcategory
+export const addSubNewCategoryService = async (
+  code,
+  category,
+  name,
+  description,
+  image,
+  status
+) => {
+  return new Promise((resolve, reject) => {
+    const query = `INSERT INTO sub_category (SUB_CATAGORY_CODE, CATAGORY_CODE, NAME, DESCRIPTION, IMAGE, STATUS) VALUES (?,?,?,?,?,?)`;
+    db.query(query, [code, category, name, description, image, status], (err, result) => {
+      if (err) {
+        if (err.code === "ER_DUP_ENTRY") {
+          reject({ message: "Data already exists!" });
+        } else {
+          reject({ message: err.message });
+        }
+      }
+      resolve({ message: "Subcategory added successfully" });
+    });
+  });
+};
+
+//update subcategory data
+export const updateSubCategoryService = async (
+  code,
+  name,
+  description,
+  image,
+  status,
+  category
+) => {
+  return new Promise((resolve, reject) => {
+    if (image === null) {
+      const query = `UPDATE sub_category SET NAME = ?, DESCRIPTION = ?, STATUS = ?, CATAGORY_CODE = ? WHERE SUB_CATAGORY_CODE = ?`;
+      db.query(query, [name, description, status, category, code], (err, result) => {
+        if (err) {
+          reject({ message: "Something went wrong, Please try again!" });
+          return;
+        }
+        resolve({ message: "Subcategory updated successfully" });
+      });
+    } else {
+      const query = `UPDATE sub_category SET NAME = ?, DESCRIPTION = ?, IMAGE = ?, STATUS = ?, CATAGORY_CODE = ? WHERE SUB_CATAGORY_CODE = ?`;
+      db.query(
+        query,
+        [name, description, image, status, category, code],
+        (err, result) => {
+          if (err) {
+            reject({ message: "Something went wrong, Please try again!" });
+            return;
+          }
+          resolve({ message: "Subcategory updated successfully" });
         }
       );
     }
