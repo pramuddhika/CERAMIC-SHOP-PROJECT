@@ -8,6 +8,9 @@ import {
   addNewCategoryController,
   getCategoryDataController,
   updateCategoryController,
+  getCategoryDataListController,
+  addNewSubCategoryController,
+  updateSubCategoryDataController
 } from "../controllers/productdata-controller.js";
 
 const router = express.Router();
@@ -30,6 +33,8 @@ const upload = multer({
   storage: storage,
 });
 
+//get category data list
+router.get("/get/categoryList", getCategoryDataListController);
 //get category-subcategoty-product ID
 router.get("/get/:tname", generateIDController);
 //add new category
@@ -38,5 +43,9 @@ router.post("/add/category", upload.single('image'), addNewCategoryController);
 router.get("/get/tableData/:tname", getCategoryDataController);
 //edit category
 router.put("/update/category/:code", upload.single('image'), updateCategoryController);
+//add new subcategory
+router.post("/add/subcategory", upload.single('image'), addNewSubCategoryController);
+//edit subcategory data
+router.put("/update/subcategory/:code", upload.single('image'), updateSubCategoryDataController);
 
 export default router;
