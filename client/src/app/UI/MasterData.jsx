@@ -127,7 +127,7 @@ const Masterdata = () => {
           </button>
         </div>
 
-        <div className="card-body overflow-auto">
+        <div className="card-body overflow-auto flex justify-center">
           <table className="border text-sm table-fixed w-full overflow-auto">
             <thead className="bg-slate-400">
               <tr className="pl-2 text-center">

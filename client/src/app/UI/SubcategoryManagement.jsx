@@ -175,16 +175,17 @@ const SubcategoryManagement = () => {
   return (
     <div>
       <div className="card rounded-lg h-full w-full">
-        <div className="card-header flex justify-between items-center border-b py-2 bg-gray-100">
-          <div>
-            <button
-              className="text-white bg-cyan-950 hover:bg-cyan-900 px-3 py-1 rounded-lg flex items-center"
-              onClick={handleModalToggle}
-            >
-              <AiOutlinePlus className="mr-1" />
-              Add New
-            </button>
-          </div>
+        <div className="card-header flex items-center justify-between border-b py-2 bg-gray-100">
+          <h2 className="text-xl font-semibold w-full text-start">
+            Subcategory Management
+          </h2>
+          <button
+            className="text-white bg-cyan-950 hover:bg-cyan-900 px-3 py-1 rounded-lg flex"
+            onClick={handleModalToggle}
+          >
+            <AiOutlinePlus className="mr-1" />
+            Add New
+          </button>
         </div>
         <div className="card-body overflow-auto flex justify-center">
           <table className="border text-sm table-fixed w-full overflow-auto">
@@ -266,7 +267,9 @@ const SubcategoryManagement = () => {
               <div className="bg-white rounded-lg shadow-lg w-2/3 p-6">
                 <div className="flex justify-between items-center mb-4">
                   <h2 className="text-lg font-bold">
-                    {isEdit ? "Edit Selected Subcategory" : "Add New Subcategory"}
+                    {isEdit
+                      ? "Edit Selected Subcategory"
+                      : "Add New Subcategory"}
                   </h2>
                   <button
                     className="text-main hover:text-main"
@@ -334,6 +337,25 @@ const SubcategoryManagement = () => {
                           value={formik.values.code || newId}
                           onChange={formik.handleChange}
                         />
+                        <div className="mt-2">
+                          <select
+                            name="category"
+                            className="w-full border rounded px-3 py-2 focus:outline-none"
+                            style={{ width: "100%" }}
+                            value={formik.values.category}
+                            onChange={formik.handleChange}
+                          >
+                            <option value="">Select Category</option>
+                            {categoryList.map((category) => (
+                              <option
+                                key={category.value}
+                                value={category.value}
+                              >
+                                {category.label}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
                       </div>
                     </div>
 
@@ -390,28 +412,6 @@ const SubcategoryManagement = () => {
                             </label>
                           </div>
                         </div>
-                      </div>
-
-                      <div className="mb-4">
-                        <label className="block text-sm font-semibold mb-2">
-                          Category
-                        </label>
-                        <select
-                          name="category"
-                          className="w-full border rounded px-3 py-2"
-                          value={formik.values.category}
-                          onChange={formik.handleChange}
-                        >
-                          <option value="">Select Category</option>
-                          {categoryList.map((category) => (
-                            <option
-                              key={category.value}
-                              value={category.value}
-                            >
-                              {category.label}
-                            </option>
-                          ))}
-                        </select>
                       </div>
 
                       <div className="flex justify-end space-x-2">

@@ -160,7 +160,7 @@ const CategoryManagement = () => {
     <div>
       <div className="card rounded-lg h-full w-full">
         <div className="card-header flex justify-between items-center border-b py-2 bg-gray-100">
-          <div>
+          <h2 className="text-xl font-semibold">Category Management</h2>
             <button
               className="text-white bg-cyan-950 hover:bg-cyan-900 px-3 py-1 rounded-lg flex items-center"
               onClick={handleModalToggle}
@@ -168,7 +168,6 @@ const CategoryManagement = () => {
               <AiOutlinePlus className="mr-1" />
               Add New
             </button>
-          </div>
         </div>
         <div className="card-body overflow-auto flex justify-center">
           <table className="border text-sm table-fixed w-full overflow-auto">

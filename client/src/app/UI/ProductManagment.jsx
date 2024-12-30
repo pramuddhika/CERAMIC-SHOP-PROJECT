@@ -21,12 +21,27 @@ const ProductManagement = () => {
 
   return (
     <div>
-      <div className="tabs gap-3">
-        <button onClick={() => setActiveTab(1)}>Category</button>
-        <button onClick={() => setActiveTab(2)}>Subcategory</button>
-        <button onClick={() => setActiveTab(3)}>Product</button>
+      <div className="tabs flex">
+        <button
+          className={`px-2 py-1 rounded ${activeTab === 1 ? "font-bold underline" : ""}`}
+          onClick={() => setActiveTab(1)}
+        >
+          Category
+        </button>
+        <button
+          className={`px-2 py-1 rounded ${activeTab === 2 ? "font-bold underline" : ""}`}
+          onClick={() => setActiveTab(2)}
+        >
+          Subcategory
+        </button>
+        <button
+          className={`px-2 py-1 rounded ${activeTab === 3 ? "font-bold underline" : ""}`}
+          onClick={() => setActiveTab(3)}
+        >
+          Product
+        </button>
       </div>
-      <div className="tab-content">{renderTabContent()}</div>
+      <div className="tab-content mt-4">{renderTabContent()}</div>
     </div>
   );
 };
