@@ -3,6 +3,7 @@ import { FaEdit } from "react-icons/fa";
 import { AiOutlinePlus } from "react-icons/ai";
 import { useFormik } from "formik";
 import axios from "axios";
+import Nodata from "../../assets/Nodata.svg";
 import { toast } from "react-toastify";
 import CommonPagination from "../../utils/CommonPagination";
 import CommonLoading from "../../utils/CommonLoading";
@@ -204,6 +205,14 @@ const SubcategoryManagement = () => {
               {subcategoryData.length === 0 && (
                 <tr>
                   <td colSpan="6" className="text-center py-4">
+                    <img
+                      src={Nodata}
+                      style={{
+                        width: "150px",
+                        margin: "0 auto",
+                        padding: "20px",
+                      }}
+                    />
                     No data found!
                   </td>
                 </tr>

@@ -1,4 +1,3 @@
-import e from "express";
 import { db } from "../env.js";
 
 //get category-subcategory-product last id
@@ -245,6 +244,88 @@ export const updateSubCategoryService = async (
             return;
           }
           resolve({ message: "Subcategory updated successfully" });
+        }
+      );
+    }
+  });
+};
+
+//get subcategory data list
+export const getSubCategoryDataListService = async () => {
+  return new Promise((resolve, reject) => {
+    const query = 'SELECT SUB_CATAGORY_CODE, NAME FROM sub_category WHERE STATUS = 1';
+    db.query(query, (err, result) => {
+      if (err) {
+        reject({ message: "Something went wrong, Please try again!" });
+        return;
+      }
+      const list = result.map(element => ({
+        value: element.SUB_CATAGORY_CODE,
+        label: element.NAME,
+      }));
+      resolve(list);
+    });
+  });
+};
+
+//add new product
+export const addNewProductService = async (
+  code,
+  category,
+  subcategory,
+  name,
+  description,
+  image,
+  status,
+  price
+) => {
+  return new Promise((resolve, reject) => {
+    const query = `INSERT INTO product (PRODUCT_CODE,SUB_CATAGORY_CODE , CATAGORY_CODE, NAME, DESCRIPTION, IMAGE, STATUS , PRICE) VALUES (?,?,?,?,?,?,?,?)`;
+    db.query(query, [code, subcategory, category, name, description, image, status , price], (err, result) => {
+      if (err) {
+        if (err.code === "ER_DUP_ENTRY") {
+          reject({ message: "Data already exists!" });
+        } else {
+          reject({ message: "Something went wrong, Please try again!" });
+        }
+      }
+      resolve({ message: "Product added successfully" });
+    });
+  });
+};
+
+//edit product data
+export const updateProductService = async (
+  code,
+  name,
+  description,
+  image,
+  status,
+  category,
+  subcategory,
+  price
+) => {
+  return new Promise((resolve, reject) => {
+    if (image === null) {
+      const query = `UPDATE product SET NAME = ?, DESCRIPTION = ?, STATUS = ?, CATAGORY_CODE = ?, SUB_CATAGORY_CODE = ?, PRICE = ? WHERE PRODUCT_CODE = ?`;
+      db.query(query, [name, description, status, category, subcategory, price, code], (err, result) => {
+        if (err) {
+          reject({ message: "Something went wrong, Please try again!" });
+          return;
+        }
+        resolve({ message: "Product updated successfully" });
+      });
+    } else {
+      const query = `UPDATE product SET NAME = ?, DESCRIPTION = ?, IMAGE = ?, STATUS = ?, CATAGORY_CODE = ?, SUB_CATAGORY_CODE = ?, PRICE = ? WHERE PRODUCT_CODE = ?`;
+      db.query(
+        query,
+        [name, description, image, status, category, subcategory, price, code],
+        (err, result) => {
+          if (err) {
+            reject({ message: "Something went wrong, Please try again!" });
+            return;
+          }
+          resolve({ message: "Product updated successfully" });
         }
       );
     }

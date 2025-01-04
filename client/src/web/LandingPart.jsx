@@ -3,8 +3,14 @@ import Image2 from "../assets/hero2.png";
 import Image3 from "../assets/hero3.png";
 import Carousel from "react-bootstrap/Carousel";
 import Button from "react-bootstrap/Button";
+import { useEffect } from "react";
 
 const LandingPart = () => {
+
+  useEffect(() => {
+    localStorage.setItem("activeTopic", "Dashboard");
+  }, []);
+
   return (
     <>
       <div id="home">

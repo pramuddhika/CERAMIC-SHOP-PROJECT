@@ -8,15 +8,17 @@ import { toast } from "react-toastify";
 import CommonPagination from "../../utils/CommonPagination";
 import CommonLoading from "../../utils/CommonLoading";
 
-const CategoryManagement = () => {
+const ProductManagementTab = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
   const [newId, setNewId] = useState("");
   const [selectedImage, setSelectedImage] = useState(null);
   const [selectedFile, setSelectedFile] = useState(null);
-  const [categoryData, setCategoryData] = useState([]);
+  const [productData, setProductData] = useState([]);
+  const [categoryList, setCategoryList] = useState([]);
   const [totalPages, setTotalPages] = useState(1);
+  const [subCategoryData, setSubCategoryData] = useState([]);
   const [itemsPerPage, setItemsPerPage] = useState(5);
   const [isLoading, setIsLoading] = useState(false);
   const [initialValues, setInitialValues] = useState({
@@ -24,6 +26,8 @@ const CategoryManagement = () => {
     name: "",
     description: "",
     status: "1",
+    category: "",
+    subcategory: "",
   });
 
   const handlePageChange = (page) => setCurrentPage(page);
@@ -44,26 +48,47 @@ const CategoryManagement = () => {
         name: "",
         description: "",
         status: "1",
+        price: "",
+        subcategory: "",
+        category: "",
       });
     }
   };
 
   const getNewId = async () => {
     try {
-      const Idresponse = await axios.get(`/api/productdata/get/category`);
+      const Idresponse = await axios.get(`/api/productdata/get/product`);
       setNewId(Idresponse?.data?.newid);
     } catch (error) {
       console.log("Error:", error);
     }
   };
 
-  const fetchCategoryData = async (page, limit) => {
+  const fetchCategoryList = async () => {
+    try {
+      const response = await axios.get("/api/productdata/get/categoryList");
+      setCategoryList(response.data);
+    } catch (error) {
+      console.log("Error:", error);
+    }
+  };
+
+  const fetchSubCategoryData = async () => { 
+    try {
+      const response = await axios.get("/api/productdata/get/subcategoryList");
+      setSubCategoryData(response.data);
+    } catch (error) {
+      console.log("Error:", error);
+    }
+  }
+
+  const fetchProductData = async (page, limit) => {
     setIsLoading(true);
     try {
       const response = await axios.get(
-        `/api/productdata/get/tableData/category?page=${page}&limit=${limit}`
+        `/api/productdata/get/tableData/product?page=${page}&limit=${limit}`
       );
-      setCategoryData(response.data.data);
+      setProductData(response.data.data);
       setTotalPages(response.data.totalPages);
     } catch (error) {
       console.log("Error:", error);
@@ -74,7 +99,9 @@ const CategoryManagement = () => {
 
   useEffect(() => {
     getNewId();
-    fetchCategoryData(currentPage, itemsPerPage);
+    fetchCategoryList();
+    fetchSubCategoryData();
+    fetchProductData(currentPage, itemsPerPage);
   }, [currentPage, itemsPerPage]);
 
   const formik = useFormik({
@@ -95,34 +122,37 @@ const CategoryManagement = () => {
       formData.append("description", values.description);
       formData.append("image", selectedFile ?? null);
       formData.append("status", values.status);
+      formData.append("category", values.category);
+      formData.append("price", values.price);
+      formData.append("subcategory", values.subcategory);
 
       if (!isEdit) {
         try {
-          const newCategory = await axios.post(
-            "/api/productdata/add/category",
+          const newSubcategory = await axios.post(
+            "/api/productdata/add/product",
             formData
           );
-          toast.success(newCategory.data.message);
+          toast.success(newSubcategory.data.message);
           formik.resetForm();
           setSelectedImage(null);
           getNewId();
           handleModalToggle();
-          fetchCategoryData(currentPage, itemsPerPage);
+          fetchProductData(currentPage, itemsPerPage);
         } catch (error) {
           console.log("Error:", error.response.data);
           toast.error(error.response.data.error);
         }
       } else {
         try {
-          const updateCategory = await axios.put(
-            `/api/productdata/update/category/${values.code}`,
+          const updateSubcategory = await axios.put(
+            `/api/productdata/update/product/${values.code}`,
             formData
           );
-          toast.success(updateCategory.data.message);
+          toast.success(updateSubcategory.data.message);
           formik.resetForm();
           setSelectedImage(null);
           handleModalToggle();
-          fetchCategoryData(currentPage, itemsPerPage);
+          fetchProductData(currentPage, itemsPerPage);
         } catch (error) {
           console.log("Error:", error.response.data);
           toast.error(error.response.data.error);
@@ -134,16 +164,21 @@ const CategoryManagement = () => {
   const handleEdit = (row) => {
     setIsEdit(true);
     setInitialValues({
-      code: row.CATAGORY_CODE,
+      code: row.PRODUCT_CODE,
       name: row.NAME,
+      subcategory: row.SUB_CATAGORY_CODE,
       description: row.DESCRIPTION,
       status: row.STATUS === 1 ? "1" : "0",
+      price: row.PRICE,
+      category: row.CATAGORY_CODE,
     });
     formik.setValues({
-      code: row.CATAGORY_CODE,
+      code: row.PRODUCT_CODE,
       name: row.NAME,
+      price: row.PRICE,
       description: row.DESCRIPTION,
       status: row.STATUS === 1 ? "1" : "0",
+      category: row.CATEGORY_CODE,
     });
     setSelectedImage(`http://localhost:8080/images/${row.IMAGE}`);
     setIsModalOpen(true);
@@ -160,10 +195,12 @@ const CategoryManagement = () => {
   return (
     <div>
       <div className="card rounded-lg h-full w-full">
-        <div className="card-header flex justify-between items-center border-b py-2 bg-gray-100">
-          <h2 className="text-xl font-semibold">Category Management</h2>
+        <div className="card-header flex items-center justify-between border-b py-2 bg-gray-100">
+          <h2 className="text-xl font-semibold w-full text-start">
+            Product Management
+          </h2>
           <button
-            className="text-white bg-cyan-950 hover:bg-cyan-900 px-3 py-1 rounded-lg flex items-center"
+            className="text-white bg-cyan-950 hover:bg-cyan-900 px-3 py-1 rounded-lg flex"
             onClick={handleModalToggle}
           >
             <AiOutlinePlus className="mr-1" />
@@ -175,17 +212,20 @@ const CategoryManagement = () => {
             <thead className="bg-slate-400">
               <tr className="text-center">
                 <th className="border py-2 min-w-[100px]">Image</th>
+                <th className="border py-2 min-w-[130px]">Cat. Code</th>
+                <th className="border py-2 min-w-[130px]">Sub. Code</th>
                 <th className="border py-2 min-w-[130px]">Code</th>
-                <th className="border py-2 min-w-[150px]">Name</th>
+                <th className="border py-2 min-w-[200px]">Name</th>
                 <th className="border py-2 min-w-[500px]">Description</th>
+                <th className="border py-2 min-w-[100px]">Price</th>
                 <th className="border py-2 min-w-[100px]">Status</th>
                 <th className="border py-2 min-w-[90px]">Actions</th>
               </tr>
             </thead>
             <tbody className="text-gray-800">
-              {categoryData.length === 0 && (
+              {productData.length === 0 && (
                 <tr>
-                  <td colSpan="6" className="text-center py-4">
+                  <td colSpan="9" className="text-center py-4">
                     <img
                       src={Nodata}
                       style={{
@@ -198,7 +238,7 @@ const CategoryManagement = () => {
                   </td>
                 </tr>
               )}
-              {categoryData.map((row, index) => (
+              {productData.map((row, index) => (
                 <tr key={index}>
                   <td className="border px-6 py-2 w-24">
                     <img
@@ -210,8 +250,15 @@ const CategoryManagement = () => {
                   <td className="border px-6 py-2 w-64 text-center">
                     {row.CATAGORY_CODE}
                   </td>
+                  <td className="border px-6 py-2 w-64 text-center">
+                    {row.SUB_CATAGORY_CODE}
+                  </td>
+                  <td className="border px-6 py-2 w-64 text-center">
+                    {row.PRODUCT_CODE}
+                  </td>
                   <td className="border px-6 py-2 text-center">{row.NAME}</td>
                   <td className="border px-6 py-2">{row.DESCRIPTION}</td>
+                  <td className="border px-6 py-2 text-center">Rs.{row.PRICE}</td>
                   {row.STATUS === 1 ? (
                     <td className="border px-6 text-center">
                       <span className="text-white bg-green-600 py-2 px-4 rounded-2xl">
@@ -254,7 +301,7 @@ const CategoryManagement = () => {
               <div className="bg-white rounded-lg shadow-lg w-2/3 p-6">
                 <div className="flex justify-between items-center mb-4">
                   <h2 className="text-lg font-bold">
-                    {isEdit ? "Edit Selected Category" : "Add New Category"}
+                    {isEdit ? "Edit Selected Product" : "Add New Product"}
                   </h2>
                   <button
                     className="text-main hover:text-main"
@@ -311,7 +358,7 @@ const CategoryManagement = () => {
                       </button>
                       <div>
                         <label className="block text-sm font-semibold mb-1 mt-4">
-                          Category Code
+                          Product Code
                         </label>
                         <input
                           type="text"
@@ -322,6 +369,44 @@ const CategoryManagement = () => {
                           value={formik.values.code || newId}
                           onChange={formik.handleChange}
                         />
+                        <div className="mt-2">
+                          <select
+                            name="category"
+                            className="w-full border rounded px-3 py-2 focus:outline-none"
+                            style={{ width: "100%" }}
+                            value={formik.values.category}
+                            onChange={formik.handleChange}
+                          >
+                            <option value="">Select Category</option>
+                            {categoryList.map((category) => (
+                              <option
+                                key={category.value}
+                                value={category.value}
+                              >
+                                {category.label}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                        <div className="mt-2">
+                          <select
+                            name="subcategory"
+                            className="w-full border rounded px-3 py-2 focus:outline-none"
+                            style={{ width: "100%" }}
+                            value={formik.values.subcategory}
+                            onChange={formik.handleChange}
+                          >
+                            <option value="">Select Sub Category</option>
+                            {subCategoryData.map((subcategory) => (
+                              <option
+                                key={subcategory.value}
+                                value={subcategory.value}
+                              >
+                                {subcategory.label}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
                       </div>
                     </div>
 
@@ -332,6 +417,15 @@ const CategoryManagement = () => {
                         className="w-full border rounded px-3 py-2 mb-4"
                         placeholder="Name"
                         value={formik.values.name}
+                        onChange={formik.handleChange}
+                      />
+
+                      <input
+                        type="text"
+                        name="price"
+                        className="w-full border rounded px-3 py-2 mb-4"
+                        placeholder="Price (in Rs.)"
+                        value={formik.values.price}
                         onChange={formik.handleChange}
                       />
 
@@ -414,4 +508,4 @@ const CategoryManagement = () => {
   );
 };
 
-export default CategoryManagement;
+export default ProductManagementTab;

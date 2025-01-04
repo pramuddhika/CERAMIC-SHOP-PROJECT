@@ -5,6 +5,7 @@ import { FaEdit } from "react-icons/fa";
 import { AiOutlinePlus } from "react-icons/ai";
 import { useEffect } from "react";
 import axios from "axios";
+import Nodata from "../../assets/Nodata.svg";
 import { Formik, Form } from "formik";
 import * as Yup from "yup";
 import CommonLoading from "../../utils/CommonLoading";
@@ -140,9 +141,18 @@ const Masterdata = () => {
               </tr>
             </thead>
             <tbody className="divide-y">
-              {(currentData.message === "No data found!" || currentData.length === 0) ? (
+              {currentData.message === "No data found!" ||
+              currentData.length === 0 ? (
                 <tr>
                   <td colSpan="4" className="text-center py-4">
+                    <img
+                      src={Nodata}
+                      style={{
+                        width: "150px",
+                        margin: "0 auto",
+                        padding: "20px",
+                      }}
+                    />
                     <span className="text-gray-500">No Data Available</span>
                   </td>
                 </tr>

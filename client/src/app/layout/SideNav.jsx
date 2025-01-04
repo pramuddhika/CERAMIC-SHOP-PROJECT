@@ -44,7 +44,7 @@ const SideNav = ({ setActiveTopic }) => {
           to="/app/Product_Management"
           Icon={() => <i className="bi bi-person-lines-fill"></i>}
           label="Product"
-          topic="Product Maganement"
+          topic="Product Management"
         />
         <NavItem
           to="/app/MasterData"
@@ -52,6 +52,14 @@ const SideNav = ({ setActiveTopic }) => {
           label="Master Data"
           topic="Master Data"
         />
+        <div className="fixed bottom-4 w-[180px]">
+          <NavItem
+            to="/"
+            Icon={() => <i className="bi bi-door-open-fill"></i>}
+            label="Logout"
+            onClick={() => localStorage.clear()}
+          />
+        </div>
       </div>
     </div>
   );
