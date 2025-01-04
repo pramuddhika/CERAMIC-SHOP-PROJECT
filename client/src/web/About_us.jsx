@@ -3,14 +3,14 @@ import hero4 from "../assets/hero4.png";
 const About_us = () => {
   return (
     <div id="About-us">
-      <div className="grid sm:grid-cols-2 bg-gray-100">
+      <div className="grid sm:grid-cols-2 bg-slate-400">
         {/* Left Side */}
-        <div className="min-h-[600px] bg-slate-500 shadow flex items-center justify-center">
-          <img src={hero4} alt="About Us" className="w-full h-screen" />
+        <div className="min-h-[600px] bg-slate-400 shadow flex items-center justify-start">
+          <img src={hero4} alt="About Us" className="object-fit w-full h-screen" />
         </div>
 
         {/* Right Side */}
-        <div className="min-h-[600px] bg-slate-400 shadow flex flex-col justify-center p-8">
+        <div className="min-h-[600px] bg-slate-400 flex flex-col justify-center p-8 mr-20">
           <div>
             <h3 className="text-lg font-bold mb-6 text-left">
               Inspired Craftsmanship, Global Recognition

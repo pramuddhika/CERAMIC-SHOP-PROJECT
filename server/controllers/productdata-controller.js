@@ -9,6 +9,8 @@ import {
   getSubCategoryDataListService,
   addNewProductService,
   updateProductService,
+  getCategoryListService,
+  getProductService
 } from "../services/productdata-service.js";
 
 //generate categoty-subcategory-product id
@@ -146,6 +148,34 @@ export const updateProductDataController = async (req, res) => {
   try {
     const updateProductResponse = await updateProductService(code, name, description, image, status , category, subcategory, price);
     res.status(200).json(updateProductResponse);
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
+
+//get subcategory according to selected category
+export const getCategoryListController = async (req, res) => {
+  const { category } = req.params;
+  if (!category) {
+    return res.status(400).json({ error: "Missing required data" });
+  }
+  try {
+    const categoryList = await getCategoryListService(category);
+    res.status(200).json(categoryList);
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
+
+//get product data according to selected sub category
+export const getCategoryController = async (req, res) => {
+  const { subcategory } = req.params;
+  if (!subcategory) {
+    return res.status(400).json({ error: "Missing required data" });
+  }
+  try {
+    const categoryList = await getProductService(subcategory);
+    res.status(200).json(categoryList);
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }

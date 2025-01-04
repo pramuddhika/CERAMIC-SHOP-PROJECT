@@ -37,6 +37,7 @@ const LandingPart = () => {
             <h6>Crafting Tomorrow&apos;s Spaces Today</h6>
             <Button
               className="mt-3 p-4"
+              href="#collection"
               style={{
                 backgroundColor: "#6794A0",
                 border: "none",
