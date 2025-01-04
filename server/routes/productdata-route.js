@@ -13,6 +13,7 @@ import {
   updateSubCategoryDataController,
   getSubCategoryDataListController,
   addNewProductController,
+  updateProductDataController
 } from "../controllers/productdata-controller.js";
 
 const router = express.Router();
@@ -53,5 +54,7 @@ router.post("/add/subcategory", upload.single('image'), addNewSubCategoryControl
 router.put("/update/subcategory/:code", upload.single('image'), updateSubCategoryDataController);
 //add new product
 router.post("/add/product", upload.single('image'), addNewProductController);
+//edit product data
+router.put("/update/product/:code", upload.single('image'), updateProductDataController);
 
 export default router;

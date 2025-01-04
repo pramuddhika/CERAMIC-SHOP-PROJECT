@@ -293,3 +293,41 @@ export const addNewProductService = async (
     });
   });
 };
+
+//edit product data
+export const updateProductService = async (
+  code,
+  name,
+  description,
+  image,
+  status,
+  category,
+  subcategory,
+  price
+) => {
+  return new Promise((resolve, reject) => {
+    if (image === null) {
+      const query = `UPDATE product SET NAME = ?, DESCRIPTION = ?, STATUS = ?, CATAGORY_CODE = ?, SUB_CATAGORY_CODE = ?, PRICE = ? WHERE PRODUCT_CODE = ?`;
+      db.query(query, [name, description, status, category, subcategory, price, code], (err, result) => {
+        if (err) {
+          reject({ message: "Something went wrong, Please try again!" });
+          return;
+        }
+        resolve({ message: "Product updated successfully" });
+      });
+    } else {
+      const query = `UPDATE product SET NAME = ?, DESCRIPTION = ?, IMAGE = ?, STATUS = ?, CATAGORY_CODE = ?, SUB_CATAGORY_CODE = ?, PRICE = ? WHERE PRODUCT_CODE = ?`;
+      db.query(
+        query,
+        [name, description, image, status, category, subcategory, price, code],
+        (err, result) => {
+          if (err) {
+            reject({ message: "Something went wrong, Please try again!" });
+            return;
+          }
+          resolve({ message: "Product updated successfully" });
+        }
+      );
+    }
+  });
+};

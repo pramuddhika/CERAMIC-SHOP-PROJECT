@@ -18,6 +18,7 @@ const ProductManagementTab = () => {
   const [productData, setProductData] = useState([]);
   const [categoryList, setCategoryList] = useState([]);
   const [totalPages, setTotalPages] = useState(1);
+  const [subCategoryData, setSubCategoryData] = useState([]);
   const [itemsPerPage, setItemsPerPage] = useState(5);
   const [isLoading, setIsLoading] = useState(false);
   const [initialValues, setInitialValues] = useState({
@@ -26,6 +27,7 @@ const ProductManagementTab = () => {
     description: "",
     status: "1",
     category: "",
+    subcategory: "",
   });
 
   const handlePageChange = (page) => setCurrentPage(page);
@@ -46,6 +48,8 @@ const ProductManagementTab = () => {
         name: "",
         description: "",
         status: "1",
+        price: "",
+        subcategory: "",
         category: "",
       });
     }
@@ -69,6 +73,15 @@ const ProductManagementTab = () => {
     }
   };
 
+  const fetchSubCategoryData = async () => { 
+    try {
+      const response = await axios.get("/api/productdata/get/subcategoryList");
+      setSubCategoryData(response.data);
+    } catch (error) {
+      console.log("Error:", error);
+    }
+  }
+
   const fetchProductData = async (page, limit) => {
     setIsLoading(true);
     try {
@@ -87,6 +100,7 @@ const ProductManagementTab = () => {
   useEffect(() => {
     getNewId();
     fetchCategoryList();
+    fetchSubCategoryData();
     fetchProductData(currentPage, itemsPerPage);
   }, [currentPage, itemsPerPage]);
 
@@ -109,11 +123,13 @@ const ProductManagementTab = () => {
       formData.append("image", selectedFile ?? null);
       formData.append("status", values.status);
       formData.append("category", values.category);
+      formData.append("price", values.price);
+      formData.append("subcategory", values.subcategory);
 
       if (!isEdit) {
         try {
           const newSubcategory = await axios.post(
-            "/api/productdata/add/subcategory",
+            "/api/productdata/add/product",
             formData
           );
           toast.success(newSubcategory.data.message);
@@ -129,7 +145,7 @@ const ProductManagementTab = () => {
       } else {
         try {
           const updateSubcategory = await axios.put(
-            `/api/productdata/update/subcategory/${values.code}`,
+            `/api/productdata/update/product/${values.code}`,
             formData
           );
           toast.success(updateSubcategory.data.message);
@@ -148,15 +164,18 @@ const ProductManagementTab = () => {
   const handleEdit = (row) => {
     setIsEdit(true);
     setInitialValues({
-      code: row.SUB_CATAGORY_CODE,
+      code: row.PRODUCT_CODE,
       name: row.NAME,
+      subcategory: row.SUB_CATAGORY_CODE,
       description: row.DESCRIPTION,
       status: row.STATUS === 1 ? "1" : "0",
+      price: row.PRICE,
       category: row.CATAGORY_CODE,
     });
     formik.setValues({
-      code: row.SUBCATEGORY_CODE,
+      code: row.PRODUCT_CODE,
       name: row.NAME,
+      price: row.PRICE,
       description: row.DESCRIPTION,
       status: row.STATUS === 1 ? "1" : "0",
       category: row.CATEGORY_CODE,
@@ -178,7 +197,7 @@ const ProductManagementTab = () => {
       <div className="card rounded-lg h-full w-full">
         <div className="card-header flex items-center justify-between border-b py-2 bg-gray-100">
           <h2 className="text-xl font-semibold w-full text-start">
-            Product Management 
+            Product Management
           </h2>
           <button
             className="text-white bg-cyan-950 hover:bg-cyan-900 px-3 py-1 rounded-lg flex"
@@ -209,7 +228,11 @@ const ProductManagementTab = () => {
                   <td colSpan="9" className="text-center py-4">
                     <img
                       src={Nodata}
-                      style={{ width: "150px" , margin: "0 auto", padding: "20px"}}
+                      style={{
+                        width: "150px",
+                        margin: "0 auto",
+                        padding: "20px",
+                      }}
                     />
                     No data found!
                   </td>
@@ -230,8 +253,12 @@ const ProductManagementTab = () => {
                   <td className="border px-6 py-2 w-64 text-center">
                     {row.SUB_CATAGORY_CODE}
                   </td>
+                  <td className="border px-6 py-2 w-64 text-center">
+                    {row.PRODUCT_CODE}
+                  </td>
                   <td className="border px-6 py-2 text-center">{row.NAME}</td>
                   <td className="border px-6 py-2">{row.DESCRIPTION}</td>
+                  <td className="border px-6 py-2 text-center">Rs.{row.PRICE}</td>
                   {row.STATUS === 1 ? (
                     <td className="border px-6 text-center">
                       <span className="text-white bg-green-600 py-2 px-4 rounded-2xl">
@@ -274,9 +301,7 @@ const ProductManagementTab = () => {
               <div className="bg-white rounded-lg shadow-lg w-2/3 p-6">
                 <div className="flex justify-between items-center mb-4">
                   <h2 className="text-lg font-bold">
-                    {isEdit
-                      ? "Edit Selected Product"
-                      : "Add New Product"}
+                    {isEdit ? "Edit Selected Product" : "Add New Product"}
                   </h2>
                   <button
                     className="text-main hover:text-main"
@@ -363,6 +388,25 @@ const ProductManagementTab = () => {
                             ))}
                           </select>
                         </div>
+                        <div className="mt-2">
+                          <select
+                            name="subcategory"
+                            className="w-full border rounded px-3 py-2 focus:outline-none"
+                            style={{ width: "100%" }}
+                            value={formik.values.subcategory}
+                            onChange={formik.handleChange}
+                          >
+                            <option value="">Select Sub Category</option>
+                            {subCategoryData.map((subcategory) => (
+                              <option
+                                key={subcategory.value}
+                                value={subcategory.value}
+                              >
+                                {subcategory.label}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
                       </div>
                     </div>
 
@@ -373,6 +417,15 @@ const ProductManagementTab = () => {
                         className="w-full border rounded px-3 py-2 mb-4"
                         placeholder="Name"
                         value={formik.values.name}
+                        onChange={formik.handleChange}
+                      />
+
+                      <input
+                        type="text"
+                        name="price"
+                        className="w-full border rounded px-3 py-2 mb-4"
+                        placeholder="Price (in Rs.)"
+                        value={formik.values.price}
                         onChange={formik.handleChange}
                       />
 
