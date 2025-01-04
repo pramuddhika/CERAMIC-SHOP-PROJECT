@@ -1,4 +1,3 @@
-import React from "react";
 import hero6 from "../assets/hero6.png";
 import { Formik, Form } from "formik";
 import { FaChevronLeft } from "react-icons/fa";
@@ -23,7 +22,7 @@ const Signup = () => {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 min-h-screen">
       {/* Left Column */}
-      <div className="flex items-center justify-center bg-slate-500 shadow">
+      <div className="flex items-center justify-right">
         <img
           src={hero6}
           alt="Signup Visual"
@@ -32,8 +31,8 @@ const Signup = () => {
       </div>
 
       {/* Right Column*/}
-      <div className="bg-white flex flex-col justify-around shadow px-8 py-16">
-        <div className="w-full max-w-lg mx-auto">
+      <div className="bg-white flex flex-col justify-around px-8 py-16">
+        <div className="w-full max-w-lg">
           <div className="text-center  flex items-center justify-center space-x-2">
             <FaChevronLeft
               className="text-teal-600 cursor-pointer"
@@ -57,6 +56,7 @@ const Signup = () => {
                     type="text"
                     name="fullname"
                     autoComplete="on"
+                    style={{ width: "100%" }}
                     className="bg-gray-100 border border-gray-300 focus:ring-2 focus:ring-teal-500 focus:outline-none rounded-lg w-full h-14 px-4"
                   />
                   {touched.fullname && errors.fullname && (
@@ -72,6 +72,7 @@ const Signup = () => {
                     {...getFieldProps("email")}
                     type="email"
                     name="email"
+                    style={{ width: "100%" }}
                     autoComplete="on"
                     className="bg-gray-100 border border-gray-300 focus:ring-2 focus:ring-teal-500 focus:outline-none rounded-lg w-full h-14 px-4"
                   />
@@ -89,6 +90,7 @@ const Signup = () => {
                     type="password"
                     name="password"
                     autoComplete="on"
+                    style={{ width: "100%" }}
                     className="bg-gray-100 border border-gray-300 focus:ring-2 focus:ring-teal-500 focus:outline-none rounded-lg w-full h-14 px-4"
                   />
                   {touched.password && errors.password && (
@@ -101,6 +103,7 @@ const Signup = () => {
                 <div>
                   <button
                     type="submit"
+                    style={{ width: "100%" }}
                     className="bg-main text-white font-semibold rounded-lg w-full h-14 hover:bg-teal-700 transition duration-300"
                   >
                     Sign Up
