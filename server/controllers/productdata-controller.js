@@ -5,7 +5,8 @@ import {
   updateCategoryService,
   getCategoryDataListService,
   addSubNewCategoryService,
-  updateSubCategoryService
+  updateSubCategoryService,
+  getSubCategoryDataListService,
 } from "../services/productdata-service.js";
 
 //generate categoty-subcategory-product id
@@ -102,6 +103,31 @@ export const updateSubCategoryDataController = async (req, res) => {
   try {
     const updateSubCategoryResponse = await updateSubCategoryService(code, name, description, image, status , category);
     res.status(200).json(updateSubCategoryResponse);
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
+
+//get subcategory data list
+export const getSubCategoryDataListController = async (req, res) => {
+  try {
+    const categoryData = await getSubCategoryDataListService();
+    res.status(200).json(categoryData);
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
+
+//add new product
+export const addNewProductController = async (req, res) => {
+  const { code,category,subcategory, name, description, status, addNewProductService } = req.body;
+  const image = req.file ? req.file.filename : null;
+  if (!code || !name || !description || !status || !image || !category || !subcategory || !price) {
+    return res.status(400).json({ error: "All data required!" });
+  }
+  try {
+    const addNewCatergoryResponse = await addNewProductService(code,category,subcategory, name, description, image, status, price);
+    res.status(200).json(addNewCatergoryResponse);
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }

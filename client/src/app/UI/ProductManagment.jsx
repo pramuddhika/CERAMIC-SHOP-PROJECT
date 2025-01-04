@@ -1,7 +1,7 @@
 import { useState } from "react";
 import CategoryManagement from "./CategoryManagement";
 import SubcategoryManagement from "./SubcategoryManagement";
-// import ProductManagementTab from "./ProductManagementTab";
+import ProductManagementTab from "./ProductManagementTab.jsx";
 
 const ProductManagement = () => {
   const [activeTab, setActiveTab] = useState(1);
@@ -12,8 +12,8 @@ const ProductManagement = () => {
         return <CategoryManagement />;
       case 2:
         return <SubcategoryManagement />;
-      // case 3:
-      //   return <ProductManagementTab />;
+      case 3:
+        return <ProductManagementTab />;
       default:
         return <CategoryManagement />;
     }
