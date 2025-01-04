@@ -13,7 +13,9 @@ import {
   updateSubCategoryDataController,
   getSubCategoryDataListController,
   addNewProductController,
-  updateProductDataController
+  updateProductDataController,
+  getCategoryListController,
+  getCategoryController
 } from "../controllers/productdata-controller.js";
 
 const router = express.Router();
@@ -36,6 +38,10 @@ const upload = multer({
   storage: storage,
 });
 
+//get product data accoring to selected sun category
+router.get("/get/product/:subcategory", getCategoryController);
+// geta subcatory according to selected category
+router.get("/get/category/:category", getCategoryListController);
 //get subcategory data list 
 router.get("/get/subcategoryList", getSubCategoryDataListController);
 //get category data list
