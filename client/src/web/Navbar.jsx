@@ -14,8 +14,7 @@ const NavbarComponent = () => {
     >
       <Container>
         <Navbar.Brand
-          as={NavLink}
-          to="/"
+          href="#home"
           style={{
             color: "#FFFFFF",
             fontWeight: "bold",
@@ -27,7 +26,7 @@ const NavbarComponent = () => {
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
         <Navbar.Collapse id="basic-navbar-nav">
           <Nav className="ms-auto">
-          <Nav.Link
+            <Nav.Link
               href="#About-us"
               className={({ isActive }) =>
                 `nav-link-custom ${isActive ? "active" : ""}`
