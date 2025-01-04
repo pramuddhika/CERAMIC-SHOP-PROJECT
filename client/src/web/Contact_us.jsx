@@ -59,6 +59,7 @@ const Contact_us = () => {
                     {...getFieldProps("fullname")}
                     type="text"
                     name="fullname"
+                    style={{width: "100%"}}
                     autoComplete="on"
                     className="bg-gray-100 border rounded-lg w-full h-12 p-3"
                   />
@@ -74,6 +75,7 @@ const Contact_us = () => {
                     {...getFieldProps("email")}
                     type="email"
                     name="email"
+                    style={{width: "100%"}}
                     autoComplete="on"
                     className="bg-gray-100 border rounded-lg w-full h-12 p-3"
                   />
@@ -89,6 +91,7 @@ const Contact_us = () => {
                     {...getFieldProps("message")}
                     name="message"
                     rows="4"
+                    style={{width: "100%"}}
                     className="bg-gray-100 border rounded-lg w-full p-3"
                   />
                   {touched.message && errors.message && (
@@ -102,7 +105,8 @@ const Contact_us = () => {
                     type="submit"
                     name="submit"
                     onClick={handleSubmit}
-                    className="bg-main text-white rounded-lg w-full h-12 hover:bg-teal-700 transition-all"
+                    style={{width: "100%" ,  backgroundColor: "#6794A0"}}
+                    className="text-white rounded-lg w-full h-12 hover:bg-teal-700 transition-all"
                   >
                     Get in Touch
                   </button>
@@ -110,9 +114,9 @@ const Contact_us = () => {
               </Form>
             )}
           </Formik>
-          <div className="bg-white p-8 mt-10">
-            <div className="flex items-center space-x-10">
-              <img src={hero7} alt="Phone" className="w-8 h-8 mr-4" />
+          <div className="bg-white p-4 mt-36 flex items-center justify-between space-y-5">
+            <div className="flex items-center justify-center space-x-10">
+              <img src={hero7} alt="Phone" className="w-8 h-8" />
               <p className="text-lg">
                 +94 710 420 954
                 <br />
@@ -139,9 +143,14 @@ const Contact_us = () => {
           <img
             src={hero5}
             alt="Contact Us"
-            className="w-full h-full"
+            className="object-none h-full w-full object-right"
           />
         </div>
+      </div>
+      <div>
+        <footer className="text-white text-center p-2" style={{ backgroundColor: "#6794A0" }}>
+          <p>&copy; 2024 Gleam Ceramic. All Rights Reserved.</p>
+        </footer>
       </div>
     </div>
   );
