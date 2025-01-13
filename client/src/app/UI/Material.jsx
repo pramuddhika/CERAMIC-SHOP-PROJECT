@@ -7,26 +7,18 @@ import Nodata from "../../assets/Nodata.svg";
 import { Formik, Form } from "formik";
 import * as Yup from "yup";
 import CommonLoading from "../../utils/CommonLoading";
+import { toast } from "react-toastify";
 
 const Material = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentData, setCurrentData] = useState([]);
+  const [newId, setNewId] = useState("");
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [formValues, setFormValues] = useState({
-    name: "",
-    description: "",
-    status: "1",
-  });
 
   const handleModalToggle = () => {
     setIsModalOpen(!isModalOpen);
     if (!isModalOpen) {
-      setFormValues({
-        name: "",
-        description: "",
-        status: "1",
-      });
       setIsEditing(false);
     }
   };
@@ -43,15 +35,28 @@ const Material = () => {
     }
   };
 
+  const fetchMaterialId = async () => {
+    try {
+      const response = await axios.get(`/api/materialdata/get/ID`);
+      setNewId(response?.data?.newid);
+    } catch (error) {
+      console.error("Failed:", error.response?.data || error.message);
+    }
+  };
+
   useEffect(() => {
     fetchMasterData();
+    fetchMaterialId();
   }, []);
 
   const initialvalues = {
+    code: newId,
     name: "",
     description: "",
     status: "1",
   };
+
+  console.log(initialvalues);
 
   const validationSchema = Yup.object().shape({
     name: Yup.string().required("Required").max(20, "Name is too long"),
@@ -155,7 +160,7 @@ const Material = () => {
                 className="text-slate-600 hover:text-main"
                 onClick={() => {
                   handleModalToggle();
-                  setFormValues(initialvalues);
+                  Formik.resetForm();
                   setIsEditing(false);
                 }}
               >
@@ -165,11 +170,16 @@ const Material = () => {
 
             <Formik
               enableReinitialize
-              initialValues={formValues}
+              initialValues={initialvalues}
               validationSchema={validationSchema}
-              onSubmit={(values) => {
-                // Handle form submission
-                console.log(values);
+              onSubmit={async (values) => {
+                try {
+                  const response = await axios.post(`/api/materialdata/add`,values);
+                  fetchMaterialId();
+                  toast.success(response?.data?.message);
+                } catch (error) {
+                  console.error("Failed:",error.response?.data || error.message);
+                }
               }}
             >
               {({
@@ -183,18 +193,18 @@ const Material = () => {
                 <Form>
                   <div className="flex divide-x divide-gray-200">
                     <div style={{ width: "480px" }} className="pr-4">
-                    <div className="mb-3">
+                      <div className="mb-3">
                         <input
                           type="text"
-                          name="id"
+                          name="code"
                           disabled
-                          {...getFieldProps("id")}
+                          {...getFieldProps("code")}
                           className="border rounded px-1 py-2"
                           style={{ width: "100%" }}
                           placeholder="Material ID"
-                          value={values.id}
+                          value={values.code}
                           onChange={(e) =>
-                            setFieldValue("id", e.target.value)
+                            setFieldValue("code", e.target.value)
                           }
                         />
                       </div>
@@ -278,7 +288,7 @@ const Material = () => {
                           className="px-4 py-2 bg-gray-200 text-gray-700 text-sm rounded hover:bg-gray-300"
                           onClick={() => {
                             handleModalToggle();
-                            setFormValues(initialvalues);
+                            Formik.resetForm();
                             setIsEditing(false);
                           }}
                         >

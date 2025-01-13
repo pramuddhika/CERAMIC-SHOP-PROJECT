@@ -14,11 +14,30 @@ export const getLastMaterialIDService = async (tname) => {
         if (code) {
           const numberpart = parseInt(code.split("-")[1], 10);
           const newnumberpart = String(numberpart + 1).padStart(6, "0");
-          id = `MaT-${newnumberpart}`;
+          id = `MAT-${newnumberpart}`;
         } else {
-          id = `MaT-000001`;
+          id = `MAT-000001`;
         }
         resolve({ newid: id });
+      }
+    });
+  });
+};
+
+// add material data
+export const addMaterialDataService = async (code, name, description, status) => {
+  return new Promise((resolve, reject) => {
+    const query = `INSERT INTO material (MATERIAL_ID, NAME, DESCRIPTION, STATUS) VALUES ('${code}', '${name}', '${description}', '${status}')`;
+
+    db.query(query, (err) => {
+      if (err) {
+        if (err.code === "ER_DUP_ENTRY") {
+          reject({ message: "Material code already exists!" });
+        } else {
+          reject({ message: "Something went wrong, Please try again!" });
+        }
+      } else {
+        resolve({ message: "Material data added successfully!" });
       }
     });
   });
