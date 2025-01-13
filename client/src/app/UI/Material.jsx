@@ -1,6 +1,4 @@
 import { useState } from "react";
-import { toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
 import { FaEdit } from "react-icons/fa";
 import { AiOutlinePlus } from "react-icons/ai";
 import { useEffect } from "react";
@@ -11,23 +9,32 @@ import * as Yup from "yup";
 import CommonLoading from "../../utils/CommonLoading";
 
 const Material = () => {
-  const [activeTab, setActiveTab] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentData, setCurrentData] = useState([]);
   const [isEditing, setIsEditing] = useState(false);
-  const [isLaoding, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [formValues, setFormValues] = useState({
+    name: "",
+    description: "",
+    status: "1",
+  });
 
-  const handleTabClick = (num) => {
-    setActiveTab(num);
+  const handleModalToggle = () => {
+    setIsModalOpen(!isModalOpen);
+    if (!isModalOpen) {
+      setFormValues({
+        name: "",
+        description: "",
+        status: "1",
+      });
+      setIsEditing(false);
+    }
   };
-  const handleModalToggle = () => setIsModalOpen(!isModalOpen);
 
   const fetchMasterData = async () => {
     setIsLoading(true);
-    const tabname =
-      activeTab === 1 ? "payment" : activeTab === 2 ? "order" : "stock";
     try {
-      const response = await axios.get(`/api/masterdata/get/${tabname}`);
+      const response = await axios.get(`/api/masterdata/get/`);
       setCurrentData(response.data);
     } catch (error) {
       console.error("Failed:", error.response?.data || error.message);
@@ -38,87 +45,28 @@ const Material = () => {
 
   useEffect(() => {
     fetchMasterData();
-  }, [activeTab]);
+  }, []);
 
   const initialvalues = {
-    tag: "",
+    name: "",
     description: "",
-    status: 1,
+    status: "1",
   };
+
   const validationSchema = Yup.object().shape({
     name: Yup.string().required("Required").max(20, "Name is too long"),
     description: Yup.string()
       .required("Required")
       .max(100, "Description too long"),
   });
-  const [formValues, setFormValues] = useState(initialvalues);
-
-  const handleEdit = (rowData) => {
-    handleModalToggle();
-    setIsEditing(true);
-    setFormValues({
-      tag:
-        activeTab === 1
-          ? rowData.PAYMENT_TAG
-          : activeTab === 2
-          ? rowData.ORDER_TYPE_TAG
-          : rowData.STOCK_STAGE_TAG,
-      description: rowData.DESCRIPTION || "",
-      status: rowData.STATUS === 1 ? "1" : "0",
-    });
-  };
-
-  const onSubmit = async (values, { setErrors }) => {
-    try {
-      if (isEditing) {
-        const tabname =
-          activeTab === 1 ? "payment" : activeTab === 2 ? "order" : "stock";
-        const response = await axios.put(`/api/masterdata/update/${tabname}`, {
-          tag: values.tag,
-          description: values.description,
-          status: values.status === "1" ? 1 : 0,
-        });
-        toast.success(response.data.message || "Data updated successfully!");
-      } else {
-        const tabname =
-          activeTab === 1 ? "payment" : activeTab === 2 ? "order" : "stock";
-        const response = await axios.post(`/api/masterdata/add/${tabname}`, {
-          tag: values.tag,
-          description: values.description,
-          status: values.status === "1" ? 1 : 0,
-        });
-        toast.success(response.data.message || "Data added successfully!");
-      }
-      setIsEditing(false);
-      setFormValues(initialvalues);
-      handleModalToggle();
-      fetchMasterData();
-    } catch (error) {
-      console.error("Failed:", error.response?.data || error.message);
-      setErrors({});
-    }
-  };
 
   return (
     <>
       <div className="card rounded-lg h-full w-full">
         <div className="card-header flex justify-between items-center border-b py-2 bg-gray-100">
-          <ul className="flex space-x-4">
-            {["Payment", "Order", "Stock"].map((tabName, index) => (
-              <li key={index}>
-                <button
-                  className={`px-4 py-2 text-sm font-semibold ${
-                    activeTab === index + 1
-                      ? "text-gray-800 border-b-2 border-amber-500"
-                      : "text-gray-500"
-                  }`}
-                  onClick={() => handleTabClick(index + 1)}
-                >
-                  {tabName}
-                </button>
-              </li>
-            ))}
-          </ul>
+          <div>
+            <h2 className="text-lg font-semibold">Material Management</h2>
+          </div>
           <button
             className="text-white bg-cyan-950 hover:bg-cyan-900 px-3 py-1 rounded-lg flex items-center"
             onClick={handleModalToggle}
@@ -180,7 +128,7 @@ const Material = () => {
                     <td className="border px-6 py-4 flex justify-center items-center">
                       <button
                         className="text-slate-500 hover:text-slate-800 border-none"
-                        onClick={() => handleEdit(row)}
+                        // onClick={() => handleEdit(row)}
                       >
                         <FaEdit />
                       </button>
@@ -219,7 +167,10 @@ const Material = () => {
               enableReinitialize
               initialValues={formValues}
               validationSchema={validationSchema}
-              onSubmit={onSubmit}
+              onSubmit={(values) => {
+                // Handle form submission
+                console.log(values);
+              }}
             >
               {({
                 getFieldProps,
@@ -232,19 +183,19 @@ const Material = () => {
                 <Form>
                   <div className="flex divide-x divide-gray-200">
                     <div style={{ width: "480px" }} className="pr-4">
-                      <div className="mb-3">
+                    <div className="mb-3">
                         <input
                           type="text"
                           name="id"
+                          disabled
                           {...getFieldProps("id")}
                           className="border rounded px-1 py-2"
                           style={{ width: "100%" }}
-                          placeholder="Id"
+                          placeholder="Material ID"
                           value={values.id}
                           onChange={(e) =>
                             setFieldValue("id", e.target.value)
                           }
-                          disabled
                         />
                       </div>
                       <div className="mb-3">
@@ -259,12 +210,10 @@ const Material = () => {
                           onChange={(e) =>
                             setFieldValue("name", e.target.value)
                           }
-                          disabled={isEditing}
                         />
-
-                        {touched.tag && errors.tag && (
+                        {touched.name && errors.name && (
                           <div className="text-red-500 text-sm mb-3">
-                            {errors.tag}
+                            {errors.name}
                           </div>
                         )}
                       </div>
@@ -280,7 +229,6 @@ const Material = () => {
                           onChange={(e) =>
                             setFieldValue("description", e.target.value)
                           }
-                          disabled={isEditing}
                         ></textarea>
                         {touched.description && errors.description && (
                           <div className="text-red-500 text-sm mb-3">
@@ -288,7 +236,6 @@ const Material = () => {
                           </div>
                         )}
                       </div>
-
                       <div className="mb-4">
                         <label className="block text-sm font-semibold mb-2">
                           Status
@@ -354,7 +301,7 @@ const Material = () => {
         </div>
       )}
 
-      {isLaoding && <CommonLoading />}
+      {isLoading && <CommonLoading />}
     </>
   );
 };

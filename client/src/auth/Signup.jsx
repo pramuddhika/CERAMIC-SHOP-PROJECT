@@ -1,23 +1,29 @@
 import hero6 from "../assets/hero6.png";
 import { Formik, Form } from "formik";
+// import axios from "axios";
 import { FaChevronLeft } from "react-icons/fa";
 
 const Signup = () => {
   const initialValues = {
-    fullname: "",
+    firstname: "",
+    lastname: "",
     email: "",
     password: "",
+    repassword: "",
   };
 
-  const onsubmit = async (values, { resetForm }) => {
-    try {
-      const response = await axios.post("", {
-        Fullname: values.fullname,
-        email: values.email,
-        password: values.password,
-      });
-    } catch {}
-  };
+  // const onsubmit = async (values, { }) => {
+  //   try {
+  //     const response = await axios.post("", {
+  //       Fullname: values.fullname,
+  //       email: values.email,
+  //       password: values.password,
+  //       repassword: values.repassword,
+  //     });
+  //   } catch {
+  //     console.log("Error");
+  //   }
+  // };
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 min-h-screen">
@@ -38,9 +44,7 @@ const Signup = () => {
               className="text-teal-600 cursor-pointer"
               onClick={() => (window.location.href = "/")}
             />
-            <h2 className="text-4xl font-bold text-main">
-              Get Started Now
-            </h2>
+            <h2 className="text-4xl font-bold text-main">Get Started Now</h2>
           </div>
           <p className="text-gray-500 text-center mb-8">
             Create your account to join us.
@@ -49,21 +53,39 @@ const Signup = () => {
           <Formik initialValues={initialValues} onSubmit={onsubmit}>
             {({ getFieldProps, touched, errors }) => (
               <Form className="space-y-6">
-                <div>
-                  <input
-                    placeholder="Full Name"
-                    {...getFieldProps("fullname")}
-                    type="text"
-                    name="fullname"
-                    autoComplete="on"
-                    style={{ width: "100%" }}
-                    className="bg-gray-100 border border-gray-300 focus:ring-2 focus:ring-teal-500 focus:outline-none rounded-lg w-full h-14 px-4"
-                  />
-                  {touched.fullname && errors.fullname && (
-                    <div className="text-red-600 text-sm mt-1">
-                      {errors.fullname}
-                    </div>
-                  )}
+                <div className="flex items-center justify-center gap-14">
+                  <div>
+                    <input
+                      placeholder="First Name"
+                      {...getFieldProps("fullname")}
+                      type="text"
+                      name="firstname"
+                      autoComplete="on"
+                      style={{ width: "100%" }}
+                      className="bg-gray-100 border border-gray-300 focus:ring-2 focus:ring-teal-500 focus:outline-none rounded-lg w-full h-14 px-4"
+                    />
+                    {touched.firstname && errors.firstname && (
+                      <div className="text-red-600 text-sm mt-1">
+                        {errors.firstname}
+                      </div>
+                    )}
+                  </div>
+                  <div>
+                    <input
+                      placeholder="Last Name"
+                      {...getFieldProps("lastname")}
+                      type="text"
+                      name="lastname"
+                      autoComplete="on"
+                      style={{ width: "100%" }}
+                      className="bg-gray-100 border border-gray-300 focus:ring-2 focus:ring-teal-500 focus:outline-none rounded-lg w-full h-14 px-4"
+                    />
+                    {touched.lastname && errors.lastname && (
+                      <div className="text-red-600 text-sm mt-1">
+                        {errors.lastname}
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 <div>
@@ -96,6 +118,23 @@ const Signup = () => {
                   {touched.password && errors.password && (
                     <div className="text-red-600 text-sm mt-1">
                       {errors.password}
+                    </div>
+                  )}
+                </div>
+
+                <div>
+                  <input
+                    placeholder="Re-Enter Password"
+                    {...getFieldProps("password")}
+                    type="password"
+                    name="Repassword"
+                    autoComplete="on"
+                    style={{ width: "100%" }}
+                    className="bg-gray-100 border border-gray-300 focus:ring-2 focus:ring-teal-500 focus:outline-none rounded-lg w-full h-14 px-4"
+                  />
+                  {touched.repassword && errors.repassword && (
+                    <div className="text-red-600 text-sm mt-1">
+                      {errors.repassword}
                     </div>
                   )}
                 </div>

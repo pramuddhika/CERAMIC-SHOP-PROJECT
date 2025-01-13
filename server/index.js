@@ -5,6 +5,7 @@ import dotenv from 'dotenv';
 import contactUsRouter from './routes/contactUs-route.js';
 import masterDataRouter from './routes/masterData-route.js';
 import productDataRouter from './routes/productdata-route.js';
+import materialDataRouter from './routes/materialData-route.js';
 
 dotenv.config();
 const app = express();
@@ -19,6 +20,8 @@ app.use('/api/contactus', contactUsRouter);
 app.use('/api/masterdata', masterDataRouter);
 //part for product data
 app.use('/api/productdata', productDataRouter);
+//part for material data
+app.use('/api/materialdata', materialDataRouter);
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
