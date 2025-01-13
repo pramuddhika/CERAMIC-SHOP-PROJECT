@@ -7,6 +7,7 @@ import Layout from "../app/layout/Layout";
 import DashBoard from "../app/UI/DashBoard";
 import ProductManagemnet from "../app/UI/ProductManagment";
 import Masterdata from "../app/UI/MasterData";
+import Material from "../app/UI/Material";
 
 const router = createBrowserRouter([
   { path: "/", element: <WebLayout /> },
@@ -19,6 +20,7 @@ const router = createBrowserRouter([
       { path: "dashboard", element: <DashBoard /> },
       { path: "Product_Management", element: <ProductManagemnet /> },
       { path: "Masterdata", element: <Masterdata /> },
+      { path: "Material", element: <Material /> },
     ],
   },
 ]);

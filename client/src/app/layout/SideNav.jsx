@@ -52,6 +52,12 @@ const SideNav = ({ setActiveTopic }) => {
           label="Master Data"
           topic="Master Data"
         />
+        <NavItem
+          to="/app/Material"
+          Icon={() => <i className="bi bi-basket2-fill"></i>}
+          label="Material"
+          topic="Material"
+        />
         <div className="fixed bottom-4 w-[180px]">
           <NavItem
             to="/"
