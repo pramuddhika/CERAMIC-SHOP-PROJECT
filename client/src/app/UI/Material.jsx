@@ -8,26 +8,61 @@ import { Formik, Form } from "formik";
 import * as Yup from "yup";
 import CommonLoading from "../../utils/CommonLoading";
 import { toast } from "react-toastify";
+import CommonPagination from "../../utils/CommonPagination";
 
 const Material = () => {
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(5);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentData, setCurrentData] = useState([]);
   const [newId, setNewId] = useState("");
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [initialvalues, setInitialValues] = useState({
+    code: '',
+    name: "",
+    description: "",
+    status: "1",
+  })
 
-  const handleModalToggle = () => {
-    setIsModalOpen(!isModalOpen);
-    if (!isModalOpen) {
-      setIsEditing(false);
-    }
+  const handlePageChange = (page) => setCurrentPage(page);
+  const handleItemsPerPageChange = (items) => {
+    setItemsPerPage(items);
+    setCurrentPage(1);
   };
 
-  const fetchMasterData = async () => {
+  const handleModalToggle = async () => {
+    if (!isModalOpen) {
+      if (!isEditing) {
+        await fetchMaterialId();
+        setInitialValues({
+          code: newId,
+          name: "",
+          description: "",
+          status: "1",
+        });
+      }
+    } else {
+      setInitialValues({
+        code: "",
+        name: "",
+        description: "",
+        status: "1",
+      });
+      setIsEditing(false);
+    }
+    setIsModalOpen(!isModalOpen);
+  };
+
+  const fetchMasterData = async (page, limit) => {
     setIsLoading(true);
     try {
-      const response = await axios.get(`/api/masterdata/get/`);
-      setCurrentData(response.data);
+      const response = await axios.get(
+        `/api/materialdata/get?page=${page}&limit=${limit}`
+      );
+      setCurrentData(response.data.data);
+      setTotalPages(response.data.totalPages);
     } catch (error) {
       console.error("Failed:", error.response?.data || error.message);
     } finally {
@@ -44,19 +79,21 @@ const Material = () => {
     }
   };
 
-  useEffect(() => {
-    fetchMasterData();
-    fetchMaterialId();
-  }, []);
-
-  const initialvalues = {
-    code: newId,
-    name: "",
-    description: "",
-    status: "1",
+  const handleEdit = (row) => {
+    setIsEditing(true);
+    setInitialValues({
+      code: row.MATERIAL_ID,
+      name: row.NAME,
+      description: row.DESCRIPTION,
+      status: row.STATUS === 1 ? "1" : "0",
+    });
+    setIsModalOpen(true);
   };
 
-  console.log(initialvalues);
+  useEffect(() => {
+    fetchMasterData(currentPage, itemsPerPage);
+    fetchMaterialId();
+  }, [currentPage, itemsPerPage]);
 
   const validationSchema = Yup.object().shape({
     name: Yup.string().required("Required").max(20, "Name is too long"),
@@ -114,8 +151,10 @@ const Material = () => {
                 Array.isArray(currentData) &&
                 currentData.map((row, index) => (
                   <tr key={index}>
-                    <td className="border px-6 py-2 text-center">{row.ID}</td>
-                    <td className="border px-6 py-2 text-center">{row.Name}</td>
+                    <td className="border px-6 py-2 text-center">
+                      {row.MATERIAL_ID}
+                    </td>
+                    <td className="border px-6 py-2 text-center">{row.NAME}</td>
                     <td className="border px-6 py-2">{row.DESCRIPTION}</td>
                     {row.STATUS === 1 ? (
                       <td className="border px-6 text-center">
@@ -133,7 +172,7 @@ const Material = () => {
                     <td className="border px-6 py-4 flex justify-center items-center">
                       <button
                         className="text-slate-500 hover:text-slate-800 border-none"
-                        // onClick={() => handleEdit(row)}
+                        onClick={() => handleEdit(row)}
                       >
                         <FaEdit />
                       </button>
@@ -144,6 +183,13 @@ const Material = () => {
             </tbody>
           </table>
         </div>
+        <CommonPagination
+          totalPages={totalPages}
+          currentPage={currentPage}
+          onPageChange={handlePageChange}
+          itemsPerPage={itemsPerPage}
+          onItemsPerPageChange={handleItemsPerPageChange}
+        />
       </div>
 
       {isModalOpen && (
@@ -173,12 +219,26 @@ const Material = () => {
               initialValues={initialvalues}
               validationSchema={validationSchema}
               onSubmit={async (values) => {
-                try {
-                  const response = await axios.post(`/api/materialdata/add`,values);
-                  fetchMaterialId();
-                  toast.success(response?.data?.message);
-                } catch (error) {
-                  console.error("Failed:",error.response?.data || error.message);
+                if (!isEditing) {
+                  try {
+                    const response = await axios.post(`/api/materialdata/add`, values);
+                    fetchMaterialId();
+                    toast.success(response?.data?.message);
+                    setIsModalOpen(false);
+                    handleModalToggle();
+                  } catch (error) {
+                    console.error("Failed:",error.response?.data || error.message);
+                  }
+                } else {
+                  try {
+                    const response = await axios.put(`/api/materialdata/edit`, values);
+                    toast.success(response?.data?.message);
+                    fetchMasterData(currentPage, itemsPerPage);
+                    setIsModalOpen(false);
+                    handleModalToggle();
+                  } catch (error) {
+                    console.error("Failed:",error.response?.data || error.message);
+                  }
                 }
               }}
             >
@@ -298,6 +358,7 @@ const Material = () => {
                           type="submit"
                           className="px-4 py-2 ml-3 bg-slate-500 text-white text-sm rounded hover:bg-slate-800"
                           onClick={handleSubmit}
+                          disabled = {Formik.dirty}
                         >
                           Submit
                         </button>
