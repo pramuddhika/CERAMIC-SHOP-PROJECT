@@ -6,6 +6,7 @@ import contactUsRouter from './routes/contactUs-route.js';
 import masterDataRouter from './routes/masterData-route.js';
 import productDataRouter from './routes/productdata-route.js';
 import materialDataRouter from './routes/materialData-route.js';
+import authRouter from './routes/auth-route.js';
 
 dotenv.config();
 const app = express();
@@ -16,12 +17,14 @@ app.use(express.json());
 app.use('/images', express.static('images'));
 //parth - conatct us
 app.use('/api/contactus', contactUsRouter);
-//parth for master data
+//parth - master data
 app.use('/api/masterdata', masterDataRouter);
-//part for product data
+//part - product data
 app.use('/api/productdata', productDataRouter);
-//part for material data
+//part - material data
 app.use('/api/materialdata', materialDataRouter);
+//part - auth
+app.use('/api/auth', authRouter);
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
