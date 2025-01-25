@@ -9,6 +9,7 @@ import ProductManagemnet from "../app/UI/ProductManagment";
 import Masterdata from "../app/UI/MasterData";
 import Material from "../app/UI/Material";
 import Registration from "../auth/Registration";
+import Home from "../store/UI/Home";
 
 const router = createBrowserRouter([
   { path: "/", element: <WebLayout /> },
@@ -25,6 +26,14 @@ const router = createBrowserRouter([
       { path: "Material", element: <Material /> },
     ],
   },
+  {
+    path: "/ceramic",
+    //TODO: change the layout to new shop layout
+    element: <Layout />,
+    children: [
+      { path: "home", element: <Home/> },
+    ],
+  }
 ]);
 const PrivateRoutes = () => {
   return (
