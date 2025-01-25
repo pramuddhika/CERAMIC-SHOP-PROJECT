@@ -8,11 +8,13 @@ import DashBoard from "../app/UI/DashBoard";
 import ProductManagemnet from "../app/UI/ProductManagment";
 import Masterdata from "../app/UI/MasterData";
 import Material from "../app/UI/Material";
+import Registration from "../auth/Registration";
 
 const router = createBrowserRouter([
   { path: "/", element: <WebLayout /> },
   { path: "/login", element: <Login /> },
   { path: "/signup", element: <Signup /> },
+  { path: "/registration", element: <Registration/> },
   {
     path: "/app",
     element: <Layout />,
