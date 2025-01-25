@@ -1,22 +1,74 @@
 import hero6 from "../assets/hero6.png";
 import { Formik, Form } from "formik";
+import { useEffect, useState } from "react";
+import axios from "axios";
 import { FaChevronLeft } from "react-icons/fa";
+import * as Yup from "yup";
+import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
+import { EyeIcon, EyeOffIcon } from "lucide-react";
 
 const Signup = () => {
-  const initialValues = {
-    fullname: "",
-    email: "",
-    password: "",
+  const [userId, setUserId] = useState("");
+  const navigate = useNavigate();
+  const [showPassword, setShowPassword] = useState(false);
+  const [showRePassword, setShowRePassword] = useState(false);
+
+  const SignUpSchema = Yup.object().shape({
+    firstname: Yup.string().required("required"),
+    lastname: Yup.string().required("required"),
+    email: Yup.string().email("Invalid email").required("required"),
+    password: Yup.string()
+      .min(8, "Password must be at least 8 characters")
+      .required("required"),
+    repassword: Yup.string()
+      .oneOf([Yup.ref("password"), null], "Passwords must match")
+      .required("required"),
+  });
+
+  const generateUserId = async () => {
+    try {
+      const response = await axios.get("/api/auth/generateUserId");
+      setUserId(response.data?.newid);
+    } catch (error) {
+      console.error(
+        "Failed to generate user id:",
+        error.response?.data || error.message
+      );
+    }
   };
 
-  const onsubmit = async (values, { resetForm }) => {
+  useEffect(() => {
+    generateUserId();
+  }, []);
+
+  const initialValues = {
+    firstname: "",
+    lastname: "",
+    email: "",
+    password: "",
+    repassword: "",
+  };
+
+  const onsubmit = async (values) => {
     try {
-      const response = await axios.post("", {
-        Fullname: values.fullname,
+      const response = await axios.post("/api/auth/createCustomer", {
+        userId: userId,
+        firstName: values.firstname,
+        lastName: values.lastname,
         email: values.email,
         password: values.password,
+        userType: "customer",
+        status: 1,
       });
-    } catch {}
+      toast.success(response.data.message);
+      setTimeout(() => {
+        navigate("/ceramic/home");
+      }, 2000);
+    } catch (error) {
+      toast.error(error.response?.data.error);
+      console.log("Error", error.message);
+    }
   };
 
   return (
@@ -38,32 +90,52 @@ const Signup = () => {
               className="text-teal-600 cursor-pointer"
               onClick={() => (window.location.href = "/")}
             />
-            <h2 className="text-4xl font-bold text-main">
-              Get Started Now
-            </h2>
+            <h2 className="text-4xl font-bold text-main">Get Started Now</h2>
           </div>
           <p className="text-gray-500 text-center mb-8">
             Create your account to join us.
           </p>
 
-          <Formik initialValues={initialValues} onSubmit={onsubmit}>
-            {({ getFieldProps, touched, errors }) => (
+          <Formik
+            initialValues={initialValues}
+            validationSchema={SignUpSchema}
+            onSubmit={onsubmit}
+          >
+            {({ getFieldProps, touched, isValid, errors }) => (
               <Form className="space-y-6">
-                <div>
-                  <input
-                    placeholder="Full Name"
-                    {...getFieldProps("fullname")}
-                    type="text"
-                    name="fullname"
-                    autoComplete="on"
-                    style={{ width: "100%" }}
-                    className="bg-gray-100 border border-gray-300 focus:ring-2 focus:ring-teal-500 focus:outline-none rounded-lg w-full h-14 px-4"
-                  />
-                  {touched.fullname && errors.fullname && (
-                    <div className="text-red-600 text-sm mt-1">
-                      {errors.fullname}
-                    </div>
-                  )}
+                <div className="flex items-center justify-center gap-14">
+                  <div>
+                    <input
+                      placeholder="First Name"
+                      {...getFieldProps("fullname")}
+                      type="text"
+                      name="firstname"
+                      autoComplete="on"
+                      style={{ width: "100%" }}
+                      className="bg-gray-100 border border-gray-300 focus:ring-2 focus:ring-teal-500 focus:outline-none rounded-lg w-full h-14 px-4"
+                    />
+                    {touched.firstname && errors.firstname && (
+                      <div className="text-red-600 text-sm mt-1">
+                        {errors.firstname}
+                      </div>
+                    )}
+                  </div>
+                  <div>
+                    <input
+                      placeholder="Last Name"
+                      {...getFieldProps("lastname")}
+                      type="text"
+                      name="lastname"
+                      autoComplete="on"
+                      style={{ width: "100%" }}
+                      className="bg-gray-100 border border-gray-300 focus:ring-2 focus:ring-teal-500 focus:outline-none rounded-lg w-full h-14 px-4"
+                    />
+                    {touched.lastname && errors.lastname && (
+                      <div className="text-red-600 text-sm mt-1">
+                        {errors.lastname}
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 <div>
@@ -84,18 +156,61 @@ const Signup = () => {
                 </div>
 
                 <div>
-                  <input
-                    placeholder="Password"
-                    {...getFieldProps("password")}
-                    type="password"
-                    name="password"
-                    autoComplete="on"
-                    style={{ width: "100%" }}
-                    className="bg-gray-100 border border-gray-300 focus:ring-2 focus:ring-teal-500 focus:outline-none rounded-lg w-full h-14 px-4"
-                  />
+                  <div className="relative w-full">
+                    <input
+                      placeholder="Password"
+                      {...getFieldProps("password")}
+                      type={showPassword ? "text" : "password"}
+                      name="password"
+                      autoComplete="on"
+                      style={{ width: "100%" }}
+                      className="bg-gray-100 border border-gray-300 focus:ring-2 focus:ring-teal-500 focus:outline-none rounded-lg w-full h-14 px-4"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword((prev) => !prev)} // Toggle the visibility
+                      className="absolute inset-y-0 right-3 flex items-center"
+                    >
+                      {showPassword ? (
+                        <EyeOffIcon className="w-5 h-5 text-gray-500" />
+                      ) : (
+                        <EyeIcon className="w-5 h-5 text-gray-500" />
+                      )}
+                    </button>
+                  </div>
                   {touched.password && errors.password && (
                     <div className="text-red-600 text-sm mt-1">
                       {errors.password}
+                    </div>
+                  )}
+                </div>
+
+                <div>
+                  <div className="relative w-full">
+                    <input
+                      placeholder="Re-Enter Password"
+                      {...getFieldProps("repassword")}
+                      type={showRePassword ? "text" : "password"}
+                      name="repassword"
+                      autoComplete="on"
+                      style={{ width: "100%" }}
+                      className="bg-gray-100 border border-gray-300 focus:ring-2 focus:ring-teal-500 focus:outline-none rounded-lg w-full h-14 px-4"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowRePassword((prev) => !prev)} // Toggle the visibility
+                      className="absolute inset-y-0 right-3 flex items-center"
+                    >
+                      {showRePassword ? (
+                        <EyeOffIcon className="w-5 h-5 text-gray-500" />
+                      ) : (
+                        <EyeIcon className="w-5 h-5 text-gray-500" />
+                      )}
+                    </button>
+                  </div>
+                  {touched.repassword && errors.repassword && (
+                    <div className="text-red-600 text-sm mt-1">
+                      {errors.repassword}
                     </div>
                   )}
                 </div>
@@ -105,6 +220,7 @@ const Signup = () => {
                     type="submit"
                     style={{ width: "100%" }}
                     className="bg-main text-white font-semibold rounded-lg w-full h-14 hover:bg-teal-700 transition duration-300"
+                    disabled={!userId || !isValid}
                   >
                     Sign Up
                   </button>
