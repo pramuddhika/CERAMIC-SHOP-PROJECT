@@ -10,6 +10,9 @@ import Masterdata from "../app/UI/MasterData";
 import Material from "../app/UI/Material";
 import Registration from "../auth/Registration";
 import Home from "../store/UI/Home";
+import CustomerManagement from "../app/UI/CustomerManagemnt";
+import MemberManagement from "../app/UI/MemberManagement";
+import SuplierManagement from "../app/UI/SupliesManagement";
 
 const router = createBrowserRouter([
   { path: "/", element: <WebLayout /> },
@@ -24,6 +27,9 @@ const router = createBrowserRouter([
       { path: "Product_Management", element: <ProductManagemnet /> },
       { path: "Masterdata", element: <Masterdata /> },
       { path: "Material", element: <Material /> },
+      { path: "customers", element: <CustomerManagement/> },
+      { path: "members", element: <MemberManagement /> },
+      { path: "suppliers", element: <SuplierManagement/> },
     ],
   },
   {

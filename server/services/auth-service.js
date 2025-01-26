@@ -33,6 +33,7 @@ export const createMemberService = (userId, firstName, lastName,userType, email,
         return;
       }
       resolve({ message: "Member created successfully!" });
+      //To do: generate link & send email to user for password setup , link shoud be navigae to registration page with user id
     });
   });
 };
