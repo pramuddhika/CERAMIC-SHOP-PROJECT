@@ -13,6 +13,7 @@ import Home from "../store/UI/Home";
 import CustomerManagement from "../app/UI/CustomerManagemnt";
 import MemberManagement from "../app/UI/MemberManagement";
 import SuplierManagement from "../app/UI/SupliesManagement";
+import Storelayout from "../store/layout/storelayout";
 
 const router = createBrowserRouter([
   { path: "/", element: <WebLayout /> },
@@ -35,7 +36,7 @@ const router = createBrowserRouter([
   {
     path: "/ceramic",
     //TODO: change the layout to new shop layout
-    element: <Layout />,
+    element: <Storelayout />,
     children: [
       { path: "home", element: <Home/> },
     ],
