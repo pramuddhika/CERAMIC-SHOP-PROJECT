@@ -1,8 +1,21 @@
 import { Link, useLocation } from "react-router-dom";
 import PropTypes from "prop-types";
+import { useState } from "react";
 
 const SideNav = ({ setActiveTopic }) => {
   const location = useLocation();
+  const [showUserSubset, setShowUserSubset] = useState(() => {
+    const savedState = localStorage.getItem('showSubset');
+    return savedState === 'true';
+  });
+
+  const toggleUserSubset = () => {
+    setShowUserSubset((prev) => {
+      const newState = !prev;
+      localStorage.setItem('showSubset', newState); 
+      return newState;
+    });
+  };
 
   const NavItem = ({ to, Icon, topic, label }) => {
     const isActive = location.pathname === to;
@@ -58,6 +71,38 @@ const SideNav = ({ setActiveTopic }) => {
           label="Material"
           topic="Material"
         />
+
+        <div
+          className={`flex pl-7 gap-2 items-center hover:text-white hover:bg-text-primary rounded-lg p-2 cursor-pointer
+        ${showUserSubset ? "text-white border border-gray-300 font-bold" : "text-gray-300"}`}
+          onClick={toggleUserSubset}
+        >
+          <i className="bi bi-people"></i>
+          <p>User Management</p>
+        </div>
+        {showUserSubset && (
+          <div className="pl-3">
+            <NavItem
+              to="/app/members"
+              Icon={() => <i className="bi bi-person-fill-gear"></i>}
+              label="Members"
+              topic="Member Management"
+            />
+            <NavItem
+              to="/app/suppliers"
+              Icon={() => <i className="bi bi-boxes"></i>}
+              label="Suppliers"
+              topic="Supplier Management"
+            />
+            <NavItem
+              to="/app/customers"
+              Icon={() => <i className="bi bi-diagram-3"></i>}
+              label="Customers"
+              topic="Customer Management"
+            />
+          </div>
+        )}
+
         <div className="fixed bottom-4 w-[180px]">
           <NavItem
             to="/"

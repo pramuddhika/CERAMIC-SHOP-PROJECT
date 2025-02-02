@@ -1,3 +1,4 @@
+// ToDo : Member Management Page UI , can add , in edit can deactivate and activate the member
 const MemberManagement = () => {
     return (
         <div>
