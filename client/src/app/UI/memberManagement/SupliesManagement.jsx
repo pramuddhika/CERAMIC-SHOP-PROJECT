@@ -116,6 +116,8 @@ const SuplierManagement = () => {
                 ✖
               </button>
             </div>
+            <div>
+            </div>
           </div>
         </div>
       )}
