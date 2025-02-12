@@ -1,7 +1,7 @@
 // To do: Create a UI for the Supplies Management page , can addd , in edit can deactivate and activate the supplier
 import { useState } from "react";
 
-const SuplierManagement = () => {
+const MemberManagement = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleModalToggle = async () => {
@@ -116,6 +116,8 @@ const SuplierManagement = () => {
                 ✖
               </button>
             </div>
+            <div>
+            </div>
           </div>
         </div>
       )}
@@ -123,4 +125,4 @@ const SuplierManagement = () => {
   );
 };
 
-export default SuplierManagement;
+export default MemberManagement;

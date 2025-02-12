@@ -3,12 +3,12 @@ import { FaEdit } from "react-icons/fa";
 import { AiOutlinePlus } from "react-icons/ai";
 import { useEffect } from "react";
 import axios from "axios";
-import Nodata from "../../assets/Nodata.svg";
+import Nodata from "../../../assets/Nodata.svg";
 import { Formik, Form } from "formik";
 import * as Yup from "yup";
-import CommonLoading from "../../utils/CommonLoading";
+import CommonLoading from "../../../utils/CommonLoading";
 import { toast } from "react-toastify";
-import CommonPagination from "../../utils/CommonPagination";
+import CommonPagination from "../../../utils/CommonPagination";
 
 const Material = () => {
   const [currentPage, setCurrentPage] = useState(1);

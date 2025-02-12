@@ -4,15 +4,27 @@ import { useState } from "react";
 
 const SideNav = ({ setActiveTopic }) => {
   const location = useLocation();
-  const [showUserSubset, setShowUserSubset] = useState(() => {
-    const savedState = localStorage.getItem('showSubset');
-    return savedState === 'true';
+  const [showUserSubsetUser, setShowUserSubsetUser] = useState(() => {
+    const savedState = localStorage.getItem("showSubsetUser");
+    return savedState === "true";
+  });
+  const [showUserSubsetMaterial, setShowUserSubsetMaterial] = useState(() => {
+    const savedState = localStorage.getItem("showSubsetMaterial");
+    return savedState === "true";
   });
 
   const toggleUserSubset = () => {
-    setShowUserSubset((prev) => {
+    setShowUserSubsetUser((prev) => {
       const newState = !prev;
-      localStorage.setItem('showSubset', newState); 
+      localStorage.setItem("showSubsetUSer", newState);
+      return newState;
+    });
+  };
+
+  const toggleMaterialSubset = () => {
+    setShowUserSubsetMaterial((prev) => {
+      const newState = !prev;
+      localStorage.setItem("showSubsetMaterial", newState);
       return newState;
     });
   };
@@ -65,22 +77,20 @@ const SideNav = ({ setActiveTopic }) => {
           label="Master Data"
           topic="Master Data"
         />
-        <NavItem
-          to="/app/Material"
-          Icon={() => <i className="bi bi-basket2-fill"></i>}
-          label="Material"
-          topic="Material"
-        />
 
         <div
           className={`flex pl-7 gap-2 items-center hover:text-white hover:bg-text-primary rounded-lg p-2 cursor-pointer
-        ${showUserSubset ? "text-white border border-gray-300 font-bold" : "text-gray-300"}`}
+        ${
+          showUserSubsetUser
+            ? "text-white border border-gray-300 font-bold"
+            : "text-gray-300"
+        }`}
           onClick={toggleUserSubset}
         >
           <i className="bi bi-people"></i>
           <p>User Management</p>
         </div>
-        {showUserSubset && (
+        {showUserSubsetUser && (
           <div className="pl-3">
             <NavItem
               to="/app/members"
@@ -99,6 +109,47 @@ const SideNav = ({ setActiveTopic }) => {
               Icon={() => <i className="bi bi-diagram-3"></i>}
               label="Customers"
               topic="Customer Management"
+            />
+          </div>
+        )}
+
+        <div
+          className={`flex pl-7 gap-2 items-center hover:text-white hover:bg-text-primary rounded-lg p-2 cursor-pointer
+        ${
+          showUserSubsetMaterial
+            ? "text-white border border-gray-300 font-bold"
+            : "text-gray-300"
+        }`}
+          onClick={toggleMaterialSubset}
+        >
+          <i className="bi bi-basket2-fill"></i>
+          <p>Material</p>
+        </div>
+        {showUserSubsetMaterial && (
+          <div className="pl-3">
+            <NavItem
+              to="/app/Material"
+              Icon={() => <i className="bi bi-list-task"></i>}
+              label="List"
+              topic="Material List"
+            />
+            <NavItem
+              to="/app/material/receive"
+              Icon={() => <i className="bi bi-box-arrow-in-up"></i>}
+              label="Receive"
+              topic="Material Receive Note" 
+            />
+            <NavItem
+              to="/app/material/stock"
+              Icon={() => <i className="bi bi-clipboard-plus"></i>}
+              label="Stock"
+              topic="Material Stock"
+            />
+            <NavItem
+              to="/app/material/use"
+              Icon={() => <i className="bi bi-clipboard2-data"></i>}
+              label="Use"
+              topic="Material Send Note"
             />
           </div>
         )}

@@ -3,6 +3,7 @@ import {
   generateUseIdService,
   createMemberService,
   signUpService,
+  createSupplierService,
 } from "../services/auth-service.js";
 
 // generate user ID
@@ -41,6 +42,20 @@ export const signUpController = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, saltRounds);
     const signUpResponse = await signUpService(userId,firstName,lastName,email,hashedPassword,userType , status);
     res.status(200).json(signUpResponse);
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
+
+//create supplier
+export const supplierController = async (req, res) => {
+  const { userId, firstName, lastName, email, status, phone, line1, line2, city, distric, province, postalCode } = req.body;
+  if (!userId || !firstName || !lastName || !email || !status || !phone || !line1 || !city || !distric || !province || !postalCode) {
+    return res.status(400).json({ error: "All data required!" });
+  }
+  try {
+    const createSupplierResponse = await createSupplierService(userId,firstName,lastName,email,status,phone,line1,line2,city,distric,province,postalCode);
+    res.status(200).json(createSupplierResponse);
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }
