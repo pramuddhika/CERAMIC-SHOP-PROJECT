@@ -122,22 +122,34 @@ const SideNav = ({ setActiveTopic }) => {
         }`}
           onClick={toggleMaterialSubset}
         >
-          <i className="bi bi-people"></i>
+          <i className="bi bi-basket2-fill"></i>
           <p>Material</p>
         </div>
         {showUserSubsetMaterial && (
           <div className="pl-3">
             <NavItem
               to="/app/Material"
-              Icon={() => <i className="bi bi-basket2-fill"></i>}
+              Icon={() => <i className="bi bi-list-task"></i>}
               label="List"
               topic="Material List"
             />
             <NavItem
-              to="/app/material"
-              Icon={() => <i className="bi bi-boxes"></i>}
-              label="Material Category"
-              topic="Material Category Management"
+              to="/app/material/receive"
+              Icon={() => <i className="bi bi-box-arrow-in-up"></i>}
+              label="Receive"
+              topic="Material Receive Note" 
+            />
+            <NavItem
+              to="/app/material/stock"
+              Icon={() => <i className="bi bi-clipboard-plus"></i>}
+              label="Stock"
+              topic="Material Stock"
+            />
+            <NavItem
+              to="/app/material/use"
+              Icon={() => <i className="bi bi-clipboard2-data"></i>}
+              label="Use"
+              topic="Material Send Note"
             />
           </div>
         )}
