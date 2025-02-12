@@ -1,32 +1,34 @@
-// To do: Create a UI for the Supplies Management page , can addd , in edit can deactivate and activate the supplier
 import { Formik } from "formik";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import * as Yup from "yup";
 import { Row } from "react-bootstrap";
+import axios from "axios";
+import { toast } from "react-toastify";
 
 const SuplierManagement = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [userId, setUserId] = useState(null);
 
   const handleModalToggle = async () => {
     setIsModalOpen(!isModalOpen);
   };
 
   const SuplierValidationSchema = Yup.object().shape({
-    firsName: Yup.string().required("Required"),
-    lastName: Yup.string().required("Required"),
-    email: Yup.string().email("Invalid email").required("Required"),
-    phone: Yup.string().required("Required"),
-    line1: Yup.string().required("Required"),
-    line2: Yup.string().required("Required"),
-    city: Yup.string().required("Required"),
-    distric: Yup.string().required("Required"),
-    province: Yup.string().required("Required"),
-    postalCode: Yup.string().required("Required"),
+    firstName: Yup.string().max(20, "too long").required("Required"),
+    lastName: Yup.string().max(20, "too long").required("Required"),
+    email: Yup.string().max(50, "too long").email("Invalid email").required("Required"),
+    phone: Yup.string().max(13, "too long").required("Required"),
+    line1: Yup.string().max(15, "too long").required("Required"),
+    line2: Yup.string().max(15, "too long").required("Required"),
+    city: Yup.string().max(30, "too long").required("Required"),
+    distric: Yup.string().max(25, "too long").required("Required"),
+    province: Yup.string().max(25, "too long").required("Required"),
+    postalCode: Yup.string().max(10, "too long").required("Required"),
     status: Yup.string().required("Required"),
   });
 
   const initValues = {
-    firsName: "",
+    firstName: "",
     lastName: "",
     email: "",
     phone: "",
@@ -36,11 +38,38 @@ const SuplierManagement = () => {
     distric: "",
     province: "",
     postalCode: "",
-    status: "",
+    status: "1",
   };
 
-  const handleSubmit = async (values) => {
-    console.log(values);
+  const UserId = async () => { 
+    try {
+      const response = await axios.get("/api/auth/generateUserId");
+      const data = await response.json();
+      setUserId(data.newid);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  useEffect(() => {
+    UserId();
+   }, []);
+
+  const handleSubmit = async (values, { resetForm }) => {
+    const data = {
+      ...values,
+      userId: userId,
+      status: parseInt(values.status),
+    }
+    try {
+      const response = await axios.post("/api/auth/createSupplier", data);
+      toast.success(response.data.message);
+      resetForm();
+      handleModalToggle();
+    } catch (error) {
+      console.log(error);
+      toast.error(error.response.data.error);
+    }
   };
 
   return (
@@ -139,7 +168,7 @@ const SuplierManagement = () => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
           <div
             className="bg-white rounded-lg shadow-lg p-6"
-            style={{ width: "800px", height: "70vh" }}
+            style={{ width: "800px", height: "65vh" }}
           >
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-lg font-bold">Supplier</h2>
@@ -170,16 +199,16 @@ const SuplierManagement = () => {
                     <Row className="flex">
                       <div className="mb-4 col-4">
                         <label
-                          htmlFor="firsName"
+                          htmlFor="firstName"
                           className="text-sm text-gray-600"
                         >
                           First Name
                         </label>
                         <input
                           type="text"
-                          name="firsName"
-                          id="firsName"
-                          value={values.firsName}
+                          name="firstName"
+                          id="firstName"
+                          value={values.firstName}
                           onChange={handleChange}
                           onBlur={handleBlur}
                           className="border rounded-lg px-3 py-2 mt-1"
@@ -187,7 +216,7 @@ const SuplierManagement = () => {
                         />
                         {errors.firsName && touched.firsName && (
                           <span className="text-red-500 text-sm">
-                            {errors.firsName}
+                            {errors.firstName}
                           </span>
                         )}
                       </div>
@@ -375,52 +404,70 @@ const SuplierManagement = () => {
                       </div>
                     </Row>
 
-                    <div className="mb-4">
-                      <label
-                        htmlFor="postalCode"
-                        className="text-sm text-gray-600"
-                      >
-                        Postal Code
-                      </label>
-                      <input
-                        type="text"
-                        name="postalCode"
-                        id="postalCode"
-                        value={values.postalCode}
-                        onChange={handleChange}
-                        onBlur={handleBlur}
-                        className="w-full border rounded-lg px-3 py-2 mt-1"
-                      />
-                      {errors.postalCode && touched.postalCode && (
-                        <span className="text-red-500 text-sm">
-                          {errors.postalCode}
-                        </span>
-                      )}
-                    </div>
-                    <div className="mb-4">
-                      <label htmlFor="status" className="text-sm text-gray-600">
-                        Status
-                      </label>
-                      <input
-                        type="text"
-                        name="status"
-                        id="status"
-                        value={values.status}
-                        onChange={handleChange}
-                        onBlur={handleBlur}
-                        className="w-full border rounded-lg px-3 py-2 mt-1"
-                      />
-                      {errors.status && touched.status && (
-                        <span className="text-red-500 text-sm">
-                          {errors.status}
-                        </span>
-                      )}
-                    </div>
+                    <Row>
+                      <div className="mb-4 col-4">
+                        <label
+                          htmlFor="postalCode"
+                          className="text-sm text-gray-600"
+                        >
+                          Postal Code
+                        </label>
+                        <input
+                          type="text"
+                          name="postalCode"
+                          id="postalCode"
+                          value={values.postalCode}
+                          onChange={handleChange}
+                          onBlur={handleBlur}
+                          className="w-full border rounded-lg px-3 py-2 mt-1"
+                        />
+                        {errors.postalCode && touched.postalCode && (
+                          <span className="text-red-500 text-sm">
+                            {errors.postalCode}
+                          </span>
+                        )}
+                      </div>
+                      <div className="mb-4 col-4">
+                        <label className="text-sm text-gray-600">Status</label>
+                        <div className="mt-1 flex space-x-4">
+                          <label className="flex items-center">
+                            <input
+                              type="radio"
+                              name="status"
+                              value="1"
+                              checked={values.status === "1"}
+                              onChange={handleChange}
+                              onBlur={handleBlur}
+                              className="mr-2"
+                            />
+                            Active
+                          </label>
+                          <label className="flex items-center">
+                            <input
+                              type="radio"
+                              name="status"
+                              value="0"
+                              checked={values.status === "0"}
+                              onChange={handleChange}
+                              onBlur={handleBlur}
+                              className="mr-2"
+                            />
+                            Inactive
+                          </label>
+                        </div>
+                        {errors.status && touched.status && (
+                          <span className="text-red-500 text-sm">
+                            {errors.status}
+                          </span>
+                        )}
+                      </div>
+                    </Row>
+
                     <div className="flex justify-end">
                       <button
                         type="reset"
                         onClick={() => {
-                          Formik.resetForm();
+                          handleModalToggle();
                         }}
                         className="text-white bg-red-600 hover:bg-red-500 px-3 py-1 gap-2 rounded-lg flex items-center mr-2"
                       >

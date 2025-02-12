@@ -3,6 +3,7 @@ import {
   generateUserIdController,
   createMemberController,
   signUpController,
+  supplierController,
 } from "../controllers/auth-controller.js";
 
 const router = express.Router();
@@ -13,5 +14,7 @@ router.get("/generateUserId", generateUserIdController);
 router.post("/createMember", createMemberController);
 // customer creation - signup
 router.post("/createCustomer", signUpController);
+// supplier creation
+router.post("/createSupplier", supplierController);
 
 export default router;
