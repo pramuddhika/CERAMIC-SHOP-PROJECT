@@ -4,6 +4,7 @@ import {
   createMemberService,
   signUpService,
   createSupplierService,
+  getSupplierListService,
 } from "../services/auth-service.js";
 
 // generate user ID
@@ -60,3 +61,13 @@ export const supplierController = async (req, res) => {
     return res.status(500).json({ error: error.message });
   }
 };
+
+//get supplier list
+export const supplierListController = async (req, res) => {
+  try {
+    const supplierList = await getSupplierListService();
+    res.status(200).json(supplierList);
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+}

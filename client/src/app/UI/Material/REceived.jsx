@@ -1,18 +1,8 @@
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import Select from "react-select";
-
-const options = [
-  { value: "ceramic", label: "Ceramic" },
-  { value: "porcelain", label: "Porcelain" },
-  { value: "clay", label: "Clay" },
-];
-
-const supplierOptions = [
-  { value: "supplier1", label: "Supplier 1" },
-  { value: "supplier2", label: "Supplier 2" },
-  { value: "supplier3", label: "Supplier 3" },
-];
+import { useEffect, useState } from "react";
+import axios from "axios";
 
 const validationSchema = Yup.object({
   material: Yup.object().required("required"),
@@ -25,6 +15,42 @@ const validationSchema = Yup.object({
 });
 
 const Received = () => {
+  const [meterialList, setMaterialList] = useState([]);
+  const [supplierList, setSupplierList] = useState([]);
+
+  const fetchMaterialListData = async () => {
+    try {
+      const response = await axios.get('/api/materialdata/get/list');
+      setMaterialList(response?.data);
+    } catch (error) { 
+      console.log(error);
+    }
+  }
+
+  const fetchSupplierListData = async () => {
+    try {
+      const response = await axios.get('/api/auth/getSupplierList');
+      setSupplierList(response?.data);
+    } catch (error) { 
+      console.log(error);
+    }
+  }
+
+  const options = meterialList.map(item => ({
+    value: item.MATERIAL_ID,
+    label: item.NAME
+  }));
+
+  const supplierOptions = supplierList.map(item => ({
+    value: item.USER_ID,
+    label: item.FIRST_NAME + ' ' + item.LAST_NAME
+  }));
+
+  useEffect(() => {
+    fetchMaterialListData();
+    fetchSupplierListData();
+  }, []);
+
   return (
     <>
       <Formik

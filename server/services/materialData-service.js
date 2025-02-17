@@ -110,3 +110,18 @@ export const editMaterialDataService = async (
     });
   });
 };
+
+// get material data list
+export const getMaterialListService = async () => {
+  return new Promise((resolve, reject) => {
+    const query = `SELECT MATERIAL_ID, NAME FROM material WHERE STATUS = 1`;
+
+    db.query(query, (err, result) => {
+      if (err) {
+        reject({ message: "Something went wrong, Please try again!" });
+      } else {
+        resolve(result);
+      }
+    });
+  });
+};

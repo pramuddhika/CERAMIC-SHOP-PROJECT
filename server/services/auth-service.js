@@ -87,3 +87,17 @@ export const createSupplierService = (userId, firstName, lastName, email, status
     });
   });
 };
+
+//get supplier list
+export const getSupplierListService = () => {
+  return new Promise((resolve, reject) => {
+    const query = `SELECT USER_ID,FIRST_NAME,LAST_NAME FROM user WHERE USER_TYPE = 'supplier' AND STATUS = 1`;
+    db.query(query, (error, result) => {
+      if (error) {
+        reject({ message: "Something went wrong, Please try again!" });
+        return;
+      }
+      resolve(result);
+    });
+  });
+};
