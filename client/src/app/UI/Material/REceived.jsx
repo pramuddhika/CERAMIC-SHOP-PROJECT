@@ -63,7 +63,14 @@ const Received = () => {
         }}
         validationSchema={validationSchema}
         onSubmit={(values) => {
-          console.log(values);
+          const receivedObj={
+            materialId: values?.material?.value,
+            supplierId: values?.supplier?.value,
+            date: values?.date,
+            quantity: values?.quantity,
+            value: values?.value
+          }
+          console.log(receivedObj);
         }}
       >
         {({ setFieldValue }) => (
