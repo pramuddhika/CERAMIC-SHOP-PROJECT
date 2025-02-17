@@ -4,7 +4,8 @@ import {
   addMaterialDataController,
   getMaterialDataController,
   editMaterialDataController,
-  getMaterialListController
+  getMaterialListController,
+  getMaterialStockController,
 } from "../controllers/materialData-controller.js";
 
 const router = express.Router();
@@ -19,6 +20,8 @@ router.get("/get", getMaterialDataController);
 router.put("/edit", editMaterialDataController);
 //get material data list
 router.get("/get/list", getMaterialListController);
+//get meterila stock data
+router.get("/get/stock", getMaterialStockController);
 
 
 export default router;

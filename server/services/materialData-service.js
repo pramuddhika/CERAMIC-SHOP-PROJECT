@@ -125,3 +125,23 @@ export const getMaterialListService = async () => {
     });
   });
 };
+
+// get material stock data
+export const getMaterialStockService = async (searchQuery) => {
+  return new Promise((resolve, reject) => {
+    let query = `SELECT material.MATERIAL_ID, material.NAME, material_stock.UPDATE_DATE, material_stock.QUANTITY 
+      FROM material INNER JOIN material_stock ON material.MATERIAL_ID = material_stock.MATERIAL_ID`;
+    
+    if (searchQuery) {
+      query += ` WHERE material.MATERIAL_ID LIKE '%${searchQuery}%' OR material.NAME LIKE '%${searchQuery}%'`;
+    }
+
+    db.query(query, (err, result) => {
+      if (err) {
+        reject({ message: "Something went wrong, Please try again!" });
+      } else {
+        resolve(result);
+      }
+    });
+  });
+};
