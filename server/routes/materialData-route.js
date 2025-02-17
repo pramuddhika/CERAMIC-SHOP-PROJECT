@@ -16,5 +16,7 @@ router.post("/add", addMaterialDataController);
 router.get("/get", getMaterialDataController);
 // edit material data
 router.put("/edit", editMaterialDataController);
+//get material data list
+
 
 export default router;
