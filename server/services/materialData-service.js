@@ -25,8 +25,14 @@ export const getLastMaterialIDService = async (tname) => {
 };
 
 // add material data
-export const addMaterialDataService = async (code, name, description, status) => {
+export const addMaterialDataService = async (
+  code,
+  name,
+  description,
+  status
+) => {
   return new Promise((resolve, reject) => {
+    const query1 =`INSERT INTO material_stock (MATERIAL_ID,UPDATE_DATE,QUANTITY) VALUES (?, ?, ?)`;
     const query = `INSERT INTO material (MATERIAL_ID, NAME, DESCRIPTION, STATUS) VALUES ('${code}', '${name}', '${description}', '${status}')`;
 
     db.query(query, (err) => {
@@ -37,7 +43,17 @@ export const addMaterialDataService = async (code, name, description, status) =>
           reject({ message: "Something went wrong, Please try again!" });
         }
       } else {
-        resolve({ message: "Material data added successfully!" });
+        db.query(query1, [code, new Date(), 0], (err) => {
+          if (err) {
+            if (err.code === "ER_DUP_ENTRY") {
+              reject({ message: "Material code already exists!" });
+            } else {
+              reject({ message: 'Something went wrong, Please try again!' });
+            }
+          } else {
+            resolve({ message: "Material data added successfully!" });
+          }
+        });
       }
     });
   });
@@ -76,7 +92,12 @@ export const getMaterialDataService = async (page = 1, limit = 10) => {
 };
 
 // edit material data
-export const editMaterialDataService = async (code, name, description, status) => {
+export const editMaterialDataService = async (
+  code,
+  name,
+  description,
+  status
+) => {
   return new Promise((resolve, reject) => {
     const query = `UPDATE material SET NAME = '${name}', DESCRIPTION = '${description}', STATUS = '${status}' WHERE MATERIAL_ID = '${code}'`;
 
@@ -85,6 +106,41 @@ export const editMaterialDataService = async (code, name, description, status) =
         reject({ message: "Something went wrong, Please try again!" });
       } else {
         resolve({ message: "Material data updated successfully!" });
+      }
+    });
+  });
+};
+
+// get material data list
+export const getMaterialListService = async () => {
+  return new Promise((resolve, reject) => {
+    const query = `SELECT MATERIAL_ID, NAME FROM material WHERE STATUS = 1`;
+
+    db.query(query, (err, result) => {
+      if (err) {
+        reject({ message: "Something went wrong, Please try again!" });
+      } else {
+        resolve(result);
+      }
+    });
+  });
+};
+
+// get material stock data
+export const getMaterialStockService = async (searchQuery) => {
+  return new Promise((resolve, reject) => {
+    let query = `SELECT material.MATERIAL_ID, material.NAME, material_stock.UPDATE_DATE, material_stock.QUANTITY 
+      FROM material INNER JOIN material_stock ON material.MATERIAL_ID = material_stock.MATERIAL_ID`;
+    
+    if (searchQuery) {
+      query += ` WHERE material.MATERIAL_ID LIKE '%${searchQuery}%' OR material.NAME LIKE '%${searchQuery}%'`;
+    }
+
+    db.query(query, (err, result) => {
+      if (err) {
+        reject({ message: "Something went wrong, Please try again!" });
+      } else {
+        resolve(result);
       }
     });
   });

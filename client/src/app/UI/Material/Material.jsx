@@ -59,8 +59,7 @@ const Material = () => {
     setIsLoading(true);
     try {
       const response = await axios.get(
-        `/api/materialdata/get?page=${page}&limit=${limit}`
-      );
+        `/api/materialdata/get?page=${page}&limit=${limit}`);
       setCurrentData(response.data.data);
       setTotalPages(response.data.totalPages);
     } catch (error) {
@@ -226,6 +225,7 @@ const Material = () => {
                     toast.success(response?.data?.message);
                     setIsModalOpen(false);
                     handleModalToggle();
+                    fetchMasterData(currentPage, itemsPerPage);
                   } catch (error) {
                     console.error("Failed:",error.response?.data || error.message);
                   }

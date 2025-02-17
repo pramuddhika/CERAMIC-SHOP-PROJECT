@@ -3,6 +3,8 @@ import {
   addMaterialDataService,
   getMaterialDataService,
   editMaterialDataService,
+  getMaterialListService,
+  getMaterialStockService,
 } from "../services/materialData-service.js";
 
 // generate material ID
@@ -49,6 +51,27 @@ export const editMaterialDataController = async (req, res) => {
   try {
     const editMaterialDataResponse = await editMaterialDataService(code, name, description, status);
     res.status(200).json(editMaterialDataResponse);
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
+
+//get material data list
+export const getMaterialListController = async (req, res) => {
+  try {
+    const materialList = await getMaterialListService();
+    res.status(200).json(materialList);
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
+
+//get meterila stock data
+export const getMaterialStockController = async (req, res) => {
+  const { search } = req.query;
+  try {
+    const materialStock = await getMaterialStockService(search);
+    res.status(200).json(materialStock);
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }
