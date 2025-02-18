@@ -6,6 +6,7 @@ import {
   editMaterialDataController,
   getMaterialListController,
   getMaterialStockController,
+  addMaterialReceivedDataController,
 } from "../controllers/materialData-controller.js";
 
 const router = express.Router();
@@ -22,6 +23,8 @@ router.put("/edit", editMaterialDataController);
 router.get("/get/list", getMaterialListController);
 //get meterila stock data
 router.get("/get/stock", getMaterialStockController);
+//add material received note data
+router.post("/add/received", addMaterialReceivedDataController);
 
 
 export default router;

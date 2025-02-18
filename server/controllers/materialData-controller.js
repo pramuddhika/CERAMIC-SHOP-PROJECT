@@ -5,6 +5,7 @@ import {
   editMaterialDataService,
   getMaterialListService,
   getMaterialStockService,
+  addMaterialReceivedDataService,
 } from "../services/materialData-service.js";
 
 // generate material ID
@@ -72,6 +73,20 @@ export const getMaterialStockController = async (req, res) => {
   try {
     const materialStock = await getMaterialStockService(search);
     res.status(200).json(materialStock);
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
+
+//add material received note data
+export const addMaterialReceivedDataController = async (req, res) => {
+  const { materialId, supplierId, date, quantity, value } = req.body;
+  if (!materialId || !supplierId || !date || !quantity || !value) {
+    return res.status(400).json({ error: "All data required!" });
+  }
+  try {
+    const addMaterialReceivedDataResponse = await addMaterialReceivedDataService(materialId, supplierId, date, quantity, value);
+    res.status(200).json(addMaterialReceivedDataResponse);
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }
