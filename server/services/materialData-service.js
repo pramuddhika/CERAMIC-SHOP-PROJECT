@@ -145,3 +145,39 @@ export const getMaterialStockService = async (searchQuery) => {
     });
   });
 };
+
+// add material received note data
+export const addMaterialReceivedDataService = async (
+  materialId,
+  supplierId,
+  date,
+  quantity,
+  value
+) => {
+  return new Promise((resolve, reject) => {
+    const query = `INSERT INTO material_received_note (MATERIAL_ID, SUPPILER_ID, DATE, QUANTITY, MATERIAL_VALUE) VALUES ('${materialId}', '${supplierId}', '${date}', '${quantity}', '${value}')`;
+    const query1 = `UPDATE material_stock SET QUANTITY = QUANTITY + ${quantity},UPDATE_DATE = '${date}' WHERE MATERIAL_ID = '${materialId}'`;
+
+    db.query(query, (err) => {
+      if (err) {
+        if (err.code === "ER_DUP_ENTRY") {
+          reject({ message: "Material received data already exists!" });
+        } else {
+          reject({ message: err });
+        }
+      } else {
+        db.query(query1, (err) => {
+          if (err) {
+            if (err.code === "ER_DUP_ENTRY") {
+              reject({ message: "Material received data already exists!" });
+            } else {
+              reject({ message: err });
+            }
+          } else {
+            resolve({ message: "Material received data added successfully!" });
+          }
+        });
+      }
+    });
+  });
+};
