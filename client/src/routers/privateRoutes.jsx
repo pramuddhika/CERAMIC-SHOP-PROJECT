@@ -17,6 +17,7 @@ import SuplierManagement from "../app/UI/memberManagement/SupliesManagement";
 import MaterialReceived from "../app/UI/Material/REceived";
 import MaterialStock from "../app/UI/Material/Stock";
 import MaterialUse from "../app/UI/Material/Use";
+import Payment from "../app/UI/Material/Payment";
 
 const router = createBrowserRouter([
   { path: "/", element: <WebLayout /> },
@@ -36,7 +37,8 @@ const router = createBrowserRouter([
       { path: "suppliers", element: <SuplierManagement /> },
       { path: "material/receive", element: <MaterialReceived /> },
       { path: "material/stock", element: <MaterialStock /> },
-      { path: "material/use", element: <MaterialUse/> },
+      { path: "material/use", element: <MaterialUse /> },
+      { path: "materila/payment" , element: <Payment/>}
     ],
   },
   {

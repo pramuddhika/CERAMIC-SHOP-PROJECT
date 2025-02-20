@@ -192,6 +192,37 @@ const Received = () => {
       </Formik>
 
       <hr className="mt-2" />
+
+      <div className="card rounded-lg w-full mt-2">
+        <div className="card-header flex justify-between items-center border-b py-2 bg-gray-100">
+          <div>
+            <h2 className="text-lg font-semibold">Material Received Note</h2>
+          </div>
+          <div className="flex items-center">
+            <button className="text-white bg-cyan-950 hover:bg-cyan-900 px-3 py-1 rounded-lg flex items-center ml-2">
+             <i className="bi bi-funnel"></i>
+            </button>
+          </div>
+        </div>
+
+        <div className="card-body overflow-auto flex justify-center">
+          <table
+            id="stock-table"
+            className="border text-sm table-fixed w-full overflow-auto"
+          >
+            <thead className="bg-slate-400">
+              <tr className="pl-2 text-center">
+                <th className="border py-2 min-w-[300px]">Material Name</th>
+                <th className="border py-2 min-w-[300px]">Supplier</th>
+                <th className="border py-2 min-w-[150px]">Quality</th>
+                <th className="border py-2 min-w-[300px]">Date</th>
+                <th className="border py-2 min-w-[300px]">Quantity(Kg)</th>
+                <th className="border py-2 min-w-[100px]">Action</th>
+              </tr>
+            </thead>
+          </table>
+        </div>
+      </div>
     </>
   );
 };

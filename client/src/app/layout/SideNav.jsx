@@ -140,6 +140,12 @@ const SideNav = ({ setActiveTopic }) => {
               topic="Material Receive Note" 
             />
             <NavItem
+              to="/app/materila/payment"
+              Icon={() => <i className="bi bi-credit-card-2-back"></i>}
+              label="Payment"
+              topic="Suppiler Payment Note"
+            />
+            <NavItem
               to="/app/material/stock"
               Icon={() => <i className="bi bi-clipboard-plus"></i>}
               label="Stock"
