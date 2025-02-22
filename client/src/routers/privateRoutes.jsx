@@ -18,6 +18,10 @@ import MaterialStock from "../app/UI/Material/Stock";
 import MaterialUse from "../app/UI/Material/Use";
 import Payment from "../app/UI/Material/Payment";
 import ProductManagemnet from "../app/UI/Products/ProductManagment";
+import ProductStock from "../app/UI/Products/Stock";
+import Stages from "../app/UI/Products/Stages";
+import QuaityUpdate from "../app/UI/Products/QuaityUpdate";
+import Creation from "../app/UI/Products/Creation";
 
 const router = createBrowserRouter([
   { path: "/", element: <WebLayout /> },
@@ -38,7 +42,11 @@ const router = createBrowserRouter([
       { path: "material/receive", element: <MaterialReceived /> },
       { path: "material/stock", element: <MaterialStock /> },
       { path: "material/use", element: <MaterialUse /> },
-      { path: "materila/payment" , element: <Payment/>}
+      { path: "materila/payment", element: <Payment /> },
+      { path: "product/stock", element: <ProductStock /> },
+      { path: "product/stages", element: <Stages /> },
+      { path: "product/quality", element: <QuaityUpdate /> },
+      { path: 'product/creation', element: <Creation /> },
     ],
   },
   {

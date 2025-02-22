@@ -12,6 +12,10 @@ const SideNav = ({ setActiveTopic }) => {
     const savedState = localStorage.getItem("showSubsetMaterial");
     return savedState === "true";
   });
+  const [showUserSubsetProduct, setShowUserSubsetProduct] = useState(() => {
+    const savedState = localStorage.getItem("showSubsetProduct");
+    return savedState === "true";
+  });
 
   const toggleUserSubset = () => {
     setShowUserSubsetUser((prev) => {
@@ -25,6 +29,14 @@ const SideNav = ({ setActiveTopic }) => {
     setShowUserSubsetMaterial((prev) => {
       const newState = !prev;
       localStorage.setItem("showSubsetMaterial", newState);
+      return newState;
+    });
+  };
+
+  const toggleProductSubset = () => {
+    setShowUserSubsetProduct((prev) => {
+      const newState = !prev;
+      localStorage.setItem("showSubsetProduct", newState);
       return newState;
     });
   };
@@ -64,12 +76,6 @@ const SideNav = ({ setActiveTopic }) => {
           Icon={() => <i className="bi bi-card-text"></i>}
           label="Dashboard"
           topic="Dashboard"
-        />
-        <NavItem
-          to="/app/Product_Management"
-          Icon={() => <i className="bi bi-person-lines-fill"></i>}
-          label="Product"
-          topic="Product Management"
         />
         <NavItem
           to="/app/MasterData"
@@ -137,7 +143,7 @@ const SideNav = ({ setActiveTopic }) => {
               to="/app/material/receive"
               Icon={() => <i className="bi bi-box-arrow-in-up"></i>}
               label="Receive"
-              topic="Material Receive Note" 
+              topic="Material Receive Note"
             />
             <NavItem
               to="/app/materila/payment"
@@ -156,6 +162,53 @@ const SideNav = ({ setActiveTopic }) => {
               Icon={() => <i className="bi bi-clipboard2-data"></i>}
               label="Use"
               topic="Material Send Note"
+            />
+          </div>
+        )}
+
+        <div
+          className={`flex pl-7 gap-2 items-center hover:text-white hover:bg-text-primary rounded-lg p-2 cursor-pointer
+        ${
+          showUserSubsetProduct
+            ? "text-white border border-gray-300 font-bold"
+            : "text-gray-300"
+        }`}
+          onClick={toggleProductSubset}
+        >
+          <i className="bi bi-box-seam"></i>
+          <p>Product</p>
+        </div>
+        {showUserSubsetProduct && (
+          <div className="pl-3">
+            <NavItem
+              to="/app/Product_Management"
+              Icon={() => <i className="bi bi-list-task"></i>}
+              label="List"
+              topic="Product List"
+            />
+            <NavItem
+              to="/app/product/creation"
+              Icon={() => <i className="bi bi-screwdriver"></i>}
+              label="Creation"
+              topic="Product Creation Note"
+            />
+            <NavItem
+              to="/app/product/stages"
+              Icon={() => <i className="bi bi-clipboard2-data"></i>}
+              label="Stages"
+              topic="Product Stages"
+            />
+            <NavItem
+              to="/app/product/quality"
+              Icon={() => <i className="bi bi-box-arrow-in-up"></i>}
+              label="Quality"
+              topic="Product Quality Check Note"
+            />
+            <NavItem
+              to="/app/product/stock"
+              Icon={() => <i className="bi bi-clipboard-plus"></i>}
+              label="Stock"
+              topic="Product Stock"
             />
           </div>
         )}
