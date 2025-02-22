@@ -5,6 +5,10 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
 import moment from "moment";
+import Nodata from "../../../assets/Nodata.svg";
+import CommonPagination from "../../../utils/CommonPagination";
+import CommonLoading from "../../../utils/CommonLoading";
+import { FaEdit } from "react-icons/fa";
 
 const validationSchema = Yup.object({
   material: Yup.object().required("required"),
@@ -16,9 +20,22 @@ const validationSchema = Yup.object({
   date: Yup.date().required("required"),
 });
 
+const filterValidationSchema = Yup.object({
+  material: Yup.object().nullable(),
+  supplier: Yup.object().nullable(),
+  toDate: Yup.date().required("required"),
+  fromDate: Yup.date().required("required"),
+});
+
 const Received = () => {
   const [meterialList, setMaterialList] = useState([]);
   const [supplierList, setSupplierList] = useState([]);
+  const [showFilter, setShowFilter] = useState(false);
+  const [receivedData, setReceivedData] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(5);
+  const [isLoading, setIsLoading] = useState(false);
 
   const fetchMaterialListData = async () => {
     try {
@@ -48,10 +65,41 @@ const Received = () => {
     label: item.FIRST_NAME + " " + item.LAST_NAME,
   }));
 
+  const fetchMaterialReceivedtData = async (page, limit) => {
+    setIsLoading(true);
+    try {
+      const response = await axios.get(
+        `/api/materialdata/get/received?page=${page}&limit=${limit}`
+      );
+      setReceivedData(response?.data?.data);
+      setTotalPages(response?.data?.totalPages);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setTimeout(() => {
+        setIsLoading(false);
+      }, 1000);
+    }
+  };
+
   useEffect(() => {
     fetchMaterialListData();
     fetchSupplierListData();
   }, []);
+
+  useEffect(() => {
+    fetchMaterialReceivedtData(currentPage, itemsPerPage);
+  }, [currentPage, itemsPerPage]);
+
+  const toggleFilter = () => {
+    setShowFilter(!showFilter);
+  };
+
+  const handlePageChange = (page) => setCurrentPage(page);
+  const handleItemsPerPageChange = (items) => {
+    setItemsPerPage(items);
+    setCurrentPage(1);
+  };
 
   return (
     <>
@@ -78,13 +126,14 @@ const Received = () => {
               receivedObj
             );
             toast.success(response?.data?.message);
-
+            fetchMaterialReceivedtData(currentPage, itemsPerPage);
             resetForm();
             setTimeout(() => {
               setFieldValue("material", null);
               setFieldValue("supplier", null);
             }, 0);
           } catch (error) {
+            toast.error("Something went wrong");
             console.error(error);
           }
         }}
@@ -199,11 +248,124 @@ const Received = () => {
             <h2 className="text-lg font-semibold">Material Received Note</h2>
           </div>
           <div className="flex items-center">
-            <button className="text-white bg-cyan-950 hover:bg-cyan-900 px-3 py-1 rounded-lg flex items-center ml-2">
-             <i className="bi bi-funnel"></i>
+            <button
+              className="text-white bg-cyan-950 hover:bg-cyan-900 px-3 py-1 rounded-lg flex items-center ml-2"
+              onClick={toggleFilter}
+            >
+              <i className="bi bi-funnel"></i>
             </button>
           </div>
         </div>
+
+        {showFilter && (
+          <div
+            className="absolute bg-white border rounded-lg p-3 shadow-lg overflow-y-auto"
+            style={{
+              zIndex: 9999,
+              top: "40px",
+              right: "-6%",
+              transform: "translateX(-50%)",
+              maxHeight: "400px",
+            }}
+          >
+            <Formik
+              initialValues={{
+                material: null,
+                supplier: null,
+                toDate: moment().subtract(7, "days").format("YYYY-MM-DD"),
+                fromDate: moment().format("YYYY-MM-DD"),
+              }}
+              validationSchema={filterValidationSchema}
+              onSubmit={(values) => {
+                console.log(values);
+              }}
+            >
+              {({ setFieldValue, values, resetForm }) => (
+                <Form className="flex flex-col">
+                  <div className="mb-1">
+                    <label className="form-label">Material</label>
+                    <Select
+                      options={options}
+                      value={values.material}
+                      onChange={(option) => setFieldValue("material", option)}
+                      menuPortalTarget={document.body}
+                      styles={{
+                        menuPortal: (base) => ({ ...base, zIndex: 9999 }),
+                      }}
+                    />
+                  </div>
+                  <div className="mb-1">
+                    <label className="form-label">Supplier</label>
+                    <Select
+                      options={supplierOptions}
+                      value={values.supplier}
+                      onChange={(option) => setFieldValue("supplier", option)}
+                      menuPortalTarget={document.body}
+                      styles={{
+                        menuPortal: (base) => ({ ...base, zIndex: 9999 }),
+                      }}
+                    />
+                  </div>
+                  <div className="mb-1">
+                    <label className="form-label">To Date</label>
+                    <Field
+                      type="date"
+                      name="toDate"
+                      className="form-control"
+                      max={moment().format("YYYY-MM-DD")}
+                      style={{
+                        boxShadow: "none",
+                        borderColor: "#ced4da",
+                        outline: "none",
+                      }}
+                    />
+                  </div>
+                  <div className="mb-1">
+                    <label className="form-label">From Date</label>
+                    <Field
+                      type="date"
+                      name="fromDate"
+                      className="form-control"
+                      max={moment().format("YYYY-MM-DD")}
+                      style={{
+                        boxShadow: "none",
+                        borderColor: "#ced4da",
+                        outline: "none",
+                      }}
+                    />
+                  </div>
+                  <div className="flex justify-end space-x-8 mt-2">
+                    <button
+                      type="submit"
+                      className="text-white bg-cyan-950 hover:bg-cyan-900 px-3 py-1 rounded-lg flex items-center"
+                    >
+                      Apply
+                    </button>
+                    <button
+                      type="button"
+                      className="text-white bg-red-600 hover:bg-red-500 px-3 py-1 rounded-lg flex items-center"
+                      onClick={() => {
+                        resetForm();
+                        setFieldValue("material", null);
+                        setFieldValue("supplier", null);
+                        setFieldValue(
+                          "toDate",
+                          moment().subtract(7, "days").format("YYYY-MM-DD")
+                        );
+                        setFieldValue(
+                          "fromDate",
+                          moment().format("YYYY-MM-DD")
+                        );
+                      }}
+                    >
+                      Reset
+                    </button>
+                  </div>
+                </Form>
+              )}
+            </Formik>
+          </div>
+        )}
 
         <div className="card-body overflow-auto flex justify-center">
           <table
@@ -216,13 +378,71 @@ const Received = () => {
                 <th className="border py-2 min-w-[300px]">Supplier</th>
                 <th className="border py-2 min-w-[150px]">Quality</th>
                 <th className="border py-2 min-w-[300px]">Date</th>
-                <th className="border py-2 min-w-[300px]">Quantity(Kg)</th>
+                <th className="border py-2 min-w-[300px]">Quantity</th>
                 <th className="border py-2 min-w-[100px]">Action</th>
               </tr>
             </thead>
+            <tbody>
+              {receivedData?.length > 0 ? (
+                receivedData?.map((item) => (
+                  <tr key={item.RECEIVED_ID} className="text-center">
+                    <td className="border py-2">{item.NAME}</td>
+                    <td className="border py-2">
+                      {item.FIRST_NAME} {item.LAST_NAME}
+                    </td>
+                    <td className="border py-2">
+                      {item.QUALITY === 'checking' ? (
+                        <td className="flex justify-center py-1">
+                        <span className="text-white bg-yellow-600 py-2 px-4 rounded-2xl">
+                          Checking
+                        </span>
+                      </td>
+                      ) : (
+                        <td>
+                        <span className="text-white bg-green-600 py-2 px-4 rounded-2xl">
+                          Passed
+                        </span>
+                      </td>
+                      )}
+                    </td>
+                    <td className="border py-2">{moment(item.DATE).format('YYYY-MM-DD')}</td>
+                    <td className="border py-2">{item.QUANTITY} kg</td>
+                    <td className="border py-2">
+                      <button
+                        className="text-slate-500 hover:text-slate-800 border-none"
+                        onClick={() => {
+                          console.log(item);
+                        }}
+                      >
+                        <FaEdit />
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="6" className="text-center py-4">
+                    <img
+                      src={Nodata}
+                      alt="No data"
+                      className="w-32 h-52 mx-auto"
+                    />
+                    <p className="text-lg text-gray-500">No data found</p>
+                  </td>
+                </tr>
+              )}
+            </tbody>
           </table>
         </div>
+        <CommonPagination
+          totalPages={totalPages}
+          currentPage={currentPage}
+          onPageChange={handlePageChange}
+          itemsPerPage={itemsPerPage}
+          onItemsPerPageChange={handleItemsPerPageChange}
+        />
       </div>
+      {isLoading && <CommonLoading />}
     </>
   );
 };

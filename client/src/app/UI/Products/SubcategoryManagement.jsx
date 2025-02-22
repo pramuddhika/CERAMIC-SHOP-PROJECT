@@ -3,10 +3,10 @@ import { FaEdit } from "react-icons/fa";
 import { AiOutlinePlus } from "react-icons/ai";
 import { useFormik } from "formik";
 import axios from "axios";
-import Nodata from "../../assets/Nodata.svg";
 import { toast } from "react-toastify";
-import CommonPagination from "../../utils/CommonPagination";
-import CommonLoading from "../../utils/CommonLoading";
+import Nodata from "../../../assets/Nodata.svg";
+import CommonPagination from "../../../utils/CommonPagination";
+import CommonLoading from "../../../utils/CommonLoading";
 
 const SubcategoryManagement = () => {
   const [currentPage, setCurrentPage] = useState(1);

@@ -5,7 +5,6 @@ import Login from "../auth/Login";
 import Signup from "../auth/Signup";
 import Layout from "../app/layout/Layout";
 import DashBoard from "../app/UI/DashBoard";
-import ProductManagemnet from "../app/UI/ProductManagment";
 import Masterdata from "../app/UI/MasterData";
 import Material from "../app/UI/Material/Material";
 import Registration from "../auth/Registration";
@@ -18,6 +17,7 @@ import MaterialReceived from "../app/UI/Material/REceived";
 import MaterialStock from "../app/UI/Material/Stock";
 import MaterialUse from "../app/UI/Material/Use";
 import Payment from "../app/UI/Material/Payment";
+import ProductManagemnet from "../app/UI/Products/ProductManagment";
 
 const router = createBrowserRouter([
   { path: "/", element: <WebLayout /> },
@@ -29,7 +29,7 @@ const router = createBrowserRouter([
     element: <Layout />,
     children: [
       { path: "dashboard", element: <DashBoard /> },
-      { path: "Product_Management", element: <ProductManagemnet /> },
+      { path: "Product_Management", element: <ProductManagemnet/> },
       { path: "Masterdata", element: <Masterdata /> },
       { path: "Material", element: <Material /> },
       { path: "customers", element: <CustomerManagement/> },

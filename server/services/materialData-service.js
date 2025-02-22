@@ -60,7 +60,7 @@ export const addMaterialDataService = async (
 };
 
 // get material data
-export const getMaterialDataService = async (page = 1, limit = 10) => {
+export const getMaterialDataService = async (page = 1, limit = 5) => {
   return new Promise((resolve, reject) => {
     const offset = (page - 1) * limit;
     const query = `SELECT * FROM material LIMIT ? OFFSET ?`;
@@ -155,8 +155,10 @@ export const addMaterialReceivedDataService = async (
   value
 ) => {
   return new Promise((resolve, reject) => {
+    const today = new Date();
+    const formattedDate = today.toISOString().split('T')[0];
     const query = `INSERT INTO material_received_note (MATERIAL_ID, SUPPILER_ID, DATE, QUANTITY, MATERIAL_VALUE) VALUES ('${materialId}', '${supplierId}', '${date}', '${quantity}', '${value}')`;
-    const query1 = `UPDATE material_stock SET QUANTITY = QUANTITY + ${quantity},UPDATE_DATE = '${date}' WHERE MATERIAL_ID = '${materialId}'`;
+    const query1 = `UPDATE material_stock SET QUANTITY = QUANTITY + ${quantity},UPDATE_DATE = '${formattedDate}' WHERE MATERIAL_ID = '${materialId}'`;
 
     db.query(query, (err) => {
       if (err) {
@@ -178,6 +180,40 @@ export const addMaterialReceivedDataService = async (
           }
         });
       }
+    });
+  });
+};
+
+// get material received note data
+export const getMaterialReceivedDataService = async (page = 1, limit = 5) => {
+  return new Promise((resolve, reject) => {
+    const offset = (page - 1) * limit;
+    const query = `SELECT  material.MATERIAL_ID,material.NAME,material_received_note.DATE,material_received_note.QUANTITY,material_received_note.QUALITY,user.USER_ID,user.FIRST_NAME,user.LAST_NAME
+     FROM material INNER JOIN material_received_note ON material.MATERIAL_ID = material_received_note.MATERIAL_ID
+     INNER JOIN user ON material_received_note.SUPPILER_ID = user.USER_ID LIMIT ? OFFSET ?`;
+    
+
+    db.query(query,[parseInt(limit), parseInt(offset)], (err, result) => {
+      if (err) {
+        reject({ message: "Something went wrong, Please try again!" });
+        return;
+      }
+      const countQuery = `SELECT COUNT(*) AS total FROM material_received_note`;
+      db.query(countQuery, (err, count) => {
+        if (err) {
+          reject({ message: "Something went wrong, Please try again!" });
+          return;
+        }
+        const total = count[0].total;
+        const pages = Math.ceil(total / limit);
+        resolve({
+          data: result,
+          total,
+          page: parseInt(page),
+          limit: parseInt(limit),
+          totalPages: pages,
+        });
+      })
     });
   });
 };
