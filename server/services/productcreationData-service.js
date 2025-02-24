@@ -24,7 +24,13 @@ export const addprojectcreationDataService = async (
 export const getProjectcreationDataService = async (page = 1, limit = 5) => {
   return new Promise((resolve, reject) => {
     const offset = (page - 1) * limit;
-    const query = `SELECT * FROM product_stock_stages LIMIT ? OFFSET ?`;
+    const query = `SELECT 
+    pss.*, 
+    p.NAME AS PRODUCT_NAME
+FROM product_stock_stages pss
+JOIN product p ON pss.PRODUCT_CODE = p.PRODUCT_CODE
+LIMIT ? OFFSET ?
+`;
 
     db.query(query, [parseInt(limit), parseInt(offset)], (err, result) => {
       if (err) {
