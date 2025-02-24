@@ -8,7 +8,7 @@ import moment from "moment";
 import Nodata from "../../../assets/Nodata.svg";
 import CommonPagination from "../../../utils/CommonPagination";
 import CommonLoading from "../../../utils/CommonLoading";
-import { FaEdit } from "react-icons/fa";
+import { FaCross, FaEdit } from "react-icons/fa";
 
 const validationSchema = Yup.object({
   product_code: Yup.object().required("required"),
@@ -39,10 +39,15 @@ const Creation = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(5);
   const [isLoading, setIsLoading] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isEdit, setIsEdit] = useState(false);
+  const [productcreationdata, setproductcreationdata] = useState({});
 
   const fetchProductListData = async () => {
     try {
       const response = await axios.get("/api/productcreationdata/get/list");
+
+      console.log(response);
       setProductList(response?.data);
     } catch (error) {
       console.log(error);
@@ -51,6 +56,7 @@ const Creation = () => {
   const fetchstockListData = async () => {
     try {
       const response = await axios.get("/api/masterdata/get/stock");
+      console.log(response);
       setstockList(response?.data);
     } catch (error) {
       console.log(error);
@@ -61,6 +67,14 @@ const Creation = () => {
     value: item.PRODUCT_CODE,
     label: item.NAME,
   }));
+  const options1 = (stockList || [])
+    .filter(
+      (item) => item.DESCRIPTION && item.STOCK_STAGE_TAG && item.STATUS === 1
+    ) // Ensure both fields exist and STATUS = 1
+    .map((item) => ({
+      label: item.STOCK_STAGE_TAG,
+      value: item.STOCK_STAGE_TAG.trim(), // Trim any extra spaces from STOCK_STAGE_TAG
+    }));
 
   const fetchproductcreationData = async (page, limit) => {
     setIsLoading(true);
@@ -77,6 +91,10 @@ const Creation = () => {
         setIsLoading(false);
       }, 1000);
     }
+  };
+  const handleEdit = (item) => {
+    setIsModalOpen(true);
+    setproductcreationdata(item);
   };
 
   useEffect(() => {
@@ -195,7 +213,7 @@ const Creation = () => {
                 className="text-danger"
               />
             </div>
-            <div className="col-2 flex items-center justify-end">
+            <div className="col-2 flex flex-row items-center justify-end mt-5">
               <button
                 type="submit"
                 className="text-white bg-cyan-950 hover:bg-cyan-900 px-3 py-1 rounded-lg flex items-center"
@@ -237,8 +255,7 @@ const Creation = () => {
           >
             <Formik
               initialValues={{
-                material: null,
-                supplier: null,
+                product_code: "",
                 toDate: moment().subtract(7, "days").format("YYYY-MM-DD"),
                 fromDate: moment().format("YYYY-MM-DD"),
               }}
@@ -253,8 +270,10 @@ const Creation = () => {
                     <label className="form-label">Product name</label>
                     <Select
                       options={options}
-                      value={values.material}
-                      onChange={(option) => setFieldValue("material", option)}
+                      value={values.product_code}
+                      onChange={(option) =>
+                        setFieldValue("product_code", option)
+                      }
                       menuPortalTarget={document.body}
                       styles={{
                         menuPortal: (base) => ({ ...base, zIndex: 9999 }),
@@ -263,10 +282,24 @@ const Creation = () => {
                   </div>
 
                   <div className="mb-1">
-                    <label className="form-label">Updated date</label>
+                    <label className="form-label">To date</label>
                     <Field
                       type="date"
                       name="toDate"
+                      className="form-control"
+                      max={moment().format("YYYY-MM-DD")}
+                      style={{
+                        boxShadow: "none",
+                        borderColor: "#ced4da",
+                        outline: "none",
+                      }}
+                    />
+                  </div>
+                  <div className="mb-1">
+                    <label className="form-label">From date</label>
+                    <Field
+                      type="date"
+                      name="fromDate"
                       className="form-control"
                       max={moment().format("YYYY-MM-DD")}
                       style={{
@@ -289,8 +322,8 @@ const Creation = () => {
                       className="text-white bg-red-600 hover:bg-red-500 px-3 py-1 rounded-lg flex items-center"
                       onClick={() => {
                         resetForm();
-                        setFieldValue("material", null);
-                        setFieldValue("supplier", null);
+                        setFieldValue("product_code", null);
+
                         setFieldValue(
                           "toDate",
                           moment().subtract(7, "days").format("YYYY-MM-DD")
@@ -310,7 +343,7 @@ const Creation = () => {
           </div>
         )}
 
-        <div className="card-body overflow-auto flex justify-center">
+        <div className="card-body overflow-auto flex justify-start">
           <table
             id="stock-table"
             className="border text-sm table-fixed w-full overflow-auto"
@@ -322,7 +355,7 @@ const Creation = () => {
                 <th className="border py-2 min-w-[150px]">Update Date</th>
                 {/* <th className="border py-2 min-w-[300px]">Damage_count</th> */}
                 <th className="border py-2 min-w-[300px]">Stage</th>
-                <th className="border py-2 min-w-[100px]">Action</th>
+                {/* <th className="border py-2 min-w-[100px]">Action</th> */}
               </tr>
             </thead>
             <tbody>
@@ -335,16 +368,16 @@ const Creation = () => {
                       {moment(item.UPDATE_DATE).format("YYYY-MM-DD")}
                     </td>
                     <td className="border py-2">{item.STAGE}</td>
-                    <td className="border py-2">
+                    {/* <td className="border py-2">
                       <button
                         className="text-slate-500 hover:text-slate-800 border-none"
                         onClick={() => {
-                          console.log(item);
+                          handleEdit(item);
                         }}
                       >
                         <FaEdit />
                       </button>
-                    </td>
+                    </td> */}
                   </tr>
                 ))
               ) : (
@@ -362,6 +395,141 @@ const Creation = () => {
             </tbody>
           </table>
         </div>
+        {isModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center ">
+            <div className="bg-slate-200 rounded-lg w-[500px] h-[350px]">
+              <Formik
+                initialValues={{
+                  product_code: productcreationdata?.PRODUCT_CODE,
+                  updated_date: productcreationdata?.UPDATE_DATE || "",
+                  damage_count: productcreationdata?.DAMAGE_COUNT || 0,
+                  stage:
+                    options1.find(
+                      (option) => option.value === productcreationdata?.STAGE
+                    ) || "",
+                }}
+                validationSchema={{
+                  product_code: Yup.object().required("required"),
+                }}
+                onSubmit={(values) => async () => {
+                  setIsLoading(true);
+                  try {
+                    await axios.post(`/api/productcreationdata/update/`, {
+                      product_code: values.product_code,
+                      updated_date: values.updated_date,
+                      damage_count: values.damage_count,
+                      stage:
+                        options1.find(
+                          (option) =>
+                            option.value === productcreationdata?.STAGE
+                        ) || "",
+                    });
+                    toast.success("Product creation data updated successfully");
+                    setIsModalOpen(false);
+                    fetchproductcreationData(currentPage, itemsPerPage);
+                    setIsLoading(false);
+                  } catch (error) {
+                    toast.error(error.response.data.message);
+                  }
+                  setTimeout(() => {
+                    setIsLoading(false);
+                  }, 1000);
+                }}
+              >
+                {({ setFieldValue, values, resetForm }) => (
+                  <Form>
+                    <div className="flex flex-col text-slate-600">
+                      <div className=" flex flex-row justify-end m-3">
+                        <button
+                          className="text-slate-600 hover:text-main"
+                          onClick={() => {
+                            setIsModalOpen(false);
+                          }}
+                        >
+                          ✖
+                        </button>
+                      </div>
+                      <h1 className="text-black flex flex-row text-bold  justify-center">
+                        Edit Product Creation Note
+                      </h1>
+                      <div className="flex flex-row">
+                        <div className="basis-1/3 flex flex-col gap-3">
+                          <label className="flex justify-start  mt-4 ml-2">
+                            Product Code
+                          </label>
+                          <label className="flex justify-start my-3 ml-2">
+                            Damage Count
+                          </label>
+                          <label className="flex justify-start mb-3 ml-2">
+                            Stage
+                          </label>
+                        </div>
+                        <div className="basis-2/3 flex flex-col gap-2">
+                          <Field
+                            type="text"
+                            name="product_code"
+                            className="form-control w-[300px] justify-start mt-4"
+                            disabled
+                          />
+                          <ErrorMessage
+                            name="product_code"
+                            component="div"
+                            className="text-red-500"
+                          />
+                          <Field
+                            type="text"
+                            name="damage_count"
+                            className="form-control w-[300px] justify-start my-2"
+                          />
+                          <ErrorMessage
+                            name="damage_count"
+                            component="div"
+                            className="text-red-500"
+                          />
+                          <Select
+                            options={options1}
+                            value={values.stage}
+                            onChange={(option) =>
+                              setFieldValue("stage", option)
+                            }
+                            menuPortalTarget={document.body}
+                            styles={{
+                              menuPortal: (base) => ({ ...base, zIndex: 9999 }),
+                            }}
+                            className=" w-[300px] justify-start mb-2"
+                          />
+                          <ErrorMessage
+                            name="stage"
+                            component="div"
+                            className="text-red-500"
+                          />
+                        </div>
+                      </div>
+                      <div className="flex flex-row position-relative gap-2 justify-end my-5 mx-4">
+                        <button
+                          type="button"
+                          className="px-4 py-2 bg-gray-200 text-gray-700 text-sm rounded hover:bg-gray-300"
+                          onClick={() => {
+                            resetForm();
+                            setIsModalOpen(false);
+                          }}
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          type="submit"
+                          className="px-4 py-2 bg-slate-500 text-white text-sm rounded hover:bg-slate-800"
+                        >
+                          Submit
+                        </button>
+                      </div>
+                    </div>
+                  </Form>
+                )}
+              </Formik>
+            </div>
+          </div>
+        )}
         <CommonPagination
           totalPages={totalPages}
           currentPage={currentPage}
