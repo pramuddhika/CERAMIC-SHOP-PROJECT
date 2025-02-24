@@ -20,23 +20,23 @@ import Payment from "../app/UI/Material/Payment";
 import ProductManagemnet from "../app/UI/Products/ProductManagment";
 import ProductStock from "../app/UI/Products/Stock";
 import Stages from "../app/UI/Products/Stages";
-import QuaityUpdate from "../app/UI/Products/QuaityUpdate";
+
 import Creation from "../app/UI/Products/Creation";
 
 const router = createBrowserRouter([
   { path: "/", element: <WebLayout /> },
   { path: "/login", element: <Login /> },
   { path: "/signup", element: <Signup /> },
-  { path: "/registration", element: <Registration/> },
+  { path: "/registration", element: <Registration /> },
   {
     path: "/app",
     element: <Layout />,
     children: [
       { path: "dashboard", element: <DashBoard /> },
-      { path: "Product_Management", element: <ProductManagemnet/> },
+      { path: "Product_Management", element: <ProductManagemnet /> },
       { path: "Masterdata", element: <Masterdata /> },
       { path: "Material", element: <Material /> },
-      { path: "customers", element: <CustomerManagement/> },
+      { path: "customers", element: <CustomerManagement /> },
       { path: "members", element: <MemberManagement /> },
       { path: "suppliers", element: <SuplierManagement /> },
       { path: "material/receive", element: <MaterialReceived /> },
@@ -45,18 +45,16 @@ const router = createBrowserRouter([
       { path: "materila/payment", element: <Payment /> },
       { path: "product/stock", element: <ProductStock /> },
       { path: "product/stages", element: <Stages /> },
-      { path: "product/quality", element: <QuaityUpdate /> },
-      { path: 'product/creation', element: <Creation /> },
+      // { path: "product/quality", element: <QuaityUpdate /> },
+      { path: "product/creation", element: <Creation /> },
     ],
   },
   {
     path: "/ceramic",
     //TODO: change the layout to new shop layout
     element: <Storelayout />,
-    children: [
-      { path: "home", element: <Home/> },
-    ],
-  }
+    children: [{ path: "home", element: <Home /> }],
+  },
 ]);
 const PrivateRoutes = () => {
   return (

@@ -198,12 +198,12 @@ const SideNav = ({ setActiveTopic }) => {
               label="Stages"
               topic="Product Stages"
             />
-            <NavItem
+            {/* <NavItem
               to="/app/product/quality"
               Icon={() => <i className="bi bi-box-arrow-in-up"></i>}
               label="Quality"
               topic="Product Quality Check Note"
-            />
+            /> */}
             <NavItem
               to="/app/product/stock"
               Icon={() => <i className="bi bi-clipboard-plus"></i>}
