@@ -1,5 +1,6 @@
 import {
   addprojectcreationDataService,
+  editProjectcreationDataService,
   getProductListService,
   getProjectcreationDataService,
 } from "../services/productcreationData-service.js";
@@ -41,17 +42,20 @@ export const getproductcreationDataController = async (req, res) => {
 export const editproductcreationDataController = async (req, res) => {
   const { product_code, updated_date, quantity, damage_count, stage } =
     req.body;
+  const { id } = req.params;
   if (!product_code || !updated_date || !quantity || !damage_count || !stage) {
     return res.status(400).json({ error: "All data required!" });
   }
   try {
-    const editproductcreationDataResponse = await editMaterialDataService(
-      product_code,
-      updated_date,
-      quantity,
-      damage_count,
-      stage
-    );
+    const editproductcreationDataResponse =
+      await editProjectcreationDataService(
+        product_code,
+        updated_date,
+        quantity,
+        damage_count,
+        stage,
+        id
+      );
     res.status(200).json(editproductcreationDataResponse);
   } catch (error) {
     return res.status(500).json({ error: error.message });

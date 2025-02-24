@@ -58,10 +58,23 @@ export const editProjectcreationDataService = async (
   updated_date,
   quantity,
   damage_count,
-  stage
+  stage,
+  id
 ) => {
   return new Promise((resolve, reject) => {
-    const query = `UPDATE product_stock_stages SET STAGE = '${stage}', DAMAGE_COUNT = '${damage_count}', QUANTITY = '${quantity}', UPDATE_DATE = '${updated_date}' WHERE PRODUCT_CODE = '${product_code}'`;
+    const query = `UPDATE product_stock_stages SET STAGE = '${stage}', DAMAGE_COUNT = '${damage_count}', QUANTITY = '${quantity}', UPDATE_DATE = '${updated_date}' WHERE ID = '${id}'`;
+    //     const query3 = `INSERT INTO production (PRODUCT_CODE, QUANTITY, UPDATE_DATE)
+    // SELECT ps.PRODUCT_CODE, ps.QUANTITY, ps.UPDATE_DATE
+    // FROM product_stock_stages ps
+    // WHERE ps.STAGE = (
+    //     SELECT MAX(STOCK_STAGE_TAG)
+    //     FROM stock_stages
+    //     WHERE STATUS = 1
+    // )
+    // ON DUPLICATE KEY UPDATE
+    //     QUANTITY = VALUES(QUANTITY),
+    //     UPDATE_DATE = VALUES(UPDATE_DATE);
+    // `;
 
     db.query(query, (err) => {
       if (err) {
@@ -70,6 +83,13 @@ export const editProjectcreationDataService = async (
         resolve({ message: "Project creation data updated successfully" });
       }
     });
+    // db.query(query3, (err) => {
+    //   if (err) {
+    //     reject({ message: " try again!" });
+    //   } else {
+    //     resolve({ message: "Project creation data updated successfully" });
+    //   }
+    // });
   });
 };
 
