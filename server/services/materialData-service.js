@@ -32,7 +32,7 @@ export const addMaterialDataService = async (
   status
 ) => {
   return new Promise((resolve, reject) => {
-    const query1 =`INSERT INTO material_stock (MATERIAL_ID,UPDATE_DATE,QUANTITY) VALUES (?, ?, ?)`;
+    const query1 = `INSERT INTO material_stock (MATERIAL_ID,UPDATE_DATE,QUANTITY) VALUES (?, ?, ?)`;
     const query = `INSERT INTO material (MATERIAL_ID, NAME, DESCRIPTION, STATUS) VALUES ('${code}', '${name}', '${description}', '${status}')`;
 
     db.query(query, (err) => {
@@ -48,7 +48,7 @@ export const addMaterialDataService = async (
             if (err.code === "ER_DUP_ENTRY") {
               reject({ message: "Material code already exists!" });
             } else {
-              reject({ message: 'Something went wrong, Please try again!' });
+              reject({ message: "Something went wrong, Please try again!" });
             }
           } else {
             resolve({ message: "Material data added successfully!" });
@@ -131,7 +131,7 @@ export const getMaterialStockService = async (searchQuery) => {
   return new Promise((resolve, reject) => {
     let query = `SELECT material.MATERIAL_ID, material.NAME, material_stock.UPDATE_DATE, material_stock.QUANTITY 
       FROM material INNER JOIN material_stock ON material.MATERIAL_ID = material_stock.MATERIAL_ID`;
-    
+
     if (searchQuery) {
       query += ` WHERE material.MATERIAL_ID LIKE '%${searchQuery}%' OR material.NAME LIKE '%${searchQuery}%'`;
     }
@@ -156,7 +156,7 @@ export const addMaterialReceivedDataService = async (
 ) => {
   return new Promise((resolve, reject) => {
     const today = new Date();
-    const formattedDate = today.toISOString().split('T')[0];
+    const formattedDate = today.toISOString().split("T")[0];
     const query = `INSERT INTO material_received_note (MATERIAL_ID, SUPPILER_ID, DATE, QUANTITY, MATERIAL_VALUE) VALUES ('${materialId}', '${supplierId}', '${date}', '${quantity}', '${value}')`;
     const query1 = `UPDATE material_stock SET QUANTITY = QUANTITY + ${quantity},UPDATE_DATE = '${formattedDate}' WHERE MATERIAL_ID = '${materialId}'`;
 
@@ -185,25 +185,70 @@ export const addMaterialReceivedDataService = async (
 };
 
 // get material received note data
-export const getMaterialReceivedDataService = async (page = 1, limit = 5) => {
+// get material received note data
+export const getMaterialReceivedDataService = async (
+  page = 1,
+  limit = 5,
+  material,
+  supplier,
+) => {
   return new Promise((resolve, reject) => {
     const offset = (page - 1) * limit;
-    const query = `SELECT  material.MATERIAL_ID,material.NAME,material_received_note.DATE,material_received_note.QUANTITY,material_received_note.QUALITY,user.USER_ID,user.FIRST_NAME,user.LAST_NAME
-     FROM material INNER JOIN material_received_note ON material.MATERIAL_ID = material_received_note.MATERIAL_ID
-     INNER JOIN user ON material_received_note.SUPPILER_ID = user.USER_ID LIMIT ? OFFSET ?`;
-    
+    let query = `SELECT material.MATERIAL_ID, material.NAME, material_received_note.DATE, 
+                        material_received_note.QUANTITY, material_received_note.MATERIAL_VALUE, 
+                        user.USER_ID, user.FIRST_NAME, user.LAST_NAME
+                 FROM material_received_note
+                 INNER JOIN material 
+                   ON material.MATERIAL_ID = material_received_note.MATERIAL_ID 
+                 INNER JOIN user 
+                   ON material_received_note.SUPPILER_ID = user.USER_ID`;
+    let queryParams = [];
+    let filters = [];
 
-    db.query(query,[parseInt(limit), parseInt(offset)], (err, result) => {
+    if (material && material !== "undefined" && material !== "") {
+      filters.push(`material.MATERIAL_ID = ?`);
+      queryParams.push(material);
+    }
+
+    if (supplier && supplier !== "undefined" && supplier !== "") {
+      filters.push(`user.USER_ID = ?`);
+      queryParams.push(supplier);
+    }
+
+    // Add WHERE clause if filters exist
+    if (filters.length > 0) {
+      query += " WHERE " + filters.join(" AND ");
+    }
+
+    query += " ORDER BY material_received_note.DATE DESC";
+    query += " LIMIT ? OFFSET ?";
+    queryParams.push(parseInt(limit), parseInt(offset));
+
+    db.query(query, queryParams, (err, result) => {
       if (err) {
-        reject({ message: "Something went wrong, Please try again!" });
+        console.error("Query error:", err);
+        reject({ message: err });
         return;
       }
-      const countQuery = `SELECT COUNT(*) AS total FROM material_received_note`;
-      db.query(countQuery, (err, count) => {
+
+      let countQuery = `SELECT COUNT(*) AS total 
+                        FROM material_received_note
+                        INNER JOIN material 
+                          ON material.MATERIAL_ID = material_received_note.MATERIAL_ID
+                        INNER JOIN user 
+                          ON material_received_note.SUPPILER_ID = user.USER_ID`;
+
+      if (filters.length > 0) {
+        countQuery += " WHERE " + filters.join(" AND ");
+      }
+
+      db.query(countQuery, queryParams.slice(0, -2), (err, count) => {
         if (err) {
-          reject({ message: "Something went wrong, Please try again!" });
+          console.error("Count query error:", err);
+          reject({ message: "Something went wrong. Please try again!" });
           return;
         }
+
         const total = count[0].total;
         const pages = Math.ceil(total / limit);
         resolve({
@@ -213,7 +258,7 @@ export const getMaterialReceivedDataService = async (page = 1, limit = 5) => {
           limit: parseInt(limit),
           totalPages: pages,
         });
-      })
+      });
     });
   });
 };

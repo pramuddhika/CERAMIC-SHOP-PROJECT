@@ -23,8 +23,6 @@ const validationSchema = Yup.object({
 const filterValidationSchema = Yup.object({
   material: Yup.object().nullable(),
   supplier: Yup.object().nullable(),
-  toDate: Yup.date().required("required"),
-  fromDate: Yup.date().required("required"),
 });
 
 const Received = () => {
@@ -36,6 +34,10 @@ const Received = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(5);
   const [isLoading, setIsLoading] = useState(false);
+  const [filterData, setFilterData] = useState({
+    material: null,
+    supplier: null,
+  });
 
   const fetchMaterialListData = async () => {
     try {
@@ -65,11 +67,14 @@ const Received = () => {
     label: item.FIRST_NAME + " " + item.LAST_NAME,
   }));
 
-  const fetchMaterialReceivedtData = async (page, limit) => {
+  const fetchMaterialReceivedtData = async (page, limit, filters) => {
     setIsLoading(true);
     try {
+      const { material, supplier} = filters;
       const response = await axios.get(
-        `/api/materialdata/get/received?page=${page}&limit=${limit}`
+        `/api/materialdata/get/received?page=${page}&limit=${limit}&material=${
+          material?.value || ""
+        }&supplier=${supplier?.value || ""}`
       );
       setReceivedData(response?.data?.data);
       setTotalPages(response?.data?.totalPages);
@@ -85,11 +90,15 @@ const Received = () => {
   useEffect(() => {
     fetchMaterialListData();
     fetchSupplierListData();
+    fetchMaterialReceivedtData(1, itemsPerPage, {
+      material: null,
+      supplier: null,
+    });
   }, []);
 
   useEffect(() => {
-    fetchMaterialReceivedtData(currentPage, itemsPerPage);
-  }, [currentPage, itemsPerPage]);
+    fetchMaterialReceivedtData(currentPage, itemsPerPage, filterData);
+  }, [currentPage, itemsPerPage, filterData]);
 
   const toggleFilter = () => {
     setShowFilter(!showFilter);
@@ -277,7 +286,9 @@ const Received = () => {
               }}
               validationSchema={filterValidationSchema}
               onSubmit={(values) => {
-                console.log(values);
+                setFilterData(values);
+                fetchMaterialReceivedtData(currentPage, itemsPerPage, values);
+                toggleFilter();
               }}
             >
               {({ setFieldValue, values, resetForm }) => (
@@ -303,34 +314,6 @@ const Received = () => {
                       menuPortalTarget={document.body}
                       styles={{
                         menuPortal: (base) => ({ ...base, zIndex: 9999 }),
-                      }}
-                    />
-                  </div>
-                  <div className="mb-1">
-                    <label className="form-label">To Date</label>
-                    <Field
-                      type="date"
-                      name="toDate"
-                      className="form-control"
-                      max={moment().format("YYYY-MM-DD")}
-                      style={{
-                        boxShadow: "none",
-                        borderColor: "#ced4da",
-                        outline: "none",
-                      }}
-                    />
-                  </div>
-                  <div className="mb-1">
-                    <label className="form-label">From Date</label>
-                    <Field
-                      type="date"
-                      name="fromDate"
-                      className="form-control"
-                      max={moment().format("YYYY-MM-DD")}
-                      style={{
-                        boxShadow: "none",
-                        borderColor: "#ced4da",
-                        outline: "none",
                       }}
                     />
                   </div>
@@ -391,21 +374,23 @@ const Received = () => {
                       {item.FIRST_NAME} {item.LAST_NAME}
                     </td>
                     <td className="border py-2">
-                      {item.QUALITY === 'checking' ? (
+                      {item.QUALITY === "checking" ? (
                         <td className="flex justify-center py-1">
-                        <span className="text-white bg-yellow-600 py-2 px-4 rounded-2xl">
-                          Checking
-                        </span>
-                      </td>
+                          <span className="text-white bg-yellow-600 py-2 px-4 rounded-2xl">
+                            Checking
+                          </span>
+                        </td>
                       ) : (
                         <td>
-                        <span className="text-white bg-green-600 py-2 px-4 rounded-2xl">
-                          Passed
-                        </span>
-                      </td>
+                          <span className="text-white bg-green-600 py-2 px-4 rounded-2xl">
+                            Passed
+                          </span>
+                        </td>
                       )}
                     </td>
-                    <td className="border py-2">{moment(item.DATE).format('YYYY-MM-DD')}</td>
+                    <td className="border py-2">
+                      {moment(item.DATE).format("YYYY-MM-DD")}
+                    </td>
                     <td className="border py-2">{item.QUANTITY} kg</td>
                     <td className="border py-2">
                       <button
