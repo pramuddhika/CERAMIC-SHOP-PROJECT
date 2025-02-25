@@ -95,9 +95,9 @@ export const addMaterialReceivedDataController = async (req, res) => {
 
 //get meteril recied note data
 export const getMaterialReceivedDataController = async (req, res) => {
-  const { page, limit } = req.query;
+  const { page, limit, material, supplier} = req.query;
   try {
-    const materialReceivedData = await getMaterialReceivedDataService(page, limit);
+    const materialReceivedData = await getMaterialReceivedDataService(page, limit ,material, supplier);
     res.status(200).json(materialReceivedData);
   } catch (error) {
     return res.status(500).json({ error: error.message });
