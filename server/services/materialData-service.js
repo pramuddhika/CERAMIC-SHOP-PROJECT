@@ -185,7 +185,6 @@ export const addMaterialReceivedDataService = async (
 };
 
 // get material received note data
-// get material received note data
 export const getMaterialReceivedDataService = async (
   page = 1,
   limit = 5,
@@ -194,7 +193,7 @@ export const getMaterialReceivedDataService = async (
 ) => {
   return new Promise((resolve, reject) => {
     const offset = (page - 1) * limit;
-    let query = `SELECT material.MATERIAL_ID, material.NAME, material_received_note.DATE, 
+    let query = `SELECT material.MATERIAL_ID, material.NAME, material_received_note.DATE,material_received_note.QUALITY,
                         material_received_note.QUANTITY, material_received_note.MATERIAL_VALUE, 
                         user.USER_ID, user.FIRST_NAME, user.LAST_NAME
                  FROM material_received_note
@@ -226,8 +225,7 @@ export const getMaterialReceivedDataService = async (
 
     db.query(query, queryParams, (err, result) => {
       if (err) {
-        console.error("Query error:", err);
-        reject({ message: err });
+        reject({ message: "Something went wrong. Please try again!" });
         return;
       }
 
@@ -244,7 +242,6 @@ export const getMaterialReceivedDataService = async (
 
       db.query(countQuery, queryParams.slice(0, -2), (err, count) => {
         if (err) {
-          console.error("Count query error:", err);
           reject({ message: "Something went wrong. Please try again!" });
           return;
         }
@@ -262,3 +259,42 @@ export const getMaterialReceivedDataService = async (
     });
   });
 };
+
+// quality update
+export const qualityUpdateService = async (materialId, date, supplierId, quality, quantity) => {
+  return new Promise((resolve, reject) => {
+    if (quality === 'failed') {
+      const today = new Date();
+      const formattedDate = today.toISOString().split("T")[0];
+      const query = `UPDATE material_stock SET QUANTITY = QUANTITY - ${quantity},UPDATE_DATE = '${formattedDate}'  WHERE MATERIAL_ID = '${materialId}'`;
+      db.query(query, (err) => {
+        if (err) {
+          reject({ message: "Something went wrong, Please try again!" });
+        } else {
+          const query1 = 'UPDATE material_received_note SET QUALITY = ? WHERE MATERIAL_ID = ? AND SUPPILER_ID = ? AND DATE = ?';
+          db.query(query1, [quality, materialId, supplierId, date], (err) => {
+            if (err) {
+              reject({ message: "Something went wrong, Please try again!" });
+              return;
+            } else {
+              resolve({ message: "Quality updated successfully!" });
+              return;
+            }
+          });
+        }
+      });
+    }
+    if(quality === 'passed'){
+      const query2 = 'UPDATE material_received_note SET QUALITY =? WHERE MATERIAL_ID =? AND SUPPILER_ID =? AND DATE =?';
+      db.query(query2, [quality, materialId, supplierId, date], (err) => {
+        if (err) {
+          reject({ message: "Something went wrong, Please try again!" });
+          return;
+        } else {
+          resolve({ message: "Quality updated successfully!" });
+          return;
+        }
+      });
+    }
+  })
+}

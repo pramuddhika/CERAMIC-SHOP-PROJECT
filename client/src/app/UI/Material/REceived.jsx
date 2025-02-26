@@ -24,7 +24,6 @@ const filterValidationSchema = Yup.object({
   material: Yup.object().nullable(),
   supplier: Yup.object().nullable(),
 });
-
 const Received = () => {
   const [meterialList, setMaterialList] = useState([]);
   const [supplierList, setSupplierList] = useState([]);
@@ -38,7 +37,9 @@ const Received = () => {
     material: null,
     supplier: null,
   });
-
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedItem, setSelectedItem] = useState(null);
+  const [selectedQuality, setSelectedQuality] = useState("");
   const fetchMaterialListData = async () => {
     try {
       const response = await axios.get("/api/materialdata/get/list");
@@ -47,7 +48,6 @@ const Received = () => {
       console.log(error);
     }
   };
-
   const fetchSupplierListData = async () => {
     try {
       const response = await axios.get("/api/auth/getSupplierList");
@@ -56,21 +56,18 @@ const Received = () => {
       console.log(error);
     }
   };
-
   const options = meterialList.map((item) => ({
     value: item.MATERIAL_ID,
     label: item.NAME,
   }));
-
   const supplierOptions = supplierList.map((item) => ({
     value: item.USER_ID,
     label: item.FIRST_NAME + " " + item.LAST_NAME,
   }));
-
   const fetchMaterialReceivedtData = async (page, limit, filters) => {
     setIsLoading(true);
     try {
-      const { material, supplier} = filters;
+      const { material, supplier } = filters;
       const response = await axios.get(
         `/api/materialdata/get/received?page=${page}&limit=${limit}&material=${
           material?.value || ""
@@ -86,7 +83,6 @@ const Received = () => {
       }, 1000);
     }
   };
-
   useEffect(() => {
     fetchMaterialListData();
     fetchSupplierListData();
@@ -95,21 +91,40 @@ const Received = () => {
       supplier: null,
     });
   }, []);
-
   useEffect(() => {
     fetchMaterialReceivedtData(currentPage, itemsPerPage, filterData);
   }, [currentPage, itemsPerPage, filterData]);
-
   const toggleFilter = () => {
     setShowFilter(!showFilter);
   };
-
   const handlePageChange = (page) => setCurrentPage(page);
   const handleItemsPerPageChange = (items) => {
     setItemsPerPage(items);
     setCurrentPage(1);
   };
-
+  const handleQualityUpdate = async () => {
+    const updateData = {
+      materialId: selectedItem?.MATERIAL_ID,
+      supplierId: selectedItem?.USER_ID,
+      date: moment(selectedItem?.DATE).format("YYYY-MM-DD"),
+      quantity: selectedItem?.QUANTITY,
+      quality: selectedQuality,
+    };
+    try {
+      const response = await axios.put(
+        "/api/materialdata/quality/update",
+        updateData
+      );
+      toast.success(response?.data?.message);
+      fetchMaterialReceivedtData(currentPage, itemsPerPage, filterData);
+    } catch (error) {
+      toast.error("Something went wrong");
+      console.error(error);
+    }
+    setIsModalOpen(false);
+    setSelectedItem(null);
+    setSelectedQuality("");
+  };
   return (
     <>
       <Formik
@@ -135,7 +150,7 @@ const Received = () => {
               receivedObj
             );
             toast.success(response?.data?.message);
-            fetchMaterialReceivedtData(currentPage, itemsPerPage);
+            fetchMaterialReceivedtData(currentPage, itemsPerPage, filterData);
             resetForm();
             setTimeout(() => {
               setFieldValue("material", null);
@@ -279,10 +294,8 @@ const Received = () => {
           >
             <Formik
               initialValues={{
-                material: null,
-                supplier: null,
-                toDate: moment().subtract(7, "days").format("YYYY-MM-DD"),
-                fromDate: moment().format("YYYY-MM-DD"),
+                material: filterData.material,
+                supplier: filterData.supplier,
               }}
               validationSchema={filterValidationSchema}
               onSubmit={(values) => {
@@ -293,7 +306,7 @@ const Received = () => {
             >
               {({ setFieldValue, values, resetForm }) => (
                 <Form className="flex flex-col">
-                  <div className="mb-1">
+                  <div className="mb-1" style={{ width: "250px" }}>
                     <label className="form-label">Material</label>
                     <Select
                       options={options}
@@ -329,16 +342,15 @@ const Received = () => {
                       className="text-white bg-red-600 hover:bg-red-500 px-3 py-1 rounded-lg flex items-center"
                       onClick={() => {
                         resetForm();
-                        setFieldValue("material", null);
-                        setFieldValue("supplier", null);
-                        setFieldValue(
-                          "toDate",
-                          moment().subtract(7, "days").format("YYYY-MM-DD")
-                        );
-                        setFieldValue(
-                          "fromDate",
-                          moment().format("YYYY-MM-DD")
-                        );
+                        setFilterData({
+                          material: null,
+                          supplier: null,
+                        });
+                        fetchMaterialReceivedtData(currentPage, itemsPerPage, {
+                          material: null,
+                          supplier: null,
+                        });
+                        toggleFilter();
                       }}
                     >
                       Reset
@@ -347,6 +359,108 @@ const Received = () => {
                 </Form>
               )}
             </Formik>
+          </div>
+        )}
+
+        {isModalOpen && (
+          <div
+            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center"
+            style={{ zIndex: 9998 }}
+          >
+            <div className="bg-white rounded-lg p-6 shadow-lg">
+              <h2 className="text-lg font-semibold mb-4">Update Quality for</h2>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700">
+                  Material
+                </label>
+                <div className="mt-1 flex items-center">
+                  <span className="text-gray-500">{selectedItem?.NAME}</span>
+                </div>
+              </div>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700">
+                  Supplier
+                </label>
+                <div className="mt-1 flex items-center">
+                  <span className="text-gray-500">
+                    {selectedItem?.FIRST_NAME} {selectedItem?.LAST_NAME}
+                  </span>
+                </div>
+              </div>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700">
+                  Value
+                </label>
+                <div className="mt-1 flex items-center">
+                  <span className="text-gray-500">
+                    Rs. {selectedItem?.MATERIAL_VALUE}
+                  </span>
+                </div>
+              </div>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700">
+                  Quantity
+                </label>
+                <div className="mt-1 flex items-center">
+                  <span className="text-gray-500">
+                    {selectedItem?.QUANTITY} kg
+                  </span>
+                </div>
+              </div>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700">
+                  Date
+                </label>
+                <div className="mt-1 flex items-center">
+                  <span className="text-gray-500">
+                    {moment(selectedItem.DATE).format("DD-MM-YYYY")}
+                  </span>
+                </div>
+              </div>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700">
+                  Quality
+                </label>
+                <div className="mt-1 flex space-x-4">
+                  <label className="inline-flex items-center">
+                    <input
+                      type="radio"
+                      className="form-radio"
+                      value="passed"
+                      checked={selectedQuality === "passed"}
+                      onChange={() => setSelectedQuality("passed")}
+                    />
+                    <span className="ml-2">Passed</span>
+                  </label>
+                  <label className="inline-flex items-center">
+                    <input
+                      type="radio"
+                      className="form-radio"
+                      value="failed"
+                      checked={selectedQuality === "failed"}
+                      onChange={() => setSelectedQuality("failed")}
+                    />
+                    <span className="ml-2">failed</span>
+                  </label>
+                </div>
+              </div>
+              <div className="flex justify-end space-x-4">
+                <button
+                  type="button"
+                  className="text-white bg-red-600 hover:bg-red-500 px-3 py-1 rounded-lg flex items-center"
+                  onClick={() => setIsModalOpen(false)}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  className="text-white bg-cyan-950 hover:bg-cyan-900 px-3 py-1 rounded-lg flex items-center"
+                  onClick={handleQualityUpdate}
+                >
+                  Update
+                </button>
+              </div>
+            </div>
           </div>
         )}
 
@@ -373,21 +487,22 @@ const Received = () => {
                     <td className="border py-2">
                       {item.FIRST_NAME} {item.LAST_NAME}
                     </td>
-                    <td className="border py-2">
+                    <td className="border py-3">
                       {item.QUALITY === "checking" ? (
-                        <td className="flex justify-center py-1">
-                          <span className="text-white bg-yellow-600 py-2 px-4 rounded-2xl">
-                            Checking
-                          </span>
-                        </td>
+                        <span className="text-white bg-yellow-600 py-2 px-4 rounded-2xl">
+                          Checking
+                        </span>
+                      ) : item.QUALITY === "failed" ? (
+                        <span className="text-white bg-red-600 py-2 px-4 rounded-2xl">
+                          Failed
+                        </span>
                       ) : (
-                        <td>
-                          <span className="text-white bg-green-600 py-2 px-4 rounded-2xl">
-                            Passed
-                          </span>
-                        </td>
+                        <span className="text-white bg-green-600 py-2 px-4 rounded-2xl">
+                          Passed
+                        </span>
                       )}
                     </td>
+
                     <td className="border py-2">
                       {moment(item.DATE).format("YYYY-MM-DD")}
                     </td>
@@ -395,8 +510,10 @@ const Received = () => {
                     <td className="border py-2">
                       <button
                         className="text-slate-500 hover:text-slate-800 border-none"
+                        disabled={item.QUALITY !== "checking"}
                         onClick={() => {
-                          console.log(item);
+                          setSelectedItem(item);
+                          setIsModalOpen(true);
                         }}
                       >
                         <FaEdit />

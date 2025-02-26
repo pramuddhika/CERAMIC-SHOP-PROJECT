@@ -7,6 +7,7 @@ import {
   getMaterialStockService,
   addMaterialReceivedDataService,
   getMaterialReceivedDataService,
+  qualityUpdateService,
 } from "../services/materialData-service.js";
 
 // generate material ID
@@ -99,6 +100,21 @@ export const getMaterialReceivedDataController = async (req, res) => {
   try {
     const materialReceivedData = await getMaterialReceivedDataService(page, limit ,material, supplier);
     res.status(200).json(materialReceivedData);
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
+
+// quality update
+export const qualityUpdateController = async (req, res) => {
+  const { materialId, date, supplierId, quality, quantity } = req.body;
+  console.log(req.body)
+  if (!materialId ||!date ||!supplierId ||!quality ||!quantity) {
+    return res.status(400).json({ error: "All data required!" });
+  }
+  try {
+    const qualityUpdateResponse = await qualityUpdateService(materialId, date, supplierId,quality , quantity);
+    res.status(200).json(qualityUpdateResponse);
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }
