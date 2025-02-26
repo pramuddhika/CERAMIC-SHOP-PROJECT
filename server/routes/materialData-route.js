@@ -9,6 +9,8 @@ import {
   addMaterialReceivedDataController,
   getMaterialReceivedDataController,
   qualityUpdateController,
+  addMaterialUsageDataController,
+  getMaterialUsageDataController,
 } from "../controllers/materialData-controller.js";
 
 const router = express.Router();
@@ -31,6 +33,9 @@ router.post("/add/received", addMaterialReceivedDataController);
 router.get("/get/received", getMaterialReceivedDataController);
 // quality update
 router.put("/quality/update", qualityUpdateController);
-
+// add meteral usage data 
+router.post("/add/usage", addMaterialUsageDataController);
+//get meterial usage data
+router.get("/get/usage", getMaterialUsageDataController);
 
 export default router;
