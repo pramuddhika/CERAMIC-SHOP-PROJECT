@@ -8,6 +8,8 @@ import {
   addMaterialReceivedDataService,
   getMaterialReceivedDataService,
   qualityUpdateService,
+  addMaterialUsageDataService,
+  getMaterialUsageDataService,
 } from "../services/materialData-service.js";
 
 // generate material ID
@@ -115,6 +117,31 @@ export const qualityUpdateController = async (req, res) => {
   try {
     const qualityUpdateResponse = await qualityUpdateService(materialId, date, supplierId,quality , quantity);
     res.status(200).json(qualityUpdateResponse);
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
+
+// add meteral usage data
+export const addMaterialUsageDataController = async (req, res) => {
+  const { materialId, date, quantity } = req.body;
+  if (!materialId || !date || !quantity ) {
+    return res.status(400).json({ error: "All data required!" });
+  }
+  try {
+    const addMaterialUsageDataResponse = await addMaterialUsageDataService(materialId, date, quantity);
+    res.status(200).json(addMaterialUsageDataResponse);
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
+
+//get meterial usage data
+export const getMaterialUsageDataController = async (req, res) => {
+  const { page, limit, material } = req.query;
+  try {
+    const materialUsageData = await getMaterialUsageDataService(page, limit, material);
+    res.status(200).json(materialUsageData);
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }

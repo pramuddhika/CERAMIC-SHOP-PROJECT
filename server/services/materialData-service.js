@@ -298,3 +298,82 @@ export const qualityUpdateService = async (materialId, date, supplierId, quality
     }
   })
 }
+
+// add material usage data
+export const addMaterialUsageDataService = async (materialId, date, quantity) => {
+  return new Promise((resolve, reject) => {
+    const today = new Date();
+    const formattedDate = today.toISOString().split("T")[0];
+    const query = `UPDATE material_stock SET QUANTITY = QUANTITY - ${quantity},UPDATE_DATE = '${formattedDate}' WHERE MATERIAL_ID = '${materialId}'`;
+
+    db.query(query, (err) => {
+      if (err) {
+        reject({ message: "Something went wrong, Please try again!" });
+      } else {
+        const query1 = `INSERT INTO material_use (MATERIAL_ID, DATE, QUANTITY) VALUES ('${materialId}', '${date}', '${quantity}')`;
+
+        db.query(query1, (err) => {
+          if (err) {
+            reject({ message: "Something went wrong, Please try again!" });
+          } else {
+            resolve({ message: "Material usage data added successfully!" });
+          }
+        });
+      }
+    });
+  });
+};
+
+// get material usage data
+export const getMaterialUsageDataService = async (page = 1, limit = 5, material) => {
+  return new Promise((resolve, reject) => {
+    const offset = (page - 1) * limit;
+    let query = `SELECT material.MATERIAL_ID, material.NAME, material_use.DATE, material_use.QUANTITY 
+                 FROM material 
+                 INNER JOIN material_use ON material.MATERIAL_ID = material_use.MATERIAL_ID`;
+
+    let countQuery = `SELECT COUNT(*) AS total FROM material_use 
+                      INNER JOIN material ON material.MATERIAL_ID = material_use.MATERIAL_ID`;
+
+    let queryParams = [];
+    let filters = [];
+
+    if (material) {
+      filters.push(`material.MATERIAL_ID = ?`);
+      queryParams.push(material);
+    }
+
+    if (filters.length > 0) {
+      query += " WHERE " + filters.join(" AND ");
+      countQuery += " WHERE " + filters.join(" AND "); 
+    }
+
+    query += " ORDER BY material_use.DATE DESC LIMIT ? OFFSET ?";
+    queryParams.push(parseInt(limit), parseInt(offset));
+
+    db.query(query, queryParams, (err, result) => {
+      if (err) {
+        reject({ message: "Something went wrong, Please try again!" });
+        return;
+      }
+
+      db.query(countQuery, queryParams.slice(0, -2), (err, count) => {
+        if (err) {
+          reject({ message: "Something went wrong, Please try again!" });
+          return;
+        }
+
+        const total = count[0].total;
+        const pages = Math.ceil(total / limit);
+        resolve({
+          data: result,
+          total,
+          page: parseInt(page),
+          limit: parseInt(limit),
+          totalPages: pages,
+        });
+      });
+    });
+  });
+};
+
