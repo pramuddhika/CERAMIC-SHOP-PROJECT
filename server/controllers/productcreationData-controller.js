@@ -2,6 +2,7 @@ import {
   addprojectcreationDataService,
   editProjectcreationDataService,
   getProductListService,
+  getProductstockDataService,
   getProjectcreationDataService,
 } from "../services/productcreationData-service.js";
 
@@ -26,11 +27,15 @@ export const addproductcreationController = async (req, res) => {
 
 // get productcreation data
 export const getproductcreationDataController = async (req, res) => {
+  const { todate, fromdate, productCode } = req.body;
   const { page, limit } = req.query;
   try {
     const productcreationData = await getProjectcreationDataService(
       page,
-      limit
+      limit,
+      todate,
+      fromdate,
+      productCode
     );
     res.status(200).json(productcreationData);
   } catch (error) {
@@ -57,6 +62,15 @@ export const editproductcreationDataController = async (req, res) => {
         id
       );
     res.status(200).json(editproductcreationDataResponse);
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
+export const getProductstockDataController = async (req, res) => {
+  const { page, limit } = req.query;
+  try {
+    const ProductData = await getProductstockDataService(page, limit);
+    res.status(200).json(ProductData);
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }

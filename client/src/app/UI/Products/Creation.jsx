@@ -22,12 +22,6 @@ const validationSchema = Yup.object({
 
 const filterValidationSchema = Yup.object({
   product_code: Yup.object().required("required"),
-
-  quantity: Yup.number()
-    .required("required")
-    .positive("must be greater than 0"),
-
-  updated_date: Yup.date().required("required"),
 });
 
 const Creation = () => {
@@ -76,11 +70,12 @@ const Creation = () => {
       value: item.STOCK_STAGE_TAG.trim(), // Trim any extra spaces from STOCK_STAGE_TAG
     }));
 
-  const fetchproductcreationData = async (page, limit) => {
+  const fetchproductcreationData = async (page, limit, filter = {}) => {
     setIsLoading(true);
     try {
-      const response = await axios.get(
-        `/api/productcreationdata/get?page=${page}&limit=${limit}`
+      const response = await axios.post(
+        `/api/productcreationdata/get?page=${page}&limit=${limit}`,
+        filter && Object.keys(filter).length ? filter : {}
       );
       setProductcreationData(response?.data?.data);
       setTotalPages(response?.data?.totalPages);
@@ -260,8 +255,26 @@ const Creation = () => {
                 fromDate: moment().format("YYYY-MM-DD"),
               }}
               validationSchema={filterValidationSchema}
-              onSubmit={(values) => {
+              onSubmit={async (values) => {
                 console.log(values);
+                setIsLoading(true);
+
+                try {
+                  filter = {
+                    productCode: values?.product_code?.value,
+                    // toDate: values?.toDate,
+                    // fromDate: values?.fromDate,
+                  };
+
+                  fetchproductcreationData(currentPage, itemsPerPage, filter);
+                } catch (error) {
+                  console.log(error);
+                  toast.error("Something went wrong");
+                } finally {
+                  setTimeout(() => {
+                    setIsLoading(false);
+                  }, 1000);
+                }
               }}
             >
               {({ setFieldValue, values, resetForm }) => (
@@ -352,7 +365,7 @@ const Creation = () => {
               <tr className="pl-2 text-center">
                 <th className="border py-2 min-w-[300px]">Product Name</th>
                 <th className="border py-2 min-w-[300px]">Quantity</th>
-                <th className="border py-2 min-w-[150px]">Update Date</th>
+                <th className="border py-2 min-w-[150px]">Created Date</th>
                 {/* <th className="border py-2 min-w-[300px]">Damage_count</th> */}
                 <th className="border py-2 min-w-[300px]">Stage</th>
                 {/* <th className="border py-2 min-w-[100px]">Action</th> */}
