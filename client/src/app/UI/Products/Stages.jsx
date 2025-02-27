@@ -32,7 +32,13 @@ const Stages = () => {
   const [ProductList, setProductList] = useState([]);
 
   const [productcreationdata, setproductcreationdata] = useState({});
+  const [totalDamageCount, setTotalDamageCount] = useState(0);
 
+  useEffect(() => {
+    if (isModalOpen && productcreationdata) {
+      setTotalDamageCount(productcreationdata.DAMAGE_COUNT || 0);
+    }
+  }, [isModalOpen, productcreationdata]);
   const fetchstockListData = async () => {
     try {
       const response = await axios.get("/api/masterdata/get/stock");
@@ -76,12 +82,14 @@ const Stages = () => {
       label: item.STOCK_STAGE_TAG.trim(),
       value: item.STOCK_STAGE_TAG.trim(),
     }));
-
-  const fetchproductcreationData = async (page, limit) => {
+  const lastStage =
+    stageOrder.length > 0 ? stageOrder[stageOrder.length - 1] : null;
+  const fetchproductcreationData = async (page, limit, filter = {}) => {
     setIsLoading(true);
     try {
-      const response = await axios.get(
-        `/api/productcreationdata/get?page=${page}&limit=${limit}`
+      const response = await axios.post(
+        `/api/productcreationdata/get?page=${page}&limit=${limit}`,
+        filter && Object.keys(filter).length ? filter : {}
       );
       setProductcreationData(response?.data?.data);
       setTotalPages(response?.data?.totalPages);
@@ -105,6 +113,7 @@ const Stages = () => {
 
   useEffect(() => {
     fetchproductcreationData(currentPage, itemsPerPage);
+    console.log(lastStage);
   }, [currentPage, itemsPerPage]);
 
   const toggleFilter = () => {
@@ -116,6 +125,22 @@ const Stages = () => {
     setItemsPerPage(items);
     setCurrentPage(1);
   };
+  const validationSchema_ = Yup.object({
+    damage_count: Yup.number()
+      .nullable()
+      .typeError("Must be a number")
+      .required("Required")
+      .min(0, "Must be 0 or greater")
+      .test(
+        "max-damage",
+        `Total damage count cannot exceed ${productcreationdata?.QUANTITY}`,
+        function (value) {
+          if (value === null || value === undefined) return false;
+          const totalDamage = (productcreationdata?.DAMAGE_COUNT || 0) + value;
+          return totalDamage <= productcreationdata?.QUANTITY;
+        }
+      ),
+  });
 
   return (
     <>
@@ -246,8 +271,10 @@ const Stages = () => {
               <tr className="pl-2 text-center">
                 <th className="border py-2 min-w-[300px]">Product Name</th>
                 <th className="border py-2 min-w-[300px]">Quantity</th>
-                <th className="border py-2 min-w-[150px]">Update Date</th>
-                {/* <th className="border py-2 min-w-[300px]">Damage_count</th> */}
+                <th className="border py-2 min-w-[150px]">Created Date</th>
+                <th className="border py-2 min-w-[300px]">
+                  Total Damage count
+                </th>
                 <th className="border py-2 min-w-[300px]">Stage</th>
                 <th className="border py-2 min-w-[100px]">Action</th>
               </tr>
@@ -261,13 +288,17 @@ const Stages = () => {
                     <td className="border py-2">
                       {moment(item.UPDATE_DATE).format("YYYY-MM-DD")}
                     </td>
+                    <td className="border py-2">{item.DAMAGE_COUNT}</td>
                     <td className="border py-2">{item.STAGE}</td>
                     <td className="border py-2">
                       <button
-                        className="text-slate-500 hover:text-slate-800 border-none"
-                        onClick={() => {
-                          handleEdit(item);
-                        }}
+                        className={`text-slate-500 hover:text-slate-800 border-none ${
+                          item.stage === lastStage
+                            ? "opacity-50 cursor-not-allowed"
+                            : ""
+                        }`}
+                        onClick={() => handleEdit(item)}
+                        disabled={item.stage === lastStage}
                       >
                         <FaEdit />
                       </button>
@@ -291,18 +322,19 @@ const Stages = () => {
         </div>
         {isModalOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center ">
-            <div className="bg-slate-200 rounded-lg w-[500px] h-[350px]">
+            <div className="bg-slate-200 rounded-lg w-[500px] h-[450px]">
               <Formik
                 initialValues={{
                   product_code: productcreationdata?.PRODUCT_CODE,
                   updated_date: productcreationdata?.UPDATE_DATE || "",
-                  damage_count: productcreationdata?.DAMAGE_COUNT || 0,
+                  damage_count: 0,
                   quantity: productcreationdata?.QUANTITY || 0,
                   stage:
                     options1.find(
                       (option) => option.value === productcreationdata?.STAGE
                     ) || "",
                 }}
+                validationSchema={validationSchema_}
                 onSubmit={async (values) => {
                   console.log("clicked");
                   console.log(values);
@@ -315,7 +347,7 @@ const Stages = () => {
                         updated_date: moment(values?.updated_date).format(
                           "YYYY-MM-DD"
                         ),
-                        damage_count: values?.damage_count,
+                        damage_count: totalDamageCount,
                         stage: values?.stage.value,
                         quantity: values?.quantity,
                       }
@@ -388,9 +420,18 @@ const Stages = () => {
                             className="text-red-500"
                           />
                           <Field
-                            type="text"
+                            type="number"
                             name="damage_count"
-                            className="form-control w-[300px] justify-start my-2"
+                            className=" w-[300px] justify-start my-2 p-2"
+                            onChange={(e) => {
+                              const newDamage =
+                                parseInt(e.target.value, 10) || null;
+                              setFieldValue("damage_count", newDamage);
+                              setTotalDamageCount(
+                                (productcreationdata?.DAMAGE_COUNT || null) +
+                                  newDamage
+                              );
+                            }}
                           />
                           <ErrorMessage
                             name="damage_count"

@@ -4,13 +4,15 @@ import {
   editproductcreationDataController,
   getproductcreationDataController,
   getProductListController,
+  getProductstockDataController,
 } from "../controllers/productcreationData-controller.js";
 
 const router = express.Router();
 
-router.get("/get", getproductcreationDataController);
+router.post("/get", getproductcreationDataController);
 router.get("/get/list", getProductListController);
 router.post("/add/creation", addproductcreationController);
 router.put("/update/creation/:id", editproductcreationDataController);
+router.get("/get/product", getProductstockDataController);
 
 export default router;
