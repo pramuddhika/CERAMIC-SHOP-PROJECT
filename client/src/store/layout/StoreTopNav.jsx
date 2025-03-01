@@ -1,8 +1,10 @@
 import { useState } from "react";
 import user from "../../assets/user.png";
+import { useNavigate } from "react-router-dom";
 
 const StoreTopNav = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const navigate = useNavigate();
 
   const toggleDropdown = () => {
     setDropdownOpen(!dropdownOpen);
@@ -37,7 +39,12 @@ const StoreTopNav = () => {
                   <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer">
                     Profile
                   </li>
-                  <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer">
+                  <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                    onClick={()=> {
+                      localStorage.clear();
+                      navigate("/");
+                    }}
+                  >
                     Log Out
                   </li>
                 </ul>
