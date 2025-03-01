@@ -2,8 +2,11 @@ import hero6 from "../assets/hero6.png";
 import { Formik, Form } from "formik";
 import { FaChevronLeft } from "react-icons/fa";
 import axios from "axios";
+import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
 
 const Login = () => {
+  const navigate = useNavigate();
   const initialValues = {
     email: "",
     password: "",
@@ -11,18 +14,19 @@ const Login = () => {
 
   const onSubmit = async (values, { resetForm }) => {
     try {
-      const response = await axios.post("http://your-backend-api.com/login", {
-        email: values.email,
-        password: values.password,
-      });
-
-      const { token } = response.data;
-
-      localStorage.setItem("jwtToken", token);
-
-      console.log("Login successful. Token saved.");
+      const response = await axios.post("/api/auth/login", values);
+      console.log("Login response:", response.data);
+      toast.success(response.data.message);
+      console.log("User:", response.data.data);
+      localStorage.setItem("User", JSON.stringify(response.data.data));
       resetForm();
+      if (response.data.data?.role === "customer") {
+        setTimeout(() => {
+          navigate("/ceramic/home");
+        }, 2000);
+      }
     } catch (error) {
+      toast.error(error.response?.data?.error);
       console.error("Login failed:", error.response?.data || error.message);
     }
   };

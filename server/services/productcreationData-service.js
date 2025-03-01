@@ -122,6 +122,7 @@ export const getProductstockDataService = async (page = 1, limit = 5) => {
     });
   });
 };
+
 export const editProjectcreationDataService = async (
   product_code,
   updated_date,

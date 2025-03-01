@@ -5,6 +5,7 @@ import {
   signUpService,
   createSupplierService,
   getSupplierListService,
+  loginService,
 } from "../services/auth-service.js";
 
 // generate user ID
@@ -71,3 +72,18 @@ export const supplierListController = async (req, res) => {
     return res.status(500).json({ error: error.message });
   }
 }
+
+//login
+// login
+export const loginController = async (req, res) => {
+  const { email, password } = req.body;
+  if (!email || !password) {
+    return res.status(400).json({ error: "Email & password are required!" });
+  }
+  try {
+    const loginResponse = await loginService(email, password);
+    res.status(200).json(loginResponse);
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
