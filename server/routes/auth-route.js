@@ -5,6 +5,7 @@ import {
   signUpController,
   supplierController,
   supplierListController,
+  loginController,
 } from "../controllers/auth-controller.js";
 
 const router = express.Router();
@@ -19,5 +20,7 @@ router.post("/createCustomer", signUpController);
 router.post("/createSupplier", supplierController);
 // get supplier list
 router.get("/getSupplierList", supplierListController);
+// log in
+router.post("/login", loginController);
 
 export default router;

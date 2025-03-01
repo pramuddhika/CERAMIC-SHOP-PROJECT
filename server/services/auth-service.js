@@ -1,4 +1,5 @@
 import { db } from "../env.js";
+import bcrypt from "bcrypt";
 
 //generate user id
 export const generateUseIdService = () => {
@@ -98,6 +99,42 @@ export const getSupplierListService = () => {
         return;
       }
       resolve(result);
+    });
+  });
+};
+
+// login
+export const loginService = (email, password) => {
+  return new Promise((resolve, reject) => {
+    const query = `SELECT USER_ID, EMAIL, FIRST_NAME, LAST_NAME, USER_TYPE, PASSWORD FROM user WHERE EMAIL = ? AND STATUS = 1`;
+    db.query(query, [email], async (error, result) => {
+      if (error) {
+        reject({ message: "Something went wrong, Please try again!" });
+        return;
+      }
+      if (result.length === 0) {
+        reject({ message: "Invalid email or password!" });
+        return;
+      }
+      const user = result[0];
+      if (!password || !user.PASSWORD) {
+        reject({ message: "Invalid email or password!" });
+        return;
+      }
+      const isPasswordValid = await bcrypt.compare(password, user.PASSWORD);
+      if (!isPasswordValid) {
+        reject({ message: "Invalid email or password!" });
+        return;
+      }
+
+      const data = {
+        id: user.USER_ID,
+        email: user.EMAIL,
+        firstName: user.FIRST_NAME,
+        lastName: user.LAST_NAME,
+        role: user.USER_TYPE,
+      };
+      resolve({ message: "Login successful!", data });
     });
   });
 };
