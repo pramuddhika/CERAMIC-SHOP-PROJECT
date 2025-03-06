@@ -10,6 +10,7 @@ import {
   qualityUpdateService,
   addMaterialUsageDataService,
   getMaterialUsageDataService,
+  getPaymentDataService,
 } from "../services/materialData-service.js";
 
 // generate material ID
@@ -142,6 +143,17 @@ export const getMaterialUsageDataController = async (req, res) => {
   try {
     const materialUsageData = await getMaterialUsageDataService(page, limit, material);
     res.status(200).json(materialUsageData);
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
+
+//GET payment data
+export const getPaymentDataController = async (req, res) => {
+  const { page, limit, material, supplier } = req.query;
+  try {
+    const paymentData = await getPaymentDataService(page, limit , material, supplier);
+    res.status(200).json(paymentData);
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }
