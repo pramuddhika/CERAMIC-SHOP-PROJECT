@@ -11,6 +11,7 @@ import {
   qualityUpdateController,
   addMaterialUsageDataController,
   getMaterialUsageDataController,
+  getPaymentDataController,
 } from "../controllers/materialData-controller.js";
 
 const router = express.Router();
@@ -37,5 +38,7 @@ router.put("/quality/update", qualityUpdateController);
 router.post("/add/usage", addMaterialUsageDataController);
 //get meterial usage data
 router.get("/get/usage", getMaterialUsageDataController);
+//GET payment data
+router.get("/get/payment", getPaymentDataController);
 
 export default router;

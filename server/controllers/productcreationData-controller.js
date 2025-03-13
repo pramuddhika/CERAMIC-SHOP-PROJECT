@@ -7,16 +7,15 @@ import {
 } from "../services/productcreationData-service.js";
 
 export const addproductcreationController = async (req, res) => {
-  const { product_code, updated_date, quantity, stage } = req.body;
-  if (!product_code || !updated_date || !quantity || !stage) {
+  const { product_code, create_date, quantity, stage } = req.body;
+  if (!product_code || !create_date || !quantity || !stage) {
     return res.status(400).json({ error: "All data required!" });
   }
   try {
     const addprojectcreationDataResponse = await addprojectcreationDataService(
       product_code,
-      updated_date,
+      create_date,
       quantity,
-
       stage
     );
     res.status(200).json(addprojectcreationDataResponse);
@@ -27,15 +26,12 @@ export const addproductcreationController = async (req, res) => {
 
 // get productcreation data
 export const getproductcreationDataController = async (req, res) => {
-  const { todate, fromdate, productCode } = req.body;
-  const { page, limit } = req.query;
+  const { page, limit, product} = req.query;
   try {
     const productcreationData = await getProjectcreationDataService(
       page,
       limit,
-      todate,
-      fromdate,
-      productCode
+      product
     );
     res.status(200).json(productcreationData);
   } catch (error) {

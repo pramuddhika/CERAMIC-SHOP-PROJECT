@@ -300,7 +300,8 @@ const Received = () => {
               validationSchema={filterValidationSchema}
               onSubmit={(values) => {
                 setFilterData(values);
-                fetchMaterialReceivedtData(currentPage, itemsPerPage, values);
+                setCurrentPage(1);
+                fetchMaterialReceivedtData(1, itemsPerPage, values);
                 toggleFilter();
               }}
             >
@@ -346,7 +347,8 @@ const Received = () => {
                           material: null,
                           supplier: null,
                         });
-                        fetchMaterialReceivedtData(currentPage, itemsPerPage, {
+                        setCurrentPage(1);
+                        fetchMaterialReceivedtData(1, itemsPerPage, {
                           material: null,
                           supplier: null,
                         });
@@ -369,95 +371,102 @@ const Received = () => {
           >
             <div className="bg-white rounded-lg p-6 shadow-lg">
               <h2 className="text-lg font-semibold mb-4">Update Quality for</h2>
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700">
-                  Material
-                </label>
-                <div className="mt-1 flex items-center">
-                  <span className="text-gray-500">{selectedItem?.NAME}</span>
-                </div>
-              </div>
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700">
-                  Supplier
-                </label>
-                <div className="mt-1 flex items-center">
-                  <span className="text-gray-500">
-                    {selectedItem?.FIRST_NAME} {selectedItem?.LAST_NAME}
-                  </span>
-                </div>
-              </div>
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700">
-                  Value
-                </label>
-                <div className="mt-1 flex items-center">
-                  <span className="text-gray-500">
-                    Rs. {selectedItem?.MATERIAL_VALUE}
-                  </span>
-                </div>
-              </div>
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700">
-                  Quantity
-                </label>
-                <div className="mt-1 flex items-center">
-                  <span className="text-gray-500">
-                    {selectedItem?.QUANTITY} kg
-                  </span>
-                </div>
-              </div>
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700">
-                  Date
-                </label>
-                <div className="mt-1 flex items-center">
-                  <span className="text-gray-500">
-                    {moment(selectedItem.DATE).format("DD-MM-YYYY")}
-                  </span>
-                </div>
-              </div>
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700">
-                  Quality
-                </label>
-                <div className="mt-1 flex space-x-4">
-                  <label className="inline-flex items-center">
-                    <input
-                      type="radio"
-                      className="form-radio"
-                      value="passed"
-                      checked={selectedQuality === "passed"}
-                      onChange={() => setSelectedQuality("passed")}
-                    />
-                    <span className="ml-2">Passed</span>
+              <div className="flex justify-center items-center gap-3">
+                <div className="min-w-40 mb-4">
+                  <label className="block text-sm font-medium text-gray-700">
+                    Material
                   </label>
-                  <label className="inline-flex items-center">
-                    <input
-                      type="radio"
-                      className="form-radio"
-                      value="failed"
-                      checked={selectedQuality === "failed"}
-                      onChange={() => setSelectedQuality("failed")}
-                    />
-                    <span className="ml-2">failed</span>
+                  <div className="mt-1 flex items-center">
+                    <span className="text-gray-500">{selectedItem?.NAME}</span>
+                  </div>
+                </div>
+                <div className="min-w-40 mb-4">
+                  <label className="block text-sm font-medium text-gray-700">
+                    Supplier
                   </label>
+                  <div className="mt-1 flex items-center">
+                    <span className="text-gray-500">
+                      {selectedItem?.FIRST_NAME} {selectedItem?.LAST_NAME}
+                    </span>
+                  </div>
                 </div>
               </div>
-              <div className="flex justify-end space-x-4">
-                <button
-                  type="button"
-                  className="text-white bg-red-600 hover:bg-red-500 px-3 py-1 rounded-lg flex items-center"
-                  onClick={() => setIsModalOpen(false)}
-                >
-                  Cancel
-                </button>
+              <div className="flex justify-center items-center gap-3">
+                <div className="min-w-40 mb-4">
+                  <label className="block text-sm font-medium text-gray-700">
+                    Value
+                  </label>
+                  <div className="mt-1 flex items-center">
+                    <span className="text-gray-500">
+                      Rs. {selectedItem?.MATERIAL_VALUE}
+                    </span>
+                  </div>
+                </div>
+                <div className="min-w-40 mb-4">
+                  <label className="block text-sm font-medium text-gray-700">
+                    Quantity
+                  </label>
+                  <div className="mt-1 flex items-center">
+                    <span className="text-gray-500">
+                      {selectedItem?.QUANTITY} kg
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <div className="flex justify-center items-center gap-3">
+                {" "}
+                <div className="min-w-40 mb-4">
+                  <label className="block text-sm font-medium text-gray-700">
+                    Date
+                  </label>
+                  <div className="mt-1 flex items-center">
+                    <span className="text-gray-500">
+                      {moment(selectedItem.DATE).format("DD-MM-YYYY")}
+                    </span>
+                  </div>
+                </div>
+                <div className="min-w-40 mb-4">
+                  <label className="block text-sm font-medium text-gray-700">
+                    Quality
+                  </label>
+                  <div className="mt-1 flex space-x-4">
+                    <label className="inline-flex items-center">
+                      <input
+                        type="radio"
+                        className="form-radio"
+                        value="passed"
+                        checked={selectedQuality === "passed"}
+                        onChange={() => setSelectedQuality("passed")}
+                      />
+                      <span className="ml-2">Passed</span>
+                    </label>
+                    <label className="inline-flex items-center">
+                      <input
+                        type="radio"
+                        className="form-radio"
+                        value="failed"
+                        checked={selectedQuality === "failed"}
+                        onChange={() => setSelectedQuality("failed")}
+                      />
+                      <span className="ml-2">failed</span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+              <div className="flex justify-end space-x-6">
                 <button
                   type="button"
                   className="text-white bg-cyan-950 hover:bg-cyan-900 px-3 py-1 rounded-lg flex items-center"
                   onClick={handleQualityUpdate}
                 >
                   Update
+                </button>
+                <button
+                  type="button"
+                  className="text-white bg-red-600 hover:bg-red-500 px-3 py-1 rounded-lg flex items-center"
+                  onClick={() => setIsModalOpen(false)}
+                >
+                  Cancel
                 </button>
               </div>
             </div>

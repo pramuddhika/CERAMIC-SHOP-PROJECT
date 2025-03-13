@@ -86,6 +86,7 @@ const Stages = () => {
     stageOrder.length > 0 ? stageOrder[stageOrder.length - 1] : null;
   const fetchproductcreationData = async (page, limit, filter = {}) => {
     setIsLoading(true);
+    setProductcreationData([])
     try {
       const response = await axios.post(
         `/api/productcreationdata/get?page=${page}&limit=${limit}`,
@@ -286,7 +287,7 @@ const Stages = () => {
                     <td className="border py-2">{item.PRODUCT_NAME}</td>
                     <td className="border py-2">{item.QUANTITY}</td>
                     <td className="border py-2">
-                      {moment(item.UPDATE_DATE).format("YYYY-MM-DD")}
+                      {moment(item.CREATE_DATE).format("YYYY-MM-DD")}
                     </td>
                     <td className="border py-2">{item.DAMAGE_COUNT}</td>
                     <td className="border py-2">{item.STAGE}</td>

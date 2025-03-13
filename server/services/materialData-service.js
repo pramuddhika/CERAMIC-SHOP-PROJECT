@@ -377,3 +377,72 @@ export const getMaterialUsageDataService = async (page = 1, limit = 5, material)
   });
 };
 
+// get payment data
+export const getPaymentDataService = async (page = 1, limit = 5, material, supplier) => {
+  return new Promise((resolve, reject) => {
+    const offset = (page - 1) * limit;
+    
+    let query = `SELECT material.MATERIAL_ID, material.NAME, material_received_note.DATE, 
+                        material_received_note.QUANTITY, material_received_note.MATERIAL_VALUE, 
+                        user.FIRST_NAME, user.LAST_NAME, material_received_note.PAID_VALUE
+                 FROM material_received_note
+                 INNER JOIN material ON material.MATERIAL_ID = material_received_note.MATERIAL_ID 
+                 INNER JOIN user ON material_received_note.SUPPILER_ID = user.USER_ID`;
+
+    let countQuery = `SELECT COUNT(*) AS total 
+                      FROM material_received_note 
+                      INNER JOIN material ON material.MATERIAL_ID = material_received_note.MATERIAL_ID 
+                      INNER JOIN user ON material_received_note.SUPPILER_ID = user.USER_ID`;
+
+    let queryParams = [];
+    let filters = [];
+
+    if (material) {
+      filters.push(`material.MATERIAL_ID = ?`);
+      queryParams.push(material);
+    }
+
+    if (supplier) {
+      filters.push(`user.USER_ID = ?`);
+      queryParams.push(supplier);
+    }
+
+    if (filters.length > 0) {
+      query += " WHERE " + filters.join(" AND ");
+      countQuery += " WHERE " + filters.join(" AND ");
+    }
+
+    // Add quality condition correctly
+    query += (filters.length > 0 ? " AND" : " WHERE") + " material_received_note.QUALITY = 'passed'";
+    countQuery += (filters.length > 0 ? " AND" : " WHERE") + " material_received_note.QUALITY = 'passed'";
+
+    query += " ORDER BY material_received_note.DATE DESC LIMIT ? OFFSET ?";
+    queryParams.push(parseInt(limit), parseInt(offset));
+
+    db.query(query, queryParams, (err, result) => {
+      if (err) {
+        reject({ message: err });
+        return;
+      }
+
+      db.query(countQuery, queryParams.slice(0, filters.length), (err, count) => {
+        if (err) {
+          reject({ message: err });
+          return;
+        }
+
+        const total = count[0].total;
+        const pages = Math.ceil(total / limit);
+        resolve({
+          data: result,
+          total,
+          page: parseInt(page),
+          limit: parseInt(limit),
+          totalPages: pages,
+        });
+      });
+    });
+  });
+};
+
+
