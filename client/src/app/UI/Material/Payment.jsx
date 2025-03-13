@@ -125,6 +125,12 @@ const Payment = () => {
     setSelectedItem(null);
     setSelectedQuality("");
   };
+  
+  console.log('1111111',selectedItem)
+  console.log('2222222',parseInt(selectedItem?.MATERIAL_VALUE))
+  console.log('3333333',(selectedQuality))
+  console.log('4444444',parseInt(selectedItem?.PAID_VALUE) === 'NaN' ? 0 : parseInt(selectedItem?.PAID_VALUE))
+  console.log('5555555',parseInt(selectedItem?.MATERIAL_VALUE) < parseInt(selectedQuality) + parseInt(selectedItem?.PAID_VALUE))
 
   return (
     <>
@@ -315,9 +321,9 @@ const Payment = () => {
                     }}
                   />
                 </div>
-                {Number(selectedItem?.MATERIAL_VALUE) >
-                  selectedQuality + Number(selectedItem?.PAID_VALUE) && (
-                  <label className="text-red-600">Invaid amount!</label>
+                {parseInt(selectedItem?.MATERIAL_VALUE) <
+                  parseInt(selectedQuality) + parseInt(selectedItem?.PAID_VALUE) && (
+                  <label className="text-red-600">Invalid amount!</label>
                 )}
               </div>
 
@@ -325,8 +331,8 @@ const Payment = () => {
                 <button
                   type="button"
                   disabled={
-                    selectedItem?.MATERIAL_VALUE >
-                    selectedQuality + selectedItem?.PAID_VALUE
+                    parseInt(selectedItem?.MATERIAL_VALUE) <
+                    parseInt(selectedQuality) + parseInt(selectedItem?.PAID_VALUE)
                   }
                   className="text-white bg-cyan-950 hover:bg-cyan-900 px-3 py-1 rounded-lg flex items-center"
                   onClick={handleQualityUpdate}

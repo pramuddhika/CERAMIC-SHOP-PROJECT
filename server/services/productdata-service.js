@@ -292,6 +292,7 @@ export const addNewProductService = async (
 ) => {
   return new Promise((resolve, reject) => {
     const query = `INSERT INTO product (PRODUCT_CODE,SUB_CATAGORY_CODE , CATAGORY_CODE, NAME, DESCRIPTION, IMAGE, STATUS , PRICE) VALUES (?,?,?,?,?,?,?,?)`;
+    const stoclQuery = `INSERT INTO production (PRODUCT_CODE,UPDATE_DATE,QUANTITY) values(?,?,?)`;
     db.query(
       query,
       [code, subcategory, category, name, description, image, status, price],
@@ -299,11 +300,23 @@ export const addNewProductService = async (
         if (err) {
           if (err.code === "ER_DUP_ENTRY") {
             reject({ message: "Data already exists!" });
+            return;
           } else {
             reject({ message: "Something went wrong, Please try again!" });
+            return;
           }
         }
-        resolve({ message: "Product added successfully" });
+
+        db.query(stoclQuery, [code, new Date(), 0], (err, result) => {
+          if (err) {
+            if (err.code === "ER_DUP_ENTRY") {
+              reject({ message: "Data already exists!" });
+            } else {
+              reject({ message: "Something went wrong, Please try again!" });
+            }
+          }
+          resolve({ message: "Product added successfully" });
+        });
       }
     );
   });
