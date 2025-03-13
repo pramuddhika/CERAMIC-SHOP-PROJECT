@@ -60,6 +60,7 @@ const Creation = () => {
 
   const fetchproductcreationData = async (page, limit, filter) => {
     setIsLoading(true);
+    setProductcreationData([]);
     try {
       const response = await axios.post(
         `/api/productcreationdata/get?page=${page}&limit=${limit}&product=${filter?.product}`,
@@ -228,18 +229,18 @@ const Creation = () => {
           >
             <Formik
               initialValues={{
-                product_code: "",
+                product_code: filterData.product ? options.find(option => option.value === filterData.product) : "",
               }}
               validationSchema={filterValidationSchema}
               onSubmit={async (values) => {
-                console.log(values?.product_code?.value);
                 setFilterData({
                   product: values?.product_code?.value,
-                })
+                });
                 setCurrentPage(1);
                 fetchproductcreationData(1, itemsPerPage, {
                   product: values?.product_code?.value,
                 });
+                toggleFilter();
               }}
             >
               {({ setFieldValue, values, resetForm }) => (
@@ -271,13 +272,15 @@ const Creation = () => {
                       className="text-white bg-red-600 hover:bg-red-500 px-3 py-1 rounded-lg flex items-center"
                       onClick={() => {
                         resetForm();
-                        setFieldValue({
+                        setFieldValue("product_code", null);
+                        setFilterData({
                           product: null,
                         });
                         setCurrentPage(1);
                         fetchproductcreationData(1, itemsPerPage, {
                           product: '',
                         });
+                        toggleFilter();
                       }}
                     >
                       Reset

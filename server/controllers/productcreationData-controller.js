@@ -8,7 +8,6 @@ import {
 
 export const addproductcreationController = async (req, res) => {
   const { product_code, create_date, quantity, stage } = req.body;
-  console.log(req.body);
   if (!product_code || !create_date || !quantity || !stage) {
     return res.status(400).json({ error: "All data required!" });
   }

@@ -19,29 +19,16 @@ export const addprojectcreationDataService = async (
     });
   });
 };
-//get all Project creation data
-export const getProjectcreationDataService = async (
-  page = 1,
-  limit = 5,
-  product
-) => {
-  try {
-    const offset = (parseInt(page) - 1) * parseInt(limit);
-
-    let query = `
-      SELECT 
-        pss.*, 
-        p.NAME AS PRODUCT_NAME
-      FROM product_stock_stages pss
-      JOIN product p ON pss.PRODUCT_CODE = p.PRODUCT_CODE
-      WHERE 1 = 1
-    `;
-
+//get all product creation data
+export const getProjectcreationDataService = async (page = 1, limit = 5, product) => {
+  return new Promise((resolve, reject) => {
+    const offset = (page - 1) * limit;
+    let query = `SELECT pss.*, p.NAME AS PRODUCT_NAME FROM product_stock_stages pss JOIN product p ON pss.PRODUCT_CODE = p.PRODUCT_CODE WHERE 1 = 1`;
     let countQuery = `SELECT COUNT(*) AS total FROM product_stock_stages WHERE 1 = 1`;
     let queryParams = [];
     let countParams = [];
 
-    if (product) {
+    if (product && product.trim() !== "" && product !== "null") {
       query += ` AND pss.PRODUCT_CODE = ?`;
       countQuery += ` AND PRODUCT_CODE = ?`;
       queryParams.push(product);
@@ -51,24 +38,32 @@ export const getProjectcreationDataService = async (
     query += ` ORDER BY pss.CREATE_DATE DESC LIMIT ? OFFSET ?`;
     queryParams.push(parseInt(limit), parseInt(offset));
 
-    const [result] = await db.query(query, queryParams);
-    const [countResult] = await db.query(countQuery, countParams);
+    db.query(query, queryParams, (err, result) => {
+      if (err) {
+        reject({ message: "Something went wrong, Please try again!" });
+        return;
+      }
 
-    const total = countResult[0]?.total || 0;
-    const totalPages = Math.ceil(total / limit);
+      db.query(countQuery, countParams, (err, count) => {
+        if (err) {
+          reject({ message: "Something went wrong, Please try again!" });
+          return;
+        }
 
-    return {
-      data: result,
-      total,
-      page: parseInt(page),
-      limit: parseInt(limit),
-      totalPages,
-    };
-  } catch (error) {
-    console.error("Error in getProjectcreationDataService:", error);
-    throw new Error("Something went wrong, Please try again!");
-  }
-};
+        const total = count[0].total;
+        const totalPages = Math.ceil(total / limit);
+
+        resolve({
+          data: result,
+          total,
+          page: parseInt(page),
+          limit: parseInt(limit),
+          totalPages,
+        });
+      });
+    });
+  });
+}
 
 export const getProductstockDataService = async (page = 1, limit = 5) => {
   return new Promise((resolve, reject) => {
