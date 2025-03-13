@@ -220,7 +220,8 @@ const Use = () => {
               validationSchema={filterValidationSchema}
               onSubmit={(values) => {
                 setFilterData(values);
-                fetchMaterialUsageData(currentPage, itemsPerPage, values);
+                setCurrentPage(1);
+                fetchMaterialUsageData(1, itemsPerPage, values);
                 toggleFilter();
               }}
             >
@@ -254,7 +255,8 @@ const Use = () => {
                           material: null,
                           supplier: null,
                         });
-                        fetchMaterialUsageData(currentPage, itemsPerPage, {
+                        setCurrentPage(1);
+                        fetchMaterialUsageData(1, itemsPerPage, {
                           material: null,
                           supplier: null,
                         });

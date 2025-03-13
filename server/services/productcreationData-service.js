@@ -3,13 +3,12 @@ import { db } from "../env.js";
 //add product creation data
 export const addprojectcreationDataService = async (
   product_code,
-  updated_date,
+  create_date,
   quantity,
-
   stage
 ) => {
   return new Promise((resolve, reject) => {
-    const query = `INSERT INTO product_stock_stages (PRODUCT_CODE,  QUANTITY, UPDATE_DATE, STAGE) VALUES ('${product_code}', '${quantity}', '${updated_date}', '${stage}')`;
+    const query = `INSERT INTO product_stock_stages (PRODUCT_CODE,  QUANTITY, CREATE_DATE, STAGE) VALUES ('${product_code}', '${quantity}', '${create_date}', '${stage}')`;
 
     db.query(query, (err) => {
       if (err) {
@@ -24,12 +23,10 @@ export const addprojectcreationDataService = async (
 export const getProjectcreationDataService = async (
   page = 1,
   limit = 5,
-  todate = null,
-  fromdate = null,
-  productCode = null
+  product
 ) => {
-  return new Promise((resolve, reject) => {
-    const offset = (page - 1) * limit;
+  try {
+    const offset = (parseInt(page) - 1) * parseInt(limit);
 
     let query = `
       SELECT 
@@ -37,56 +34,40 @@ export const getProjectcreationDataService = async (
         p.NAME AS PRODUCT_NAME
       FROM product_stock_stages pss
       JOIN product p ON pss.PRODUCT_CODE = p.PRODUCT_CODE
-      WHERE 1 = 1  
+      WHERE 1 = 1
     `;
 
     let countQuery = `SELECT COUNT(*) AS total FROM product_stock_stages WHERE 1 = 1`;
-
     let queryParams = [];
     let countParams = [];
 
-    if (fromdate && todate) {
-      query += ` AND pss.CREATED_DATE BETWEEN ? AND ?`;
-      countQuery += ` AND CREATED_DATE BETWEEN ? AND ?`;
-      queryParams.push(fromdate, todate);
-      countParams.push(fromdate, todate);
-    }
-
-    if (productCode) {
+    if (product) {
       query += ` AND pss.PRODUCT_CODE = ?`;
       countQuery += ` AND PRODUCT_CODE = ?`;
-      queryParams.push(productCode);
-      countParams.push(productCode);
+      queryParams.push(product);
+      countParams.push(product);
     }
 
-    query += ` LIMIT ? OFFSET ?`;
+    query += ` ORDER BY pss.CREATE_DATE DESC LIMIT ? OFFSET ?`;
     queryParams.push(parseInt(limit), parseInt(offset));
 
-    db.query(query, queryParams, (err, result) => {
-      if (err) {
-        reject({ message: "Something went wrong, Please try again!" });
-        return;
-      }
+    const [result] = await db.query(query, queryParams);
+    const [countResult] = await db.query(countQuery, countParams);
 
-      db.query(countQuery, countParams, (err, count) => {
-        if (err) {
-          reject({ message: "Something went wrong, Please try again!" });
-          return;
-        }
+    const total = countResult[0]?.total || 0;
+    const totalPages = Math.ceil(total / limit);
 
-        const total = count[0].total;
-        const pages = Math.ceil(total / limit);
-
-        resolve({
-          data: result,
-          total,
-          page: parseInt(page),
-          limit: parseInt(limit),
-          totalPages: pages,
-        });
-      });
-    });
-  });
+    return {
+      data: result,
+      total,
+      page: parseInt(page),
+      limit: parseInt(limit),
+      totalPages,
+    };
+  } catch (error) {
+    console.error("Error in getProjectcreationDataService:", error);
+    throw new Error("Something went wrong, Please try again!");
+  }
 };
 
 export const getProductstockDataService = async (page = 1, limit = 5) => {

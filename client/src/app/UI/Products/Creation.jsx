@@ -8,7 +8,6 @@ import moment from "moment";
 import Nodata from "../../../assets/Nodata.svg";
 import CommonPagination from "../../../utils/CommonPagination";
 import CommonLoading from "../../../utils/CommonLoading";
-import { FaCross, FaEdit } from "react-icons/fa";
 
 const validationSchema = Yup.object({
   product_code: Yup.object().required("required"),
@@ -33,15 +32,13 @@ const Creation = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(5);
   const [isLoading, setIsLoading] = useState(false);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isEdit, setIsEdit] = useState(false);
-  const [productcreationdata, setproductcreationdata] = useState({});
+  const [filterData, setFilterData] = useState({
+    product: null,
+  });
 
   const fetchProductListData = async () => {
     try {
       const response = await axios.get("/api/productcreationdata/get/list");
-
-      console.log(response);
       setProductList(response?.data);
     } catch (error) {
       console.log(error);
@@ -50,7 +47,6 @@ const Creation = () => {
   const fetchstockListData = async () => {
     try {
       const response = await axios.get("/api/masterdata/get/stock");
-      console.log(response);
       setstockList(response?.data);
     } catch (error) {
       console.log(error);
@@ -61,21 +57,12 @@ const Creation = () => {
     value: item.PRODUCT_CODE,
     label: item.NAME,
   }));
-  const options1 = (stockList || [])
-    .filter(
-      (item) => item.DESCRIPTION && item.STOCK_STAGE_TAG && item.STATUS === 1
-    ) // Ensure both fields exist and STATUS = 1
-    .map((item) => ({
-      label: item.STOCK_STAGE_TAG,
-      value: item.STOCK_STAGE_TAG.trim(), // Trim any extra spaces from STOCK_STAGE_TAG
-    }));
 
-  const fetchproductcreationData = async (page, limit, filter = {}) => {
+  const fetchproductcreationData = async (page, limit, filter) => {
     setIsLoading(true);
     try {
       const response = await axios.post(
-        `/api/productcreationdata/get?page=${page}&limit=${limit}`,
-        filter && Object.keys(filter).length ? filter : {}
+        `/api/productcreationdata/get?page=${page}&limit=${limit}&product=${filter?.product}`,
       );
       setProductcreationData(response?.data?.data);
       setTotalPages(response?.data?.totalPages);
@@ -87,10 +74,6 @@ const Creation = () => {
       }, 1000);
     }
   };
-  const handleEdit = (item) => {
-    setIsModalOpen(true);
-    setproductcreationdata(item);
-  };
 
   useEffect(() => {
     fetchProductListData();
@@ -98,8 +81,8 @@ const Creation = () => {
   }, []);
 
   useEffect(() => {
-    fetchproductcreationData(currentPage, itemsPerPage);
-  }, [currentPage, itemsPerPage]);
+    fetchproductcreationData(currentPage, itemsPerPage , filterData);
+  }, [currentPage, itemsPerPage , filterData]);
 
   const toggleFilter = () => {
     setShowFilter(!showFilter);
@@ -123,24 +106,20 @@ const Creation = () => {
         }}
         validationSchema={validationSchema}
         onSubmit={async (values, { resetForm, setFieldValue }) => {
-          const activeStages = stockList?.filter((stage) => stage.STATUS === 1);
-
           const receivedObj = {
             product_code: values?.product_code?.value,
             quantity: values?.quantity,
-            updated_date: values?.updated_date,
-
+            create_date: values?.updated_date,
             stage: stockList?.find((stage) => stage.STATUS === 1)
               ?.STOCK_STAGE_TAG,
           };
           try {
-            console.log(receivedObj);
             const response = await axios.post(
               "/api/productcreationdata/add/creation",
               receivedObj
             );
             toast.success(response?.data?.message);
-            fetchproductcreationData(currentPage, itemsPerPage);
+            fetchproductcreationData(currentPage, itemsPerPage , filterData);
             resetForm();
             setTimeout(() => {
               setFieldValue("product_code", null);
@@ -151,8 +130,8 @@ const Creation = () => {
           }
         }}
       >
-        {({ setFieldValue, values, handleSubmit }) => (
-          <Form className="row g-3 p-3 border rounded">
+        {({ setFieldValue, values }) => (
+          <Form className="row g-3 p-3 border rounded flex justify-center">
             <div className="col-md-2">
               <label className="form-label">Product Name</label>
               <Select
@@ -169,9 +148,8 @@ const Creation = () => {
                 className="text-danger"
               />
             </div>
-
             <div className="col-md-2">
-              <label className="form-label">Quantity </label>
+              <label className="form-label">Quantity (units)</label>
               <Field
                 type="number"
                 name="quantity"
@@ -251,30 +229,17 @@ const Creation = () => {
             <Formik
               initialValues={{
                 product_code: "",
-                toDate: moment().subtract(7, "days").format("YYYY-MM-DD"),
-                fromDate: moment().format("YYYY-MM-DD"),
               }}
               validationSchema={filterValidationSchema}
               onSubmit={async (values) => {
-                console.log(values);
-                setIsLoading(true);
-
-                try {
-                  filter = {
-                    productCode: values?.product_code?.value,
-                    // toDate: values?.toDate,
-                    // fromDate: values?.fromDate,
-                  };
-
-                  fetchproductcreationData(currentPage, itemsPerPage, filter);
-                } catch (error) {
-                  console.log(error);
-                  toast.error("Something went wrong");
-                } finally {
-                  setTimeout(() => {
-                    setIsLoading(false);
-                  }, 1000);
-                }
+                console.log(values?.product_code?.value);
+                setFilterData({
+                  product: values?.product_code?.value,
+                })
+                setCurrentPage(1);
+                fetchproductcreationData(1, itemsPerPage, {
+                  product: values?.product_code?.value,
+                });
               }}
             >
               {({ setFieldValue, values, resetForm }) => (
@@ -294,35 +259,6 @@ const Creation = () => {
                     />
                   </div>
 
-                  <div className="mb-1">
-                    <label className="form-label">To date</label>
-                    <Field
-                      type="date"
-                      name="toDate"
-                      className="form-control"
-                      max={moment().format("YYYY-MM-DD")}
-                      style={{
-                        boxShadow: "none",
-                        borderColor: "#ced4da",
-                        outline: "none",
-                      }}
-                    />
-                  </div>
-                  <div className="mb-1">
-                    <label className="form-label">From date</label>
-                    <Field
-                      type="date"
-                      name="fromDate"
-                      className="form-control"
-                      max={moment().format("YYYY-MM-DD")}
-                      style={{
-                        boxShadow: "none",
-                        borderColor: "#ced4da",
-                        outline: "none",
-                      }}
-                    />
-                  </div>
-
                   <div className="flex justify-end space-x-8 mt-2">
                     <button
                       type="submit"
@@ -335,16 +271,13 @@ const Creation = () => {
                       className="text-white bg-red-600 hover:bg-red-500 px-3 py-1 rounded-lg flex items-center"
                       onClick={() => {
                         resetForm();
-                        setFieldValue("product_code", null);
-
-                        setFieldValue(
-                          "toDate",
-                          moment().subtract(7, "days").format("YYYY-MM-DD")
-                        );
-                        setFieldValue(
-                          "fromDate",
-                          moment().format("YYYY-MM-DD")
-                        );
+                        setFieldValue({
+                          product: null,
+                        });
+                        setCurrentPage(1);
+                        fetchproductcreationData(1, itemsPerPage, {
+                          product: '',
+                        });
                       }}
                     >
                       Reset
@@ -356,7 +289,7 @@ const Creation = () => {
           </div>
         )}
 
-        <div className="card-body overflow-auto flex justify-start">
+        <div className="card-body overflow-auto flex justify-center">
           <table
             id="stock-table"
             className="border text-sm table-fixed w-full overflow-auto"
@@ -364,11 +297,8 @@ const Creation = () => {
             <thead className="bg-slate-400">
               <tr className="pl-2 text-center">
                 <th className="border py-2 min-w-[300px]">Product Name</th>
-                <th className="border py-2 min-w-[300px]">Quantity</th>
+                <th className="border py-2 min-w-[300px]">Quantity (units)</th>
                 <th className="border py-2 min-w-[150px]">Created Date</th>
-                {/* <th className="border py-2 min-w-[300px]">Damage_count</th> */}
-                <th className="border py-2 min-w-[300px]">Stage</th>
-                {/* <th className="border py-2 min-w-[100px]">Action</th> */}
               </tr>
             </thead>
             <tbody>
@@ -378,19 +308,8 @@ const Creation = () => {
                     <td className="border py-2">{item.PRODUCT_NAME}</td>
                     <td className="border py-2">{item.QUANTITY}</td>
                     <td className="border py-2">
-                      {moment(item.UPDATE_DATE).format("YYYY-MM-DD")}
+                      {moment(item.CREATE_DATE).format("YYYY-MM-DD")}
                     </td>
-                    <td className="border py-2">{item.STAGE}</td>
-                    {/* <td className="border py-2">
-                      <button
-                        className="text-slate-500 hover:text-slate-800 border-none"
-                        onClick={() => {
-                          handleEdit(item);
-                        }}
-                      >
-                        <FaEdit />
-                      </button>
-                    </td> */}
                   </tr>
                 ))
               ) : (
@@ -408,141 +327,6 @@ const Creation = () => {
             </tbody>
           </table>
         </div>
-        {isModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center ">
-            <div className="bg-slate-200 rounded-lg w-[500px] h-[350px]">
-              <Formik
-                initialValues={{
-                  product_code: productcreationdata?.PRODUCT_CODE,
-                  updated_date: productcreationdata?.UPDATE_DATE || "",
-                  damage_count: productcreationdata?.DAMAGE_COUNT || 0,
-                  stage:
-                    options1.find(
-                      (option) => option.value === productcreationdata?.STAGE
-                    ) || "",
-                }}
-                validationSchema={{
-                  product_code: Yup.object().required("required"),
-                }}
-                onSubmit={(values) => async () => {
-                  setIsLoading(true);
-                  try {
-                    await axios.post(`/api/productcreationdata/update/`, {
-                      product_code: values.product_code,
-                      updated_date: values.updated_date,
-                      damage_count: values.damage_count,
-                      stage:
-                        options1.find(
-                          (option) =>
-                            option.value === productcreationdata?.STAGE
-                        ) || "",
-                    });
-                    toast.success("Product creation data updated successfully");
-                    setIsModalOpen(false);
-                    fetchproductcreationData(currentPage, itemsPerPage);
-                    setIsLoading(false);
-                  } catch (error) {
-                    toast.error(error.response.data.message);
-                  }
-                  setTimeout(() => {
-                    setIsLoading(false);
-                  }, 1000);
-                }}
-              >
-                {({ setFieldValue, values, resetForm }) => (
-                  <Form>
-                    <div className="flex flex-col text-slate-600">
-                      <div className=" flex flex-row justify-end m-3">
-                        <button
-                          className="text-slate-600 hover:text-main"
-                          onClick={() => {
-                            setIsModalOpen(false);
-                          }}
-                        >
-                          ✖
-                        </button>
-                      </div>
-                      <h1 className="text-black flex flex-row text-bold  justify-center">
-                        Edit Product Creation Note
-                      </h1>
-                      <div className="flex flex-row">
-                        <div className="basis-1/3 flex flex-col gap-3">
-                          <label className="flex justify-start  mt-4 ml-2">
-                            Product Code
-                          </label>
-                          <label className="flex justify-start my-3 ml-2">
-                            Damage Count
-                          </label>
-                          <label className="flex justify-start mb-3 ml-2">
-                            Stage
-                          </label>
-                        </div>
-                        <div className="basis-2/3 flex flex-col gap-2">
-                          <Field
-                            type="text"
-                            name="product_code"
-                            className="form-control w-[300px] justify-start mt-4"
-                            disabled
-                          />
-                          <ErrorMessage
-                            name="product_code"
-                            component="div"
-                            className="text-red-500"
-                          />
-                          <Field
-                            type="text"
-                            name="damage_count"
-                            className="form-control w-[300px] justify-start my-2"
-                          />
-                          <ErrorMessage
-                            name="damage_count"
-                            component="div"
-                            className="text-red-500"
-                          />
-                          <Select
-                            options={options1}
-                            value={values.stage}
-                            onChange={(option) =>
-                              setFieldValue("stage", option)
-                            }
-                            menuPortalTarget={document.body}
-                            styles={{
-                              menuPortal: (base) => ({ ...base, zIndex: 9999 }),
-                            }}
-                            className=" w-[300px] justify-start mb-2"
-                          />
-                          <ErrorMessage
-                            name="stage"
-                            component="div"
-                            className="text-red-500"
-                          />
-                        </div>
-                      </div>
-                      <div className="flex flex-row position-relative gap-2 justify-end my-5 mx-4">
-                        <button
-                          type="button"
-                          className="px-4 py-2 bg-gray-200 text-gray-700 text-sm rounded hover:bg-gray-300"
-                          onClick={() => {
-                            resetForm();
-                            setIsModalOpen(false);
-                          }}
-                        >
-                          Cancel
-                        </button>
-                        <button
-                          type="submit"
-                          className="px-4 py-2 bg-slate-500 text-white text-sm rounded hover:bg-slate-800"
-                        >
-                          Submit
-                        </button>
-                      </div>
-                    </div>
-                  </Form>
-                )}
-              </Formik>
-            </div>
-          </div>
-        )}
         <CommonPagination
           totalPages={totalPages}
           currentPage={currentPage}

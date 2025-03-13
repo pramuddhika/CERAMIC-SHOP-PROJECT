@@ -300,7 +300,8 @@ const Received = () => {
               validationSchema={filterValidationSchema}
               onSubmit={(values) => {
                 setFilterData(values);
-                fetchMaterialReceivedtData(currentPage, itemsPerPage, values);
+                setCurrentPage(1);
+                fetchMaterialReceivedtData(1, itemsPerPage, values);
                 toggleFilter();
               }}
             >
@@ -346,7 +347,8 @@ const Received = () => {
                           material: null,
                           supplier: null,
                         });
-                        fetchMaterialReceivedtData(currentPage, itemsPerPage, {
+                        setCurrentPage(1);
+                        fetchMaterialReceivedtData(1, itemsPerPage, {
                           material: null,
                           supplier: null,
                         });
