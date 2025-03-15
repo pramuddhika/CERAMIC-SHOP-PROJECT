@@ -63,9 +63,9 @@ export const editproductcreationDataController = async (req, res) => {
   }
 };
 export const getProductstockDataController = async (req, res) => {
-  const { page, limit } = req.query;
+  const { search } = req.query;
   try {
-    const ProductData = await getProductstockDataService(page, limit);
+    const ProductData = await getProductstockDataService(search);
     res.status(200).json(ProductData);
   } catch (error) {
     return res.status(500).json({ error: error.message });
