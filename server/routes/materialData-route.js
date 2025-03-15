@@ -12,6 +12,7 @@ import {
   addMaterialUsageDataController,
   getMaterialUsageDataController,
   getPaymentDataController,
+  addPaymentDataController,
 } from "../controllers/materialData-controller.js";
 
 const router = express.Router();
@@ -40,5 +41,7 @@ router.post("/add/usage", addMaterialUsageDataController);
 router.get("/get/usage", getMaterialUsageDataController);
 //GET payment data
 router.get("/get/payment", getPaymentDataController);
+// add payment data
+router.post("/add/payment", addPaymentDataController);
 
 export default router;

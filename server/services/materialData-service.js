@@ -308,6 +308,10 @@ export const addMaterialUsageDataService = async (materialId, date, quantity) =>
 
     db.query(query, (err) => {
       if (err) {
+        if (err.code === "ER_CHECK_CONSTRAINT_VIOLATED") {
+          reject({ message: "Material quantity is not enough!" });
+          return;
+        }
         reject({ message: "Something went wrong, Please try again!" });
       } else {
         const query1 = `INSERT INTO material_use (MATERIAL_ID, DATE, QUANTITY) VALUES ('${materialId}', '${date}', '${quantity}')`;
@@ -383,7 +387,7 @@ export const getPaymentDataService = async (page = 1, limit = 5, material, suppl
     const offset = (page - 1) * limit;
     
     let query = `SELECT material.MATERIAL_ID, material.NAME, material_received_note.DATE, 
-                        material_received_note.QUANTITY, material_received_note.MATERIAL_VALUE, 
+                        material_received_note.QUANTITY, material_received_note.MATERIAL_VALUE,material_received_note.SUPPILER_ID,
                         user.FIRST_NAME, user.LAST_NAME, material_received_note.PAID_VALUE
                  FROM material_received_note
                  INNER JOIN material ON material.MATERIAL_ID = material_received_note.MATERIAL_ID 
@@ -441,6 +445,21 @@ export const getPaymentDataService = async (page = 1, limit = 5, material, suppl
           totalPages: pages,
         });
       });
+    });
+  });
+};
+
+// add payment data
+export const addPaymentDataService = async (materialId, supplierId, date, payment) => {
+  return new Promise((resolve, reject) => {
+    const query = `UPDATE material_received_note SET PAID_VALUE = (PAID_VALUE + ?) WHERE MATERIAL_ID = ? AND SUPPILER_ID = ? AND DATE = ?`;
+
+    db.query(query, [payment, materialId, supplierId, date], (err) => {
+      if (err) {
+        reject({ message: "Something went wrong, Please try again!" });
+      } else {
+        resolve({ message: "Payment data added successfully!" });
+      }
     });
   });
 };
