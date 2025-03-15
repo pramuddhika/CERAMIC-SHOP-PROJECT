@@ -45,20 +45,22 @@ const Stock = () => {
           >
             <thead className="bg-slate-400">
               <tr className="pl-2 text-center">
+                <th className="border py-2 min-w-[300px]">Product Code</th>
                 <th className="border py-2 min-w-[300px]">Product Name</th>
+                <th className="border py-2 min-w-[200px]">Last Update Date</th>
                 <th className="border py-2 min-w-[300px]">Quantity</th>
-                <th className="border py-2 min-w-[150px]">Created Date</th>
               </tr>
             </thead>
             <tbody>
               {ProductstockData?.length > 0 ? (
                 ProductstockData?.map((item) => (
                   <tr key={item.PRODUCT_CODE} className="text-center">
+                    <td className="border py-2">{item.PRODUCT_CODE}</td>
                     <td className="border py-2">{item.NAME}</td>
-                    <td className="border py-2">{item.QUANTITY}</td>
                     <td className="border py-2">
                       {moment(item.UPDATE_DATE).format("YYYY-MM-DD")}
                     </td>
+                    <td className="border py-2">{item.QUANTITY}</td>
                   </tr>
                 ))
               ) : (
