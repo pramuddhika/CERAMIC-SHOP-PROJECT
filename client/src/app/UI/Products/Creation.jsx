@@ -102,7 +102,6 @@ const Creation = () => {
           product_code: "",
           quantity: "",
           updated_date: "",
-
           stage: "",
         }}
         validationSchema={validationSchema}

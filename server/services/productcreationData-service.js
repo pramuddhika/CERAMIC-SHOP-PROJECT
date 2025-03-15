@@ -8,7 +8,7 @@ export const addprojectcreationDataService = async (
   stage
 ) => {
   return new Promise((resolve, reject) => {
-    const query = `INSERT INTO product_stock_stages (PRODUCT_CODE,  QUANTITY, CREATE_DATE, STAGE) VALUES ('${product_code}', '${quantity}', '${create_date}', '${stage}')`;
+    const query = `INSERT INTO product_stock_stages (PRODUCT_CODE,  QUANTITY, CREATE_DATE,UPDATE_DATE, STAGE) VALUES ('${product_code}', '${quantity}', '${create_date}','${create_date}', '${stage}')`;
 
     db.query(query, (err) => {
       if (err) {
@@ -109,18 +109,13 @@ export const editProjectcreationDataService = async (
 ) => {
   return new Promise((resolve, reject) => {
     const query = `UPDATE product_stock_stages SET STAGE = '${stage}', DAMAGE_COUNT = '${damage_count}', QUANTITY = '${quantity}', UPDATE_DATE = '${updated_date}' WHERE ID = '${id}'`;
-    const query3 = `INSERT INTO production (PRODUCT_CODE, QUANTITY, UPDATE_DATE)
-SELECT 
-    ps.PRODUCT_CODE, 
-    (ps.QUANTITY - ps.DAMAGE_COUNT) AS QUANTITY, 
-    ps.UPDATE_DATE
-FROM product_stock_stages ps
-WHERE ps.STAGE = (
-    SELECT MAX(STOCK_STAGE_TAG)
-    FROM stock_stages
-    WHERE STATUS = 1
-);
-`;
+    const query3 =`UPDATE production p 
+     JOIN product_stock_stages ps ON p.PRODUCT_CODE = ps.PRODUCT_CODE
+     SET p.QUANTITY = (ps.QUANTITY - ps.DAMAGE_COUNT),
+     p.UPDATE_DATE = NOW() WHERE ps.STAGE = (
+      SELECT MAX(ss.STOCK_STAGE_TAG) 
+      FROM stock_stages ss 
+      WHERE ps.PRODUCT_CODE = p.PRODUCT_CODE);`;
 
     db.query(query, (err) => {
       if (err) {
@@ -131,7 +126,7 @@ WHERE ps.STAGE = (
     });
     db.query(query3, (err) => {
       if (err) {
-        reject({ message: " try again!" });
+        reject({ message: err });
       } else {
         resolve({ message: "Project creation data updated successfully" });
       }
