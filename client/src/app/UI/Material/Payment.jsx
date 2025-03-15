@@ -102,35 +102,28 @@ const Payment = () => {
     setCurrentPage(1);
   };
 
-  const handleQualityUpdate = async () => {
+  const handleQualityUpdate = async (payment) => {
     const updateData = {
       materialId: selectedItem?.MATERIAL_ID,
-      supplierId: selectedItem?.USER_ID,
+      supplierId: selectedItem?.SUPPILER_ID,
       date: moment(selectedItem?.DATE).format("YYYY-MM-DD"),
-      quantity: selectedItem?.QUANTITY,
-      Payment: selectedQuality,
+      payment: payment,
     };
     try {
-      const response = await axios.put(
-        "/api/materialdata/quality/update",
+      const response = await axios.post(
+        "/api/materialdata/add/payment",
         updateData
       );
       toast.success(response?.data?.message);
       fetchMaterialReceivedtData(currentPage, itemsPerPage, filterData);
     } catch (error) {
-      toast.error("Something went wrong");
-      console.error(error);
+      console.log(error);
+    } finally {
+      setIsModalOpen(false);
+      setSelectedItem(null);
+      setSelectedQuality("");
     }
-    setIsModalOpen(false);
-    setSelectedItem(null);
-    setSelectedQuality("");
   };
-  
-  console.log('1111111',selectedItem)
-  console.log('2222222',parseInt(selectedItem?.MATERIAL_VALUE))
-  console.log('3333333',(selectedQuality))
-  console.log('4444444',parseInt(selectedItem?.PAID_VALUE) === 'NaN' ? 0 : parseInt(selectedItem?.PAID_VALUE))
-  console.log('5555555',parseInt(selectedItem?.MATERIAL_VALUE) < parseInt(selectedQuality) + parseInt(selectedItem?.PAID_VALUE))
 
   return (
     <>
@@ -168,7 +161,8 @@ const Payment = () => {
               validationSchema={filterValidationSchema}
               onSubmit={(values) => {
                 setFilterData(values);
-                fetchMaterialReceivedtData(currentPage, itemsPerPage, values);
+                setCurrentPage(1);
+                fetchMaterialReceivedtData(1, itemsPerPage, values);
                 toggleFilter();
               }}
             >
@@ -214,7 +208,8 @@ const Payment = () => {
                           material: null,
                           supplier: null,
                         });
-                        fetchMaterialReceivedtData(currentPage, itemsPerPage, {
+                        setCurrentPage(1);
+                        fetchMaterialReceivedtData(1, itemsPerPage, {
                           material: null,
                           supplier: null,
                         });
@@ -237,116 +232,134 @@ const Payment = () => {
           >
             <div className="bg-white rounded-lg p-6 shadow-lg">
               <h2 className="text-lg font-semibold mb-4">Update Payment for</h2>
-              <div className="flex justify-center items-center gap-3">
-                <div className="min-w-40 mb-4">
-                  <label className="block text-sm font-medium text-gray-700">
-                    Material
-                  </label>
-                  <div className="mt-1 flex items-center">
-                    <span className="text-gray-500">{selectedItem?.NAME}</span>
-                  </div>
-                </div>
-                <div className="min-w-40 mb-4">
-                  <label className="block text-sm font-medium text-gray-700">
-                    Supplier
-                  </label>
-                  <div className="mt-1 flex items-center">
-                    <span className="text-gray-500">
-                      {selectedItem?.FIRST_NAME} {selectedItem?.LAST_NAME}
-                    </span>
-                  </div>
-                </div>
-              </div>
-              <div className="flex justify-center items-center gap-3">
-                <div className="min-w-40 mb-4">
-                  <label className="block text-sm font-medium text-gray-700">
-                    Value
-                  </label>
-                  <div className="mt-1 flex items-center">
-                    <span className="text-gray-500">
-                      Rs. {selectedItem?.MATERIAL_VALUE}
-                    </span>
-                  </div>
-                </div>
-                <div className="min-w-40 mb-4">
-                  <label className="block text-sm font-medium text-gray-700">
-                    Quantity
-                  </label>
-                  <div className="mt-1 flex items-center">
-                    <span className="text-gray-500">
-                      {selectedItem?.QUANTITY} kg
-                    </span>
-                  </div>
-                </div>
-              </div>
-              <div className="flex justify-center items-center gap-3">
-                <div className="min-w-40 mb-4">
-                  <label className="block text-sm font-medium text-gray-700">
-                    Received Date
-                  </label>
-                  <div className="mt-1 flex items-center">
-                    <span className="text-gray-500">
-                      {moment(selectedItem.DATE).format("DD-MM-YYYY")}
-                    </span>
-                  </div>
-                </div>
-                <div className="min-w-40 mb-4">
-                  <label className="block text-sm font-medium text-gray-700">
-                    Paid Value
-                  </label>
-                  <div className="mt-1 flex space-x-4">
-                    <span className="text-gray-500">
-                      {selectedItem?.PAID_VALUE
-                        ? `Rs. ${selectedItem?.PAID_VALUE}`
-                        : "-"}
-                    </span>
-                  </div>
-                </div>
-              </div>
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700">
-                  New Paid Value
-                </label>
-                <div className="mt-1 flex justify-center items-center gap-3 space-x-4 fo">
-                  Rs.
-                  <input
-                    type="number"
-                    className="border rounded-lg px-2 py-1 w-48"
-                    value={selectedQuality}
-                    onChange={(e) => setSelectedQuality(e.target.value)}
-                    style={{
-                      boxShadow: "none",
-                      borderColor: "#ced4da",
-                      outline: "none",
-                    }}
-                  />
-                </div>
-                {parseInt(selectedItem?.MATERIAL_VALUE) <
-                  parseInt(selectedQuality) + parseInt(selectedItem?.PAID_VALUE) && (
-                  <label className="text-red-600">Invalid amount!</label>
+              <Formik
+                initialValues={{ newPaidValue: selectedQuality }}
+                validationSchema={Yup.object({
+                  newPaidValue: Yup.number()
+                    .required("Required")
+                    .max(
+                      parseInt(selectedItem?.MATERIAL_VALUE) -
+                        parseInt(selectedItem?.PAID_VALUE ?? 0),
+                      "cannot exceed the remaining amount!"
+                    ),
+                })}
+                onSubmit={(values) => {
+                  handleQualityUpdate(values.newPaidValue);
+                }}
+              >
+                {({ values, handleChange, handleSubmit, errors, touched }) => (
+                  <form onSubmit={handleSubmit}>
+                    <div className="flex justify-center items-center gap-3">
+                      <div className="min-w-40 mb-4">
+                        <label className="block text-sm font-medium text-gray-700">
+                          Material
+                        </label>
+                        <div className="mt-1 flex items-center">
+                          <span className="text-gray-500">
+                            {selectedItem?.NAME}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="min-w-40 mb-4">
+                        <label className="block text-sm font-medium text-gray-700">
+                          Supplier
+                        </label>
+                        <div className="mt-1 flex items-center">
+                          <span className="text-gray-500">
+                            {selectedItem?.FIRST_NAME} {selectedItem?.LAST_NAME}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex justify-center items-center gap-3">
+                      <div className="min-w-40 mb-4">
+                        <label className="block text-sm font-medium text-gray-700">
+                          Value
+                        </label>
+                        <div className="mt-1 flex items-center">
+                          <span className="text-gray-500">
+                            Rs. {selectedItem?.MATERIAL_VALUE}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="min-w-40 mb-4">
+                        <label className="block text-sm font-medium text-gray-700">
+                          Quantity
+                        </label>
+                        <div className="mt-1 flex items-center">
+                          <span className="text-gray-500">
+                            {selectedItem?.QUANTITY} kg
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex justify-center items-center gap-3">
+                      <div className="min-w-40 mb-4">
+                        <label className="block text-sm font-medium text-gray-700">
+                          Received Date
+                        </label>
+                        <div className="mt-1 flex items-center">
+                          <span className="text-gray-500">
+                            {moment(selectedItem.DATE).format("DD-MM-YYYY")}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="min-w-40 mb-4">
+                        <label className="block text-sm font-medium text-gray-700">
+                          Paid Value
+                        </label>
+                        <div className="mt-1 flex space-x-4">
+                          <span className="text-gray-500">
+                            {selectedItem?.PAID_VALUE
+                              ? `Rs. ${selectedItem?.PAID_VALUE}`
+                              : "-"}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="mb-4">
+                      <label className="block text-sm font-medium text-gray-700">
+                        New Paid Value
+                      </label>
+                      <div className="mt-1 flex justify-center items-center gap-3 space-x-4 fo">
+                        Rs.
+                        <input
+                          type="number"
+                          name="newPaidValue"
+                          className="border rounded-lg px-2 py-1 w-48"
+                          value={values.newPaidValue}
+                          onChange={handleChange}
+                          style={{
+                            boxShadow: "none",
+                            borderColor: "#ced4da",
+                            outline: "none",
+                          }}
+                        />
+                      </div>
+                      {errors.newPaidValue && touched.newPaidValue && (
+                        <label className="text-red-600">
+                          {errors.newPaidValue}
+                        </label>
+                      )}
+                    </div>
+                    <div className="flex justify-end space-x-6">
+                      <button
+                        type="submit"
+                        className="text-white bg-cyan-950 hover:bg-cyan-900 px-3 py-1 rounded-lg flex items-center"
+                      >
+                        Update
+                      </button>
+                      <button
+                        type="button"
+                        className="text-white bg-red-600 hover:bg-red-500 px-3 py-1 rounded-lg flex items-center"
+                        onClick={() => setIsModalOpen(false)}
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </form>
                 )}
-              </div>
-
-              <div className="flex justify-end space-x-6">
-                <button
-                  type="button"
-                  disabled={
-                    parseInt(selectedItem?.MATERIAL_VALUE) <
-                    parseInt(selectedQuality) + parseInt(selectedItem?.PAID_VALUE)
-                  }
-                  className="text-white bg-cyan-950 hover:bg-cyan-900 px-3 py-1 rounded-lg flex items-center"
-                  onClick={handleQualityUpdate}
-                >
-                  Update
-                </button>
-                <button
-                  type="button"
-                  className="text-white bg-red-600 hover:bg-red-500 px-3 py-1 rounded-lg flex items-center"
-                  onClick={() => setIsModalOpen(false)}
-                >
-                  Cancel
-                </button>
-              </div>
+              </Formik>
             </div>
           </div>
         )}
@@ -369,8 +382,8 @@ const Payment = () => {
             </thead>
             <tbody>
               {receivedData?.length > 0 ? (
-                receivedData?.map((item) => (
-                  <tr key={item.RECEIVED_ID} className="text-center">
+                receivedData?.map((item, index) => (
+                  <tr key={item.RECEIVED_ID || index} className="text-center">
                     <td className="border py-2">{item.NAME}</td>
                     <td className="border py-2">
                       {item.FIRST_NAME} {item.LAST_NAME}
@@ -386,7 +399,11 @@ const Payment = () => {
                     </td>
                     <td className="border py-2">
                       <button
-                        className="text-slate-500 hover:text-slate-800 border-none"
+                        className={`border-none ${
+                          item.PAID_VALUE === item.MATERIAL_VALUE
+                            ? "text-red-500 hover:text-red-700 cursor-not-allowed"
+                            : "text-slate-500 hover:text-slate-800"
+                        }`}
                         disabled={item.PAID_VALUE === item.MATERIAL_VALUE}
                         onClick={() => {
                           setSelectedItem(item);

@@ -221,3 +221,9 @@ ALTER TABLE `ceramic`.`product_stock_stages`
 ADD COLUMN `CREATE_DATE` DATE NOT NULL AFTER `QUANTITY`;
 ALTER TABLE `ceramic`.`product_stock_stages` 
 CHANGE COLUMN `UPDATE_DATE` `UPDATE_DATE` DATE NULL ;
+
+-- update 2025.03.15
+ALTER TABLE `ceramic`.`material_received_note` 
+DROP COLUMN `PAYMENT_SATUS`;
+ALTER TABLE `ceramic`.`material_received_note` 
+CHANGE COLUMN `PAID_VALUE` `PAID_VALUE` DECIMAL(10,2) NULL DEFAULT 0.0

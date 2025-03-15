@@ -11,6 +11,7 @@ import {
   addMaterialUsageDataService,
   getMaterialUsageDataService,
   getPaymentDataService,
+  addPaymentDataService,
 } from "../services/materialData-service.js";
 
 // generate material ID
@@ -111,7 +112,6 @@ export const getMaterialReceivedDataController = async (req, res) => {
 // quality update
 export const qualityUpdateController = async (req, res) => {
   const { materialId, date, supplierId, quality, quantity } = req.body;
-  console.log(req.body)
   if (!materialId ||!date ||!supplierId ||!quality ||!quantity) {
     return res.status(400).json({ error: "All data required!" });
   }
@@ -154,6 +154,20 @@ export const getPaymentDataController = async (req, res) => {
   try {
     const paymentData = await getPaymentDataService(page, limit , material, supplier);
     res.status(200).json(paymentData);
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
+
+// add payment data
+export const addPaymentDataController = async (req, res) => {
+  const { materialId, supplierId, date, payment } = req.body;
+  if (!materialId || !supplierId || !date || !payment) {
+    return res.status(400).json({ error: "All data required!" });
+  }
+  try {
+    const addPaymentDataResponse = await addPaymentDataService(materialId, supplierId, date, payment);
+    res.status(200).json(addPaymentDataResponse);
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }
