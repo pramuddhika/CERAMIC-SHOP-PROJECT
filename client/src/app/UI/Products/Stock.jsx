@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-
 import moment from "moment";
 import Nodata from "../../../assets/Nodata.svg";
 import CommonLoading from "../../../utils/CommonLoading";
+import jsPDF from "jspdf";
 
 const Stock = () => {
   const [ProductstockData, setProductstockData] = useState([]);
@@ -25,6 +25,39 @@ const Stock = () => {
     }
   };
 
+  const handlePrint = () => {
+    const pdf = new jsPDF();
+    const today = moment().format('YYYY-MM-DD');
+
+    // Add title
+    pdf.setFontSize(18);
+    pdf.text('GLEAM CERAMIC', pdf.internal.pageSize.getWidth() / 2, 10, { align: 'center' });
+
+    // Add date and report type
+    pdf.setFontSize(12);
+    pdf.text(`Date: ${today}`, 10, 20);
+    pdf.text('Report: Product Stock', pdf.internal.pageSize.getWidth() - 10, 20, { align: 'right' });
+
+    // Add table
+    pdf.autoTable({
+      startY: 30,
+      head: [['ID', 'Material Name', 'Last Update', 'Quantity(units)']],
+      body: ProductstockData.map(item => [
+        item.PRODUCT_CODE,
+        item.NAME,
+        moment(item.UPDATE_DATE).format('YYYY-MM-DD'),
+        item.QUANTITY.toString()
+      ]),
+      theme: 'grid',
+      headStyles: { fillColor: [60, 141, 188] },
+      alternateRowStyles: { fillColor: [240, 240, 240] },
+      styles: { fontSize: 10, cellPadding: 3 }
+    });
+
+    // Save the PDF
+    pdf.save("product_stock.pdf");
+  }
+
   useEffect(() => {
     fetchproductstockData();
   }, []);
@@ -35,6 +68,24 @@ const Stock = () => {
         <div className="card-header flex justify-between items-center border-b py-2 bg-gray-100">
           <div>
             <h2 className="text-lg font-semibold">Product Stock</h2>
+          </div>
+          <div className="flex items-center">
+            {/* <input
+              type="text"
+              placeholder="Search by ID or Name"
+              value={searchQuery}
+              onChange={handleInputChange}
+              onKeyDown={handleSearch}
+              ref={searchInputRef}
+              className="border border-gray-300 rounded-lg px-3 py-1 mr-2"
+              style={{ outline: "none" }}
+            /> */}
+            <button
+              className="text-white bg-cyan-950 hover:bg-cyan-900 px-3 py-1 rounded-lg flex items-center ml-2"
+              onClick={handlePrint}
+            >
+              Print
+            </button>
           </div>
         </div>
 
