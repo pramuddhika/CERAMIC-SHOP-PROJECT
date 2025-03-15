@@ -308,6 +308,10 @@ export const addMaterialUsageDataService = async (materialId, date, quantity) =>
 
     db.query(query, (err) => {
       if (err) {
+        if (err.code === "ER_CHECK_CONSTRAINT_VIOLATED") {
+          reject({ message: "Material quantity is not enough!" });
+          return;
+        }
         reject({ message: "Something went wrong, Please try again!" });
       } else {
         const query1 = `INSERT INTO material_use (MATERIAL_ID, DATE, QUANTITY) VALUES ('${materialId}', '${date}', '${quantity}')`;

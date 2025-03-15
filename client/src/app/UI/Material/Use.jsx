@@ -75,6 +75,7 @@ const Use = () => {
   useEffect(() => {
     fetchMaterialUsageData(currentPage, itemsPerPage, filterData);
   }, [currentPage, itemsPerPage, filterData]);
+
   const toggleFilter = () => {
     setShowFilter(!showFilter);
   };
@@ -111,7 +112,7 @@ const Use = () => {
               setFieldValue("material", null);
             }, 0);
           } catch (error) {
-            toast.error("Something went wrong");
+            toast.error(error?.response?.data?.error);
             console.error(error);
           }
         }}
