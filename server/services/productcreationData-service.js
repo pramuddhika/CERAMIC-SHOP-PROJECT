@@ -65,39 +65,22 @@ export const getProjectcreationDataService = async (page = 1, limit = 5, product
   });
 }
 
-export const getProductstockDataService = async (page = 1, limit = 5) => {
+export const getProductstockDataService = async () => {
   return new Promise((resolve, reject) => {
-    const offset = (page - 1) * limit;
     const query = `SELECT p.*, pr.NAME
     FROM production p
-    JOIN product pr ON p.PRODUCT_CODE = pr.PRODUCT_CODE
-    LIMIT ? OFFSET ?`;
+    JOIN product pr ON p.PRODUCT_CODE = pr.PRODUCT_CODE`;
 
-    db.query(query, [parseInt(limit), parseInt(offset)], (err, result) => {
+    db.query(query, (err, result) => {
       if (err) {
         reject({ message: "Something went wrong, Please try again!" });
         return;
       }
-      const countQuery = `SELECT COUNT(*) AS total FROM production`;
-
-      db.query(countQuery, (err, count) => {
-        if (err) {
-          reject({ message: "Something went wrong, Please try again!" });
-          return;
-        }
-        const total = count[0].total;
-        const pages = Math.ceil(total / limit);
-        resolve({
-          data: result,
-          total,
-          page: parseInt(page),
-          limit: parseInt(limit),
-          totalPages: pages,
-        });
-      });
+      resolve({ data: result });
     });
   });
 };
+
 
 export const editProjectcreationDataService = async (
   product_code,

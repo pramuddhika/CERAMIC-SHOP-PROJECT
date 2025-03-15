@@ -3,24 +3,19 @@ import axios from "axios";
 
 import moment from "moment";
 import Nodata from "../../../assets/Nodata.svg";
-import CommonPagination from "../../../utils/CommonPagination";
 import CommonLoading from "../../../utils/CommonLoading";
 
 const Stock = () => {
   const [ProductstockData, setProductstockData] = useState([]);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(5);
   const [isLoading, setIsLoading] = useState(false);
 
-  const fetchproductstockData = async (page, limit) => {
+  const fetchproductstockData = async () => {
     setIsLoading(true);
     try {
       const response = await axios.get(
-        `/api/productcreationdata/get/product?page=${page}&limit=${limit}`
+        `/api/productcreationdata/get/product`
       );
       setProductstockData(response?.data?.data);
-      setTotalPages(response?.data?.totalPages);
     } catch (error) {
       console.log(error);
     } finally {
@@ -31,19 +26,11 @@ const Stock = () => {
   };
 
   useEffect(() => {
-    fetchproductstockData(currentPage, itemsPerPage);
-  }, [currentPage, itemsPerPage]);
-
-  const handlePageChange = (page) => setCurrentPage(page);
-  const handleItemsPerPageChange = (items) => {
-    setItemsPerPage(items);
-    setCurrentPage(1);
-  };
+    fetchproductstockData();
+  }, []);
 
   return (
     <>
-      <hr className="mt-2" />
-
       <div className="card rounded-lg w-full mt-2">
         <div className="card-header flex justify-between items-center border-b py-2 bg-gray-100">
           <div>
@@ -51,7 +38,7 @@ const Stock = () => {
           </div>
         </div>
 
-        <div className="card-body overflow-auto flex justify-start">
+        <div className="card-body overflow-auto flex justify-center">
           <table
             id="stock-table"
             className="border text-sm table-fixed w-full overflow-auto"
@@ -89,14 +76,6 @@ const Stock = () => {
             </tbody>
           </table>
         </div>
-
-        <CommonPagination
-          totalPages={totalPages}
-          currentPage={currentPage}
-          onPageChange={handlePageChange}
-          itemsPerPage={itemsPerPage}
-          onItemsPerPageChange={handleItemsPerPageChange}
-        />
       </div>
       {isLoading && <CommonLoading />}
     </>
