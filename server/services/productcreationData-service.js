@@ -65,11 +65,15 @@ export const getProjectcreationDataService = async (page = 1, limit = 5, product
   });
 }
 
-export const getProductstockDataService = async () => {
+export const getProductstockDataService = async (searchQuery) => {
   return new Promise((resolve, reject) => {
-    const query = `SELECT p.*, pr.NAME
+    let query = `SELECT p.*, pr.NAME
     FROM production p
     JOIN product pr ON p.PRODUCT_CODE = pr.PRODUCT_CODE`;
+
+    if (searchQuery) {
+      query += ` WHERE p.PRODUCT_CODE LIKE '%${searchQuery}%' OR pr.NAME LIKE '%${searchQuery}%'`;
+    }
 
     db.query(query, (err, result) => {
       if (err) {

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import moment from "moment";
 import Nodata from "../../../assets/Nodata.svg";
@@ -8,12 +8,14 @@ import jsPDF from "jspdf";
 const Stock = () => {
   const [ProductstockData, setProductstockData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const searchInputRef = useRef(null);
+  const [searchQuery, setSearchQuery] = useState("");
 
-  const fetchproductstockData = async () => {
+  const fetchproductstockData = async (query = "") => {
     setIsLoading(true);
     try {
       const response = await axios.get(
-        `/api/productcreationdata/get/product`
+        `/api/productcreationdata/get/product${query ? `?search=${query}` : ""}`
       );
       setProductstockData(response?.data?.data);
     } catch (error) {
@@ -58,6 +60,19 @@ const Stock = () => {
     pdf.save("product_stock.pdf");
   }
 
+  const handleSearch = (event) => {
+    if (event.key === "Enter") {
+      fetchproductstockData(searchQuery);
+    }
+  }
+
+  const handleInputChange = (event) => {
+    setSearchQuery(event.target.value);
+    if (event.target.value === "") {
+      fetchproductstockData();
+    }
+  }
+
   useEffect(() => {
     fetchproductstockData();
   }, []);
@@ -70,7 +85,7 @@ const Stock = () => {
             <h2 className="text-lg font-semibold">Product Stock</h2>
           </div>
           <div className="flex items-center">
-            {/* <input
+            <input
               type="text"
               placeholder="Search by ID or Name"
               value={searchQuery}
@@ -79,7 +94,7 @@ const Stock = () => {
               ref={searchInputRef}
               className="border border-gray-300 rounded-lg px-3 py-1 mr-2"
               style={{ outline: "none" }}
-            /> */}
+            />
             <button
               className="text-white bg-cyan-950 hover:bg-cyan-900 px-3 py-1 rounded-lg flex items-center ml-2"
               onClick={handlePrint}
