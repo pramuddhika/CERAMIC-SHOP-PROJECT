@@ -403,3 +403,40 @@ export const getProductService = async (subcategory) => {
     });
   });
 };
+
+//get active product data
+export const getShopProductService = async (page, limit) => {
+  return new Promise((resolve, reject) => {
+    const query =
+     `SELECT
+      product.PRODUCT_CODE,product.SUB_CATAGORY_CODE,product.CATAGORY_CODE,product.NAME,product.DESCRIPTION,product.IMAGE,product.PRICE,
+      sub_category.NAME AS SUB_CATAGORY_NAME,category.NAME AS CATAGORY_NAME
+      FROM product
+      JOIN sub_category ON product.SUB_CATAGORY_CODE = sub_category.SUB_CATAGORY_CODE
+      JOIN category ON product.CATAGORY_CODE = category.CATAGORY_CODE
+      WHERE product.STATUS = 1 LIMIT ? OFFSET ?`;
+    
+    const offset = (page - 1) * limit;
+    db.query(query, [parseInt(limit), parseInt(offset)], (err, result) => {
+      if (err) {
+        reject({ message: err });
+        return;
+      }
+      let countQuery = `SELECT COUNT(*) AS total FROM product WHERE STATUS = 1`;
+      db.query(countQuery, (err, countResult) => {
+        if (err) {
+          reject({ message: "Something went wrong, Please try again!" });
+          return;
+        }
+        const total = countResult[0].total;
+        resolve({
+          data: result,
+          total,
+          page: parseInt(page),
+          limit: parseInt(limit),
+          totalPages: Math.ceil(total / limit),
+        });
+      });
+    });
+  });
+};
