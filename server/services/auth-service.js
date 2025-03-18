@@ -140,21 +140,65 @@ export const loginService = (email, password) => {
 };
 
 // get supplier data
-export const getSupplierDataService = (userId) => {
+export const getSupplierDataService = async (page = 1, limit = 5) => {
   return new Promise((resolve, reject) => {
-    const query = `SELECT user.USER_ID, user.FIRST_NAME, user.LAST_NAME,user.EMAIL,user.STATUS,
+    const offset = (page - 1) * limit;
+    
+    const query = `SELECT user.USER_ID, user.FIRST_NAME, user.LAST_NAME, user.EMAIL, user.STATUS,
       address_book.TELEPHONE_NUMBER, address_book.LINE_1, address_book.LINE_2,
       address_book.CITY, address_book.DISTRICT, address_book.PROVINCE, address_book.POSTAL_CODE
       FROM user
       JOIN address_book ON user.USER_ID = address_book.USER_ID
-      WHERE USER_TYPE = 'supplier'`;
-    
-    db.query(query, (error, result) => {
+      WHERE USER_TYPE = 'supplier'
+      LIMIT ? OFFSET ?`;
+
+    db.query(query, [parseInt(limit), parseInt(offset)], (error, result) => {
+      if (error) {
+        reject({ message: "Something went wrong, Please try again!", error });
+        return;
+      }
+
+      // Count total suppliers
+      const countQuery = `SELECT COUNT(*) AS total FROM user WHERE USER_TYPE = 'supplier'`;
+      db.query(countQuery, (error, countResult) => {
+        if (error) {
+          reject({ message: "Something went wrong, Please try again!", error });
+          return;
+        }
+
+        const total = countResult[0].total;
+        const totalPages = Math.ceil(total / limit);
+
+        resolve({
+          data: result,
+          total,
+          page: parseInt(page),
+          limit: parseInt(limit),
+          totalPages,
+        });
+      });
+    });
+  });
+};
+
+
+// edit supplier
+export const editSupplierService = (userId, firstName, lastName, email, status, phone, line1, line2, city, distric, province, postalCode) => {
+  return new Promise((resolve, reject) => {
+    const query1 = `UPDATE user SET FIRST_NAME = ?, LAST_NAME = ?, EMAIL = ?, STATUS = ? WHERE USER_ID = ?`;
+    const query2 = `UPDATE address_book SET TELEPHONE_NUMBER = ?, LINE_1 = ?, LINE_2 = ?, CITY = ?, DISTRICT = ?, PROVINCE = ?, POSTAL_CODE = ? WHERE USER_ID = ?`;
+    db.query(query1,[firstName, lastName, email, status, userId], (error, result) => {
       if (error) {
         reject({ message: "Something went wrong, Please try again!" });
         return;
       }
-      resolve(result);
+      db.query(query2,[phone, line1, line2, city, distric, province, postalCode, userId], (error, result) => {
+        if (error) {
+          reject({ message: "Something went wrong, Please try again!" });
+          return;
+        }
+        resolve({ message: "Supplier updated successfully!" });
+      });
     });
   });
 };
