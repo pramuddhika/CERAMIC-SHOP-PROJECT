@@ -4,10 +4,13 @@ import * as Yup from "yup";
 import { Row } from "react-bootstrap";
 import axios from "axios";
 import { toast } from "react-toastify";
+import { FaEdit } from "react-icons/fa";
+import Nodata from "../../../assets/Nodata.svg";
 
 const SuplierManagement = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [userId, setUserId] = useState(null);
+  const [supplierList, setSupplierList] = useState([]);
 
   const handleModalToggle = async () => {
     setIsModalOpen(!isModalOpen);
@@ -16,14 +19,24 @@ const SuplierManagement = () => {
   const SuplierValidationSchema = Yup.object().shape({
     firstName: Yup.string().max(20, "too long").required("Required"),
     lastName: Yup.string().max(20, "too long").required("Required"),
-    email: Yup.string().max(50, "too long").email("Invalid email").required("Required"),
-    phone: Yup.string().max(13, "too long").required("Required"),
+    email: Yup.string()
+      .max(50, "too long")
+      .email("Invalid email")
+      .required("Required"),
+    phone: Yup.string()
+      .matches(
+        /^(?:0|94|\+94)?(?:(70|71|72|75|76|77|78|79)?\d{7})$/,
+        "Invalid phone number"
+      )
+      .required("Required"),
     line1: Yup.string().max(15, "too long").required("Required"),
     line2: Yup.string().max(15, "too long").required("Required"),
     city: Yup.string().max(30, "too long").required("Required"),
     distric: Yup.string().max(25, "too long").required("Required"),
     province: Yup.string().max(25, "too long").required("Required"),
-    postalCode: Yup.string().max(10, "too long").required("Required"),
+    postalCode: Yup.string()
+      .matches(/^\d{5}$/, "Invalid postal code")
+      .required("Required"),
     status: Yup.string().required("Required"),
   });
 
@@ -41,26 +54,37 @@ const SuplierManagement = () => {
     status: "1",
   };
 
-  const UserId = async () => { 
+  const UserId = async () => {
     try {
       const response = await axios.get("/api/auth/generateUserId");
-      const data = await response.json();
-      setUserId(data.newid);
+      setUserId(response.data.newid);
     } catch (error) {
       console.log(error);
     }
-  }
+  };
+
+  const fetchSupplierData = async () => {
+    try {
+      const response = await axios.post("/api/auth//getSupplierData");
+      setSupplierList(response?.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  console.log(supplierList);
 
   useEffect(() => {
     UserId();
-   }, []);
+    fetchSupplierData();
+  }, []);
 
   const handleSubmit = async (values, { resetForm }) => {
     const data = {
       ...values,
       userId: userId,
       status: parseInt(values.status),
-    }
+    };
     try {
       const response = await axios.post("/api/auth/createSupplier", data);
       toast.success(response.data.message);
@@ -92,8 +116,8 @@ const SuplierManagement = () => {
           <table className="border text-sm table-fixed w-full overflow-auto">
             <thead className="bg-slate-400">
               <tr className="pl-2 text-center">
-                <th className="border py-2 min-w-[200px]">ID</th>
-                <th className="border py-2 min-w-[280px]">Name</th>
+                <th className="border py-2 min-w-[100px]">ID</th>
+                <th className="border py-2 min-w-[250px]">Name</th>
                 <th className="border py-2 min-w-[200px]">Email</th>
                 <th className="border py-2 min-w-[200px]">Phone</th>
                 <th className="border py-2 min-w-[200px]">City</th>
@@ -103,56 +127,56 @@ const SuplierManagement = () => {
                 </th>
               </tr>
             </thead>
-            {/* <tbody className="divide-y">
-                          {currentData.message === "No data found!" ||
-                          currentData.length === 0 ? (
-                            <tr>
-                              <td colSpan="5" className="text-center py-4">
-                                <img
-                                  src={Nodata}
-                                  style={{
-                                    width: "150px",
-                                    margin: "0 auto",
-                                    padding: "20px",
-                                  }}
-                                />
-                                <span className="text-gray-500">No Data Available</span>
-                              </td>
-                            </tr>
-                          ) : (
-                            Array.isArray(currentData) &&
-                            currentData.map((row, index) => (
-                              <tr key={index}>
-                                <td className="border px-6 py-2 text-center">
-                                  {row.MATERIAL_ID}
-                                </td>
-                                <td className="border px-6 py-2 text-center">{row.NAME}</td>
-                                <td className="border px-6 py-2">{row.DESCRIPTION}</td>
-                                {row.STATUS === 1 ? (
-                                  <td className="border px-6 text-center">
-                                    <span className="text-white bg-green-600 py-2 px-4 rounded-2xl">
-                                      Active
-                                    </span>
-                                  </td>
-                                ) : (
-                                  <td className="border px-6 py-2 text-center">
-                                    <span className="text-white bg-red-600 py-2  px-4 rounded-2xl">
-                                      Inactive
-                                    </span>
-                                  </td>
-                                )}
-                                <td className="border px-6 py-4 flex justify-center items-center">
-                                  <button
-                                    className="text-slate-500 hover:text-slate-800 border-none"
-                                    // onClick={() => handleEdit(row)}
-                                  >
-                                    {/* <FaEdit /> 
-                                  </button>
-                                </td>
-                              </tr>
-                            ))
-                          )}
-                        </tbody> */}
+            <tbody className="divide-y">
+              {supplierList.message === "No data found!" ||
+              supplierList.length === 0 ? (
+                <tr>
+                  <td colSpan="5" className="text-center py-4">
+                    <img
+                      src={Nodata}
+                      style={{
+                        width: "150px",
+                        margin: "0 auto",
+                        padding: "20px",
+                      }}
+                    />
+                    <span className="text-gray-500">No Data Available</span>
+                  </td>
+                </tr>
+              ) : (
+                Array.isArray(supplierList) &&
+                supplierList.map((row, index) => (
+                  <tr key={index}>
+                    <td className="border px-6 py-2 text-center">{row.USER_ID}</td>
+                    <td className="border px-6 py-2 text-center">{row.FIRST_NAME} {row.LAST_NAME}</td>
+                    <td className="border px-6 py-2">{row.EMAIL}</td>
+                    <td className="border px-6 py-2 text-center">{row.TELEPHONE_NUMBER}</td>
+                    <td className="border px-6 py-2 text-center">{row.CITY}</td>
+                    {row.STATUS === 1 ? (
+                      <td className="border px-6 text-center">
+                        <span className="text-white bg-green-600 py-2 px-4 rounded-2xl">
+                          Active
+                        </span>
+                      </td>
+                    ) : (
+                      <td className="border px-6 py-2 text-center">
+                        <span className="text-white bg-red-600 py-2  px-4 rounded-2xl">
+                          Inactive
+                        </span>
+                      </td>
+                    )}
+                    <td className="border px-6 py-4 flex justify-center items-center">
+                      <button
+                        className="text-slate-500 hover:text-slate-800 border-none"
+                        // onClick={() => handleEdit(row)}
+                      >
+                        <FaEdit />
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
           </table>
         </div>
         {/* <CommonPagination
@@ -167,7 +191,7 @@ const SuplierManagement = () => {
       {isModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
           <div
-            className="bg-white rounded-lg shadow-lg p-6"
+            className="bg-white rounded-lg shadow-lg p-6 overflow-auto"
             style={{ width: "800px", height: "65vh" }}
           >
             <div className="flex justify-between items-center mb-4">
@@ -214,8 +238,8 @@ const SuplierManagement = () => {
                           className="border rounded-lg px-3 py-2 mt-1"
                           style={{ width: "100%" }}
                         />
-                        {errors.firsName && touched.firsName && (
-                          <span className="text-red-500 text-sm">
+                        {errors.firstName && touched.firstName && (
+                          <span className="text-red-500 text-sm block">
                             {errors.firstName}
                           </span>
                         )}
@@ -238,7 +262,7 @@ const SuplierManagement = () => {
                           style={{ width: "100%" }}
                         />
                         {errors.lastName && touched.lastName && (
-                          <span className="text-red-500 text-sm">
+                          <span className="text-red-500 text-sm block">
                             {errors.lastName}
                           </span>
                         )}
@@ -261,7 +285,7 @@ const SuplierManagement = () => {
                           style={{ width: "100%" }}
                         />
                         {errors.email && touched.email && (
-                          <span className="text-red-500 text-sm">
+                          <span className="text-red-500 text-sm block">
                             {errors.email}
                           </span>
                         )}
@@ -286,7 +310,7 @@ const SuplierManagement = () => {
                           style={{ width: "100%" }}
                         />
                         {errors.phone && touched.phone && (
-                          <span className="text-red-500 text-sm">
+                          <span className="text-red-500 text-sm block">
                             {errors.phone}
                           </span>
                         )}
@@ -309,7 +333,7 @@ const SuplierManagement = () => {
                           style={{ width: "100%" }}
                         />
                         {errors.line1 && touched.line1 && (
-                          <span className="text-red-500 text-sm">
+                          <span className="text-red-500 text-sm block">
                             {errors.line1}
                           </span>
                         )}
@@ -332,7 +356,7 @@ const SuplierManagement = () => {
                           style={{ width: "100%" }}
                         />
                         {errors.line2 && touched.line2 && (
-                          <span className="text-red-500 text-sm">
+                          <span className="text-red-500 text-sm block">
                             {errors.line2}
                           </span>
                         )}
@@ -353,7 +377,7 @@ const SuplierManagement = () => {
                           className="w-full border rounded-lg px-3 py-2 mt-1"
                         />
                         {errors.city && touched.city && (
-                          <span className="text-red-500 text-sm">
+                          <span className="text-red-500 text-sm block">
                             {errors.city}
                           </span>
                         )}
@@ -375,7 +399,7 @@ const SuplierManagement = () => {
                           className="w-full border rounded-lg px-3 py-2 mt-1"
                         />
                         {errors.distric && touched.distric && (
-                          <span className="text-red-500 text-sm">
+                          <span className="text-red-500 text-sm block">
                             {errors.distric}
                           </span>
                         )}
@@ -397,7 +421,7 @@ const SuplierManagement = () => {
                           className="w-full border rounded-lg px-3 py-2 mt-1"
                         />
                         {errors.province && touched.province && (
-                          <span className="text-red-500 text-sm">
+                          <span className="text-red-500 text-sm block">
                             {errors.province}
                           </span>
                         )}
@@ -422,7 +446,7 @@ const SuplierManagement = () => {
                           className="w-full border rounded-lg px-3 py-2 mt-1"
                         />
                         {errors.postalCode && touched.postalCode && (
-                          <span className="text-red-500 text-sm">
+                          <span className="text-red-500 text-sm block">
                             {errors.postalCode}
                           </span>
                         )}
@@ -456,7 +480,7 @@ const SuplierManagement = () => {
                           </label>
                         </div>
                         {errors.status && touched.status && (
-                          <span className="text-red-500 text-sm">
+                          <span className="text-red-500 text-sm block">
                             {errors.status}
                           </span>
                         )}

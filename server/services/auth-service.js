@@ -138,3 +138,23 @@ export const loginService = (email, password) => {
     });
   });
 };
+
+// get supplier data
+export const getSupplierDataService = (userId) => {
+  return new Promise((resolve, reject) => {
+    const query = `SELECT user.USER_ID, user.FIRST_NAME, user.LAST_NAME,user.EMAIL,user.STATUS,
+      address_book.TELEPHONE_NUMBER, address_book.LINE_1, address_book.LINE_2,
+      address_book.CITY, address_book.DISTRICT, address_book.PROVINCE, address_book.POSTAL_CODE
+      FROM user
+      JOIN address_book ON user.USER_ID = address_book.USER_ID
+      WHERE USER_TYPE = 'supplier'`;
+    
+    db.query(query, (error, result) => {
+      if (error) {
+        reject({ message: "Something went wrong, Please try again!" });
+        return;
+      }
+      resolve(result);
+    });
+  });
+};

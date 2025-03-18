@@ -6,6 +6,7 @@ import {
   supplierController,
   supplierListController,
   loginController,
+  supplierDataController,
 } from "../controllers/auth-controller.js";
 
 const router = express.Router();
@@ -20,6 +21,8 @@ router.post("/createCustomer", signUpController);
 router.post("/createSupplier", supplierController);
 // get supplier list
 router.get("/getSupplierList", supplierListController);
+// get supllier data
+router.post("/getSupplierData", supplierDataController);
 // log in
 router.post("/login", loginController);
 

@@ -13,11 +13,19 @@ const StoreTopNav = () => {
   return (
     <div className="bg-slate-700">
       <div className="flex items-center justify-between mb-3 px-2">
-        <div className="flex justify-between items-center h-16 p-2">
+        <div className="flex justify-between items-center h-16 p-2 hover:cursor-pointer"
+          onClick={()=> {
+            navigate("/ceramic/home");
+          }}
+        >
           <h1 className="text-white font-bold text-lg">GLEAM CERAMIC</h1>
         </div>
         <div className="flex justify-between items-center gap-5 h-16 p-2 relative">
-          <button className="text-white bg-slate-700 font-bold px-2">
+          <button className="text-white bg-slate-700 font-bold px-2"
+            onClick={()=> {
+              navigate("/ceramic/cart");
+            }}
+          >
             <i className="bi bi-cart px-2"></i>
             Cart
           </button>
@@ -36,7 +44,12 @@ const StoreTopNav = () => {
             {dropdownOpen && (
               <div className="absolute right-0 mt-2 w-40 bg-white shadow-lg rounded-lg">
                 <ul className="py-2 text-gray-700">
-                  <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer">
+                  <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                    onClick={()=> {
+                      navigate("/ceramic/profile");
+                      toggleDropdown();
+                    }}
+                  >
                     Profile
                   </li>
                   <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
