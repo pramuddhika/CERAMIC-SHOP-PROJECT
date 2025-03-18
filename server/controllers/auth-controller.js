@@ -6,7 +6,8 @@ import {
   createSupplierService,
   getSupplierListService,
   loginService,
-  getSupplierDataService
+  getSupplierDataService,
+  editSupplierService
 } from "../services/auth-service.js";
 
 // generate user ID
@@ -53,9 +54,6 @@ export const signUpController = async (req, res) => {
 //create supplier
 export const supplierController = async (req, res) => {
   const { userId, firstName, lastName, email, status, phone, line1, line2, city, distric, province, postalCode } = req.body;
-  if (!userId || !firstName || !lastName || !email || !status || !phone || !line1 || !city || !distric || !province || !postalCode) {
-    return res.status(400).json({ error: "All data required!" });
-  }
   try {
     const createSupplierResponse = await createSupplierService(userId,firstName,lastName,email,status,phone,line1,line2,city,distric,province,postalCode);
     res.status(200).json(createSupplierResponse);
@@ -90,9 +88,21 @@ export const loginController = async (req, res) => {
 
 // get supplier data
 export const supplierDataController = async (req, res) => {
+  const { page, limit , search } = req.query;
   try {
-    const supplierData = await getSupplierDataService();
+    const supplierData = await getSupplierDataService( page, limit , search);
     res.status(200).json(supplierData);
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
+
+// edit supplier
+export const supplierEditController = async (req, res) => {
+  const { userId, firstName, lastName, email, status, phone, line1, line2, city, distric, province, postalCode } = req.body;
+  try {
+    const editSupplierResponse = await editSupplierService(userId,firstName,lastName,email,status,phone,line1,line2,city,distric,province,postalCode);
+    res.status(200).json(editSupplierResponse);
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }

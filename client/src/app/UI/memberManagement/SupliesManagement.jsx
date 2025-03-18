@@ -1,18 +1,37 @@
 import { Formik } from "formik";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import * as Yup from "yup";
 import { Row } from "react-bootstrap";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { FaEdit } from "react-icons/fa";
 import Nodata from "../../../assets/Nodata.svg";
+import CommonPagination from "../../../utils/CommonPagination";
+import CommonLoading from "../../../utils/CommonLoading";
 
 const SuplierManagement = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [userId, setUserId] = useState(null);
   const [supplierList, setSupplierList] = useState([]);
+  const [selectedSupplier, setSelectedSupplier] = useState(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [totalPages, setTotalPages] = useState(1);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(5);
+  const [isLoading, setIsLoading] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const searchInputRef = useRef(null);
 
-  const handleModalToggle = async () => {
+  const handleModalToggle = async (isEdit = false) => {
+    if (!isModalOpen) {
+      setIsEditing(isEdit);
+      if (!isEdit) {
+        await UserId();
+      }
+    } else {
+      setSelectedSupplier(null);
+      setIsEditing(false);
+    }
     setIsModalOpen(!isModalOpen);
   };
 
@@ -63,38 +82,75 @@ const SuplierManagement = () => {
     }
   };
 
-  const fetchSupplierData = async () => {
+  const fetchSupplierData = async (page, limit , query = "") => {
+    setIsLoading(true);
     try {
-      const response = await axios.post("/api/auth//getSupplierData");
-      setSupplierList(response?.data);
+      const response = await axios.post(
+        `/api/auth//getSupplierData?page=${page}&limit=${limit}&${query ? `search=${query}` : ""}`
+      );
+      setSupplierList(response?.data?.data);
+      setTotalPages(response?.data?.totalPages);
+      UserId();
     } catch (error) {
       console.log(error);
+    } finally {
+      setTimeout(() => {
+        setIsLoading(false);
+      }, 1000);
     }
   };
 
-  console.log(supplierList);
-
   useEffect(() => {
     UserId();
-    fetchSupplierData();
-  }, []);
+    fetchSupplierData(currentPage, itemsPerPage , searchQuery);
+  }, [currentPage, itemsPerPage]);
+
+  const handlePageChange = (page) => setCurrentPage(page);
+  const handleItemsPerPageChange = (items) => {
+    setItemsPerPage(items);
+    setCurrentPage(1);
+  };
+
+  const handleInputChange = (event) => {
+    setSearchQuery(event.target.value);
+    if (event.target.value === "") {
+      fetchSupplierData(currentPage, itemsPerPage);
+    }
+  };
 
   const handleSubmit = async (values, { resetForm }) => {
     const data = {
       ...values,
-      userId: userId,
+      userId: isEditing && selectedSupplier ? selectedSupplier.USER_ID : userId,
       status: parseInt(values.status),
     };
     try {
-      const response = await axios.post("/api/auth/createSupplier", data);
-      toast.success(response.data.message);
-      resetForm();
-      handleModalToggle();
+      if (isEditing && selectedSupplier) {
+        const response = await axios.post("/api/auth/editSupplier", data);
+        toast.success(response.data.message);
+        setUserId(null);
+        handleModalToggle();
+        resetForm();
+      } else {
+        const response = await axios.post("/api/auth/createSupplier", data);
+        setUserId(null);
+        toast.success(response.data.message);
+        resetForm();
+        handleModalToggle();
+      }
+      fetchSupplierData(currentPage, itemsPerPage);
     } catch (error) {
       console.log(error);
       toast.error(error.response.data.error);
     }
   };
+
+  const handleSearch = (event) => {
+    if (event.key === "Enter") {
+      setCurrentPage(1);
+      fetchSupplierData(1, itemsPerPage , searchQuery);
+    }
+  }
 
   return (
     <>
@@ -103,13 +159,25 @@ const SuplierManagement = () => {
           <div>
             <h2 className="text-lg font-semibold">Supplier Management</h2>
           </div>
-          <button
-            className="text-white bg-cyan-950 hover:bg-cyan-900 px-3 py-1 gap-2 rounded-lg flex items-center"
-            onClick={handleModalToggle}
-          >
-            <i className="bi bi-person-plus"></i>
-            Add New
-          </button>
+          <div className="flex items-center">
+            <input
+              type="text"
+              placeholder="Search by ID or Name"
+              value={searchQuery}
+              onChange={handleInputChange}
+              onKeyDown={handleSearch}
+              ref={searchInputRef}
+              className="border border-gray-300 rounded-lg px-3 py-1 mr-2"
+              style={{ outline: "none" }}
+            />
+            <button
+              className="text-white bg-cyan-950 hover:bg-cyan-900 px-3 py-1 gap-2 rounded-lg flex items-center"
+              onClick={handleModalToggle}
+            >
+              <i className="bi bi-person-plus"></i>
+              Add New
+            </button>
+          </div>
         </div>
 
         <div className="card-body overflow-auto flex justify-center">
@@ -147,10 +215,16 @@ const SuplierManagement = () => {
                 Array.isArray(supplierList) &&
                 supplierList.map((row, index) => (
                   <tr key={index}>
-                    <td className="border px-6 py-2 text-center">{row.USER_ID}</td>
-                    <td className="border px-6 py-2 text-center">{row.FIRST_NAME} {row.LAST_NAME}</td>
+                    <td className="border px-6 py-2 text-center">
+                      {row.USER_ID}
+                    </td>
+                    <td className="border px-6 py-2 text-center">
+                      {row.FIRST_NAME} {row.LAST_NAME}
+                    </td>
                     <td className="border px-6 py-2">{row.EMAIL}</td>
-                    <td className="border px-6 py-2 text-center">{row.TELEPHONE_NUMBER}</td>
+                    <td className="border px-6 py-2 text-center">
+                      {row.TELEPHONE_NUMBER}
+                    </td>
                     <td className="border px-6 py-2 text-center">{row.CITY}</td>
                     {row.STATUS === 1 ? (
                       <td className="border px-6 text-center">
@@ -168,7 +242,10 @@ const SuplierManagement = () => {
                     <td className="border px-6 py-4 flex justify-center items-center">
                       <button
                         className="text-slate-500 hover:text-slate-800 border-none"
-                        // onClick={() => handleEdit(row)}
+                        onClick={() => {
+                          setSelectedSupplier(row);
+                          handleModalToggle(true);
+                        }}
                       >
                         <FaEdit />
                       </button>
@@ -179,13 +256,13 @@ const SuplierManagement = () => {
             </tbody>
           </table>
         </div>
-        {/* <CommonPagination
-                      totalPages={totalPages}
-                      currentPage={currentPage}
-                      onPageChange={handlePageChange}
-                      itemsPerPage={itemsPerPage}
-                      onItemsPerPageChange={handleItemsPerPageChange}
-                    /> */}
+        <CommonPagination
+          totalPages={totalPages}
+          currentPage={currentPage}
+          onPageChange={handlePageChange}
+          itemsPerPage={itemsPerPage}
+          onItemsPerPageChange={handleItemsPerPageChange}
+        />
       </div>
 
       {isModalOpen && (
@@ -207,9 +284,26 @@ const SuplierManagement = () => {
             </div>
             <div>
               <Formik
-                initialValues={initValues}
+                initialValues={
+                  isEditing && selectedSupplier
+                    ? {
+                        firstName: selectedSupplier.FIRST_NAME,
+                        lastName: selectedSupplier.LAST_NAME,
+                        email: selectedSupplier.EMAIL,
+                        phone: selectedSupplier.TELEPHONE_NUMBER,
+                        line1: selectedSupplier.LINE_1,
+                        line2: selectedSupplier.LINE_2,
+                        city: selectedSupplier.CITY,
+                        distric: selectedSupplier.DISTRICT,
+                        province: selectedSupplier.PROVINCE,
+                        postalCode: selectedSupplier.POSTAL_CODE,
+                        status: selectedSupplier.STATUS.toString(),
+                      }
+                    : initValues
+                }
                 validationSchema={SuplierValidationSchema}
                 onSubmit={handleSubmit}
+                enableReinitialize
               >
                 {({
                   values,
@@ -511,6 +605,7 @@ const SuplierManagement = () => {
           </div>
         </div>
       )}
+      {isLoading && <CommonLoading />}
     </>
   );
 };

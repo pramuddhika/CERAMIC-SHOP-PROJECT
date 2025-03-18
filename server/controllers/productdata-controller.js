@@ -10,8 +10,20 @@ import {
   addNewProductService,
   updateProductService,
   getCategoryListService,
-  getProductService
+  getProductService,
+  getShopProductService
 } from "../services/productdata-service.js";
+
+//get active product data
+export const getShopProductController = async (req, res) => {
+  const { page, limit } = req.query;
+  try {
+    const shopProduct = await getShopProductService(page, limit);
+    res.status(200).json(shopProduct);
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
 
 //generate categoty-subcategory-product id
 export const generateIDController = async (req, res) => {
