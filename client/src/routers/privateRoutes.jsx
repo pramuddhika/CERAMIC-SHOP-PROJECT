@@ -22,6 +22,8 @@ import ProductStock from "../app/UI/Products/Stock";
 import Stages from "../app/UI/Products/Stages";
 
 import Creation from "../app/UI/Products/Creation";
+import Cart from "../store/UI/Cart";
+import Profile from "../store/UI/Profile";
 
 const router = createBrowserRouter([
   { path: "/", element: <WebLayout /> },
@@ -53,7 +55,11 @@ const router = createBrowserRouter([
     path: "/ceramic",
     //TODO: change the layout to new shop layout
     element: <Storelayout />,
-    children: [{ path: "home", element: <Home /> }],
+    children: [
+      { path: "home", element: <Home /> },
+      { path: "cart", element: <Cart /> },
+      { path: "profile", element: <Profile /> },
+    ],
   },
 ]);
 const PrivateRoutes = () => {
