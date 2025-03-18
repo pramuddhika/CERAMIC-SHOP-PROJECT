@@ -88,9 +88,9 @@ export const loginController = async (req, res) => {
 
 // get supplier data
 export const supplierDataController = async (req, res) => {
-  const { page, limit } = req.query;
+  const { page, limit , search } = req.query;
   try {
-    const supplierData = await getSupplierDataService( page, limit);
+    const supplierData = await getSupplierDataService( page, limit , search);
     res.status(200).json(supplierData);
   } catch (error) {
     return res.status(500).json({ error: error.message });

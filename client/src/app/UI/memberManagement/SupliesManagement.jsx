@@ -1,5 +1,5 @@
 import { Formik } from "formik";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import * as Yup from "yup";
 import { Row } from "react-bootstrap";
 import axios from "axios";
@@ -19,6 +19,8 @@ const SuplierManagement = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(5);
   const [isLoading, setIsLoading] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const searchInputRef = useRef(null);
 
   const handleModalToggle = async (isEdit = false) => {
     if (!isModalOpen) {
@@ -80,11 +82,11 @@ const SuplierManagement = () => {
     }
   };
 
-  const fetchSupplierData = async (page, limit) => {
+  const fetchSupplierData = async (page, limit , query = "") => {
     setIsLoading(true);
     try {
       const response = await axios.post(
-        `/api/auth//getSupplierData?page=${page}&limit=${limit}`
+        `/api/auth//getSupplierData?page=${page}&limit=${limit}&${query ? `search=${query}` : ""}`
       );
       setSupplierList(response?.data?.data);
       setTotalPages(response?.data?.totalPages);
@@ -100,13 +102,20 @@ const SuplierManagement = () => {
 
   useEffect(() => {
     UserId();
-    fetchSupplierData(currentPage, itemsPerPage);
+    fetchSupplierData(currentPage, itemsPerPage , searchQuery);
   }, [currentPage, itemsPerPage]);
 
   const handlePageChange = (page) => setCurrentPage(page);
   const handleItemsPerPageChange = (items) => {
     setItemsPerPage(items);
     setCurrentPage(1);
+  };
+
+  const handleInputChange = (event) => {
+    setSearchQuery(event.target.value);
+    if (event.target.value === "") {
+      fetchSupplierData(currentPage, itemsPerPage);
+    }
   };
 
   const handleSubmit = async (values, { resetForm }) => {
@@ -136,6 +145,13 @@ const SuplierManagement = () => {
     }
   };
 
+  const handleSearch = (event) => {
+    if (event.key === "Enter") {
+      setCurrentPage(1);
+      fetchSupplierData(1, itemsPerPage , searchQuery);
+    }
+  }
+
   return (
     <>
       <div className="card rounded-lg h-full w-full">
@@ -143,13 +159,25 @@ const SuplierManagement = () => {
           <div>
             <h2 className="text-lg font-semibold">Supplier Management</h2>
           </div>
-          <button
-            className="text-white bg-cyan-950 hover:bg-cyan-900 px-3 py-1 gap-2 rounded-lg flex items-center"
-            onClick={handleModalToggle}
-          >
-            <i className="bi bi-person-plus"></i>
-            Add New
-          </button>
+          <div className="flex items-center">
+            <input
+              type="text"
+              placeholder="Search by ID or Name"
+              value={searchQuery}
+              onChange={handleInputChange}
+              onKeyDown={handleSearch}
+              ref={searchInputRef}
+              className="border border-gray-300 rounded-lg px-3 py-1 mr-2"
+              style={{ outline: "none" }}
+            />
+            <button
+              className="text-white bg-cyan-950 hover:bg-cyan-900 px-3 py-1 gap-2 rounded-lg flex items-center"
+              onClick={handleModalToggle}
+            >
+              <i className="bi bi-person-plus"></i>
+              Add New
+            </button>
+          </div>
         </div>
 
         <div className="card-body overflow-auto flex justify-center">

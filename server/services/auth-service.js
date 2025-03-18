@@ -140,27 +140,36 @@ export const loginService = (email, password) => {
 };
 
 // get supplier data
-export const getSupplierDataService = async (page = 1, limit = 5) => {
+export const getSupplierDataService = async (page = 1, limit = 5, search = "") => {
   return new Promise((resolve, reject) => {
     const offset = (page - 1) * limit;
+    let queryParams = [parseInt(limit), parseInt(offset)];
+    let countQueryParams = [];
     
+    let searchCondition = "";
+    if (search) {
+      searchCondition = `AND (user.USER_ID LIKE ? OR user.FIRST_NAME LIKE ? OR user.LAST_NAME LIKE ?)`;
+      queryParams.unshift(`%${search}%`, `%${search}%`, `%${search}%`);
+      countQueryParams = [`%${search}%`, `%${search}%`, `%${search}%`];
+    }
+
     const query = `SELECT user.USER_ID, user.FIRST_NAME, user.LAST_NAME, user.EMAIL, user.STATUS,
       address_book.TELEPHONE_NUMBER, address_book.LINE_1, address_book.LINE_2,
       address_book.CITY, address_book.DISTRICT, address_book.PROVINCE, address_book.POSTAL_CODE
       FROM user
       JOIN address_book ON user.USER_ID = address_book.USER_ID
-      WHERE USER_TYPE = 'supplier'
+      WHERE USER_TYPE = 'supplier' ${searchCondition}
       LIMIT ? OFFSET ?`;
 
-    db.query(query, [parseInt(limit), parseInt(offset)], (error, result) => {
+    db.query(query, queryParams, (error, result) => {
       if (error) {
         reject({ message: "Something went wrong, Please try again!", error });
         return;
       }
 
       // Count total suppliers
-      const countQuery = `SELECT COUNT(*) AS total FROM user WHERE USER_TYPE = 'supplier'`;
-      db.query(countQuery, (error, countResult) => {
+      let countQuery = `SELECT COUNT(*) AS total FROM user WHERE USER_TYPE = 'supplier' ${searchCondition}`;
+      db.query(countQuery, countQueryParams.length ? countQueryParams : [], (error, countResult) => {
         if (error) {
           reject({ message: "Something went wrong, Please try again!", error });
           return;
@@ -180,6 +189,7 @@ export const getSupplierDataService = async (page = 1, limit = 5) => {
     });
   });
 };
+
 
 
 // edit supplier
