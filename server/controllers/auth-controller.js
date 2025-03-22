@@ -7,7 +7,9 @@ import {
   getSupplierListService,
   loginService,
   getSupplierDataService,
-  editSupplierService
+  editSupplierService,
+  getMemberDataService,
+  editMemberService
 } from "../services/auth-service.js";
 
 // generate user ID
@@ -102,6 +104,28 @@ export const supplierEditController = async (req, res) => {
   try {
     const editSupplierResponse = await editSupplierService(userId,firstName,lastName,email,status,phone,line1,line2,city,distric,province,postalCode);
     res.status(200).json(editSupplierResponse);
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
+
+// get member data
+export const getMemberDataController = async (req, res) => {
+  const { page, limit , search } = req.query;
+  try {
+    const supplierData = await getMemberDataService( page, limit , search);
+    res.status(200).json(supplierData);
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
+
+// edit member data
+export const editMemberDataController = async (req, res) => {
+  const { userId, firstName, lastName, email, status , userType } = req.body;
+  try {
+    const editMemberResponse = await editMemberService(userId,firstName,lastName,email,status, userType);
+    res.status(200).json(editMemberResponse);
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }

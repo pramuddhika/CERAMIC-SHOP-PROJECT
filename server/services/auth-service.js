@@ -1,5 +1,6 @@
 import { db, EMAIL_USER, EMAIL_PASS} from "../env.js";
 import bcrypt from "bcrypt";
+import e from "express";
 import nodemailer from "nodemailer";
 import { v4 as uuidv4 } from "uuid";
 
@@ -66,7 +67,7 @@ export const createMemberService = (
         [userId, firstName, lastName, userType, email, status, id],
         (error, result) => {
           if (error) {
-            reject({ message: "Something went wrong while inserting data, Please try again!" });
+            reject({ message: "Something went wrong, Please try again!" });
             return;
           }
           resolve({ message: "Member created successfully!" });
@@ -319,6 +320,91 @@ export const editSupplierService = (
             resolve({ message: "Supplier updated successfully!" });
           }
         );
+      }
+    );
+  });
+};
+
+// get member data
+export const getMemberDataService = async (
+  page = 1,
+  limit = 5,
+  search = ""
+) => {
+  return new Promise((resolve, reject) => {
+    const offset = (page - 1) * limit;
+    let queryParams = [parseInt(limit), parseInt(offset)];
+    let countQueryParams = [];
+
+    let searchCondition = " WHERE (USER_TYPE = 'Admin' OR USER_TYPE = 'Sales Manager' OR USER_TYPE = 'Stock Manager')";
+    if (search) {
+      searchCondition += ` AND (user.USER_ID LIKE ? OR user.FIRST_NAME LIKE ? OR user.LAST_NAME LIKE ?)`;
+      queryParams = [`%${search}%`, `%${search}%`, `%${search}%`, ...queryParams];
+      countQueryParams = [`%${search}%`, `%${search}%`, `%${search}%`];
+    }
+
+    const query = `SELECT user.USER_ID, user.FIRST_NAME, user.LAST_NAME, user.EMAIL, user.STATUS, user.USER_TYPE
+      FROM user
+      ${searchCondition}
+      LIMIT ? OFFSET ?`;
+
+    db.query(query, queryParams, (error, result) => {
+      if (error) {
+        reject({ message: "Something went wrong, Please try again!", error });
+        return;
+      }
+
+      // Count total members
+      let countQuery = `SELECT COUNT(*) AS total FROM user ${searchCondition}`;
+      db.query(
+        countQuery,
+        countQueryParams.length ? countQueryParams : [],
+        (error, countResult) => {
+          if (error) {
+            reject({
+              message: "Something went wrong, Please try again!",
+              error,
+            });
+            return;
+          }
+
+          const total = countResult[0].total;
+          const totalPages = Math.ceil(total / limit);
+
+          resolve({
+            data: result,
+            total,
+            page: parseInt(page),
+            limit: parseInt(limit),
+            totalPages,
+          });
+        }
+      );
+    });
+  });
+};
+
+
+// edit member data
+export const editMemberService = (
+  userId,
+  firstName,
+  lastName,
+  email,
+  status,
+  userType
+) => {
+  return new Promise((resolve, reject) => {
+    const query = `UPDATE user SET FIRST_NAME = ?, LAST_NAME = ?, EMAIL = ?, STATUS = ?,USER_TYPE = ? WHERE USER_ID = ? `;
+    db.query(
+      query,
+      [firstName, lastName, email, status,userType, userId],
+      (error, result) => {
+        if (error) {
+          reject({ message: "Something went wrong, Please try again!" });
+          return;
+        }
+        resolve({ message: "Member updated successfully!" });
       }
     );
   });

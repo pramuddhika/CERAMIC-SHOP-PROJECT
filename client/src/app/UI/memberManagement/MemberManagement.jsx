@@ -63,11 +63,11 @@ const MemberManagement = () => {
     }
   };
 
-  const fetchSupplierData = async (page, limit, query = "") => {
+  const fetchMemberData = async (page, limit, query = "") => {
     setIsLoading(true);
     try {
       const response = await axios.post(
-        `/api/auth//getSupplierData?page=${page}&limit=${limit}&${
+        `/api/auth/getMemberData?page=${page}&limit=${limit}&${
           query ? `search=${query}` : ""
         }`
       );
@@ -85,7 +85,7 @@ const MemberManagement = () => {
 
   useEffect(() => {
     UserId();
-    fetchSupplierData(currentPage, itemsPerPage, searchQuery);
+    fetchMemberData(currentPage, itemsPerPage, searchQuery);
   }, [currentPage, itemsPerPage]);
 
   const handlePageChange = (page) => setCurrentPage(page);
@@ -97,7 +97,7 @@ const MemberManagement = () => {
   const handleInputChange = (event) => {
     setSearchQuery(event.target.value);
     if (event.target.value === "") {
-      fetchSupplierData(currentPage, itemsPerPage);
+      fetchMemberData(currentPage, itemsPerPage);
     }
   };
 
@@ -109,9 +109,8 @@ const MemberManagement = () => {
     };
     try {
       if (isEditing && selectedSupplier) {
-        console.log('edit',data);
-        // const response = await axios.post("/api/auth/editSupplier", data);
-        // toast.success(response.data.message);
+        const response = await axios.post("/api/auth/editMemberData", data);
+        toast.success(response.data.message);
         setUserId(null);
         handleModalToggle();
         resetForm();
@@ -122,7 +121,7 @@ const MemberManagement = () => {
         resetForm();
         handleModalToggle();
       }
-      fetchSupplierData(currentPage, itemsPerPage);
+      fetchMemberData(currentPage, itemsPerPage);
     } catch (error) {
       console.log(error);
       toast.error(error.response.data.error);
@@ -132,7 +131,7 @@ const MemberManagement = () => {
   const handleSearch = (event) => {
     if (event.key === "Enter") {
       setCurrentPage(1);
-      fetchSupplierData(1, itemsPerPage, searchQuery);
+      fetchMemberData(1, itemsPerPage, searchQuery);
     }
   };
 
