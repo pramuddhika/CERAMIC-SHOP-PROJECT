@@ -8,6 +8,8 @@ import {
   loginController,
   supplierDataController,
   supplierEditController,
+  getMemberDataController,
+  editMemberDataController,
 } from "../controllers/auth-controller.js";
 
 const router = express.Router();
@@ -28,5 +30,9 @@ router.post("/getSupplierData", supplierDataController);
 router.post("/login", loginController);
 // edit supplier
 router.post("/editSupplier", supplierEditController);
+// get member data
+router.post("/getMemberData", getMemberDataController);
+// edit member data
+router.post("/editMemberData", editMemberDataController);
 
 export default router;
