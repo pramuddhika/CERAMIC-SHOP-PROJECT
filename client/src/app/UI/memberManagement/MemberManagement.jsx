@@ -109,13 +109,14 @@ const MemberManagement = () => {
     };
     try {
       if (isEditing && selectedSupplier) {
-        const response = await axios.post("/api/auth/editSupplier", data);
-        toast.success(response.data.message);
+        console.log('edit',data);
+        // const response = await axios.post("/api/auth/editSupplier", data);
+        // toast.success(response.data.message);
         setUserId(null);
         handleModalToggle();
         resetForm();
       } else {
-        const response = await axios.post("/api/auth/createSupplier", data);
+        const response = await axios.post("/api/auth/createMember", data);
         setUserId(null);
         toast.success(response.data.message);
         resetForm();

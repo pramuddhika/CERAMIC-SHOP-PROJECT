@@ -23,7 +23,6 @@ export const generateUserIdController = async (req, res) => {
 // create member
 export const createMemberController = async (req, res) => {
     const { userId, firstName, lastName, userType, email, status } = req.body;
-    console.log('req.body',req.body)
   if (!userId || !firstName || !lastName || !userType || !email || !status) {
     return res.status(400).json({ error: "All data required!" });
   }

@@ -1,5 +1,7 @@
-import { db } from "../env.js";
+import { db, EMAIL_USER, EMAIL_PASS} from "../env.js";
 import bcrypt from "bcrypt";
+import nodemailer from "nodemailer";
+import { v4 as uuidv4 } from "uuid";
 
 //generate user id
 export const generateUseIdService = () => {
@@ -25,57 +27,111 @@ export const generateUseIdService = () => {
 };
 
 // create member
-export const createMemberService = (userId, firstName, lastName,userType, email, status) => {
+export const createMemberService = (
+  userId,
+  firstName,
+  lastName,
+  userType,
+  email,
+  status
+) => {
   return new Promise((resolve, reject) => {
-    const query = `INSERT INTO user (USER_ID, FIRST_NAME, LAST_NAME, USER_TYPE, EMAIL, STATUS) VALUES (?,?,?,?,?,?)`;
-    db.query(query,[userId, firstName, lastName,userType, email, status], (error, result) => {
-      if (error) {
-        reject({ message: error.message });
+    const id = uuidv4();
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: EMAIL_USER,
+        pass: EMAIL_PASS,
+      },
+      tls: {
+        rejectUnauthorized: false,
+      },
+    });
+
+    const mailOptions = {
+      from: EMAIL_USER,
+      to: email,
+      subject: "GLEAM - Account Created",
+      text: `Hi ${firstName} ${lastName},\n\nYour account has been created successfully. \nYou can register from : http://localhost:5173/registration?token=${id}\n\nThank you,\nGLEAM Team`,
+    };
+
+    transporter.sendMail(mailOptions, (err, data) => {
+      if (err) {
+        reject({ message: "Something went wrong while sending email, Please try again!" });
         return;
       }
-      resolve({ message: "Member created successfully!" });
-      //To do: generate link & send email to user for password setup , link shoud be navigae to registration page with user id
+      const query = `INSERT INTO user (USER_ID, FIRST_NAME, LAST_NAME, USER_TYPE, EMAIL, STATUS, PASSWORD) VALUES (?,?,?,?,?,? ,?)`;
+      db.query(
+        query,
+        [userId, firstName, lastName, userType, email, status, id],
+        (error, result) => {
+          if (error) {
+            reject({ message: "Something went wrong while inserting data, Please try again!" });
+            return;
+          }
+          resolve({ message: "Member created successfully!" });
+        }
+      );
     });
   });
 };
 
+
 // create customer - signup
-export const signUpService = (userId, firstName, lastName, email, password, userType , status) => {
+export const signUpService = (
+  userId,
+  firstName,
+  lastName,
+  email,
+  password,
+  userType,
+  status
+) => {
   return new Promise((resolve, reject) => {
     const query = `INSERT INTO user (USER_ID, FIRST_NAME, LAST_NAME, EMAIL, PASSWORD, USER_TYPE , STATUS) VALUES (?,?,?,?,?,?,?)`;
-    db.query(query,[userId, firstName, lastName, email, password, userType , status], (error, result) => {
-      if (error) {
-        if (error.code === "ER_DUP_ENTRY") {
-          reject({ message: "Email already exists!" });
-          return;
-        } else { 
-          reject({ message: "Something went wrong, Please try again!" });
-          return;
+    db.query(
+      query,
+      [userId, firstName, lastName, email, password, userType, status],
+      (error, result) => {
+        if (error) {
+          if (error.code === "ER_DUP_ENTRY") {
+            reject({ message: "Email already exists!" });
+            return;
+          } else {
+            reject({ message: "Something went wrong, Please try again!" });
+            return;
+          }
         }
+        resolve({ message: "Account created successfully!" });
       }
-      resolve({ message: "Account created successfully!" });
-    });
+    );
   });
 };
 
 //create supplier
-export const createSupplierService = (userId, firstName, lastName, email, status, phone, line1, line2, city, distric, province, postalCode) => {
+export const createSupplierService = (
+  userId,
+  firstName,
+  lastName,
+  email,
+  status,
+  phone,
+  line1,
+  line2,
+  city,
+  distric,
+  province,
+  postalCode
+) => {
   return new Promise((resolve, reject) => {
     const query1 = `INSERT INTO user (USER_ID,EMAIL, FIRST_NAME, LAST_NAME, USER_TYPE, STATUS) VALUES (?,?,?,?,?,?)`;
     const query2 = `INSERT INTO address_book (USER_ID,TAG, TELEPHONE_NUMBER, LINE_1, LINE_2, CITY, DISTRICT, PROVINCE, POSTAL_CODE) VALUES (?,?,?,?,?,?,?,?,?)`;
-    db.query(query1,[userId,email, firstName, lastName, "supplier", status], (error, result) => {
-      if (error) {
-        if(error.code === "ER_DUP_ENTRY"){
-          reject({ message: "User already exists!" });
-          return;
-        } else {
-          reject({ message: "Something wrong plese try again!" });
-          return;
-        }
-      }
-      db.query(query2,[userId,"Primary", phone, line1, line2, city, distric, province, postalCode], (error, result) => {
+    db.query(
+      query1,
+      [userId, email, firstName, lastName, "supplier", status],
+      (error, result) => {
         if (error) {
-          if(error.code === "ER_DUP_ENTRY"){
+          if (error.code === "ER_DUP_ENTRY") {
             reject({ message: "User already exists!" });
             return;
           } else {
@@ -83,9 +139,34 @@ export const createSupplierService = (userId, firstName, lastName, email, status
             return;
           }
         }
-        resolve({ message: "Supplier created successfully!" });
-      });
-    });
+        db.query(
+          query2,
+          [
+            userId,
+            "Primary",
+            phone,
+            line1,
+            line2,
+            city,
+            distric,
+            province,
+            postalCode,
+          ],
+          (error, result) => {
+            if (error) {
+              if (error.code === "ER_DUP_ENTRY") {
+                reject({ message: "User already exists!" });
+                return;
+              } else {
+                reject({ message: "Something wrong plese try again!" });
+                return;
+              }
+            }
+            resolve({ message: "Supplier created successfully!" });
+          }
+        );
+      }
+    );
   });
 };
 
@@ -140,12 +221,16 @@ export const loginService = (email, password) => {
 };
 
 // get supplier data
-export const getSupplierDataService = async (page = 1, limit = 5, search = "") => {
+export const getSupplierDataService = async (
+  page = 1,
+  limit = 5,
+  search = ""
+) => {
   return new Promise((resolve, reject) => {
     const offset = (page - 1) * limit;
     let queryParams = [parseInt(limit), parseInt(offset)];
     let countQueryParams = [];
-    
+
     let searchCondition = "";
     if (search) {
       searchCondition = `AND (user.USER_ID LIKE ? OR user.FIRST_NAME LIKE ? OR user.LAST_NAME LIKE ?)`;
@@ -169,46 +254,72 @@ export const getSupplierDataService = async (page = 1, limit = 5, search = "") =
 
       // Count total suppliers
       let countQuery = `SELECT COUNT(*) AS total FROM user WHERE USER_TYPE = 'supplier' ${searchCondition}`;
-      db.query(countQuery, countQueryParams.length ? countQueryParams : [], (error, countResult) => {
-        if (error) {
-          reject({ message: "Something went wrong, Please try again!", error });
-          return;
+      db.query(
+        countQuery,
+        countQueryParams.length ? countQueryParams : [],
+        (error, countResult) => {
+          if (error) {
+            reject({
+              message: "Something went wrong, Please try again!",
+              error,
+            });
+            return;
+          }
+
+          const total = countResult[0].total;
+          const totalPages = Math.ceil(total / limit);
+
+          resolve({
+            data: result,
+            total,
+            page: parseInt(page),
+            limit: parseInt(limit),
+            totalPages,
+          });
         }
-
-        const total = countResult[0].total;
-        const totalPages = Math.ceil(total / limit);
-
-        resolve({
-          data: result,
-          total,
-          page: parseInt(page),
-          limit: parseInt(limit),
-          totalPages,
-        });
-      });
+      );
     });
   });
 };
 
-
-
 // edit supplier
-export const editSupplierService = (userId, firstName, lastName, email, status, phone, line1, line2, city, distric, province, postalCode) => {
+export const editSupplierService = (
+  userId,
+  firstName,
+  lastName,
+  email,
+  status,
+  phone,
+  line1,
+  line2,
+  city,
+  distric,
+  province,
+  postalCode
+) => {
   return new Promise((resolve, reject) => {
     const query1 = `UPDATE user SET FIRST_NAME = ?, LAST_NAME = ?, EMAIL = ?, STATUS = ? WHERE USER_ID = ?`;
     const query2 = `UPDATE address_book SET TELEPHONE_NUMBER = ?, LINE_1 = ?, LINE_2 = ?, CITY = ?, DISTRICT = ?, PROVINCE = ?, POSTAL_CODE = ? WHERE USER_ID = ?`;
-    db.query(query1,[firstName, lastName, email, status, userId], (error, result) => {
-      if (error) {
-        reject({ message: "Something went wrong, Please try again!" });
-        return;
-      }
-      db.query(query2,[phone, line1, line2, city, distric, province, postalCode, userId], (error, result) => {
+    db.query(
+      query1,
+      [firstName, lastName, email, status, userId],
+      (error, result) => {
         if (error) {
           reject({ message: "Something went wrong, Please try again!" });
           return;
         }
-        resolve({ message: "Supplier updated successfully!" });
-      });
-    });
+        db.query(
+          query2,
+          [phone, line1, line2, city, distric, province, postalCode, userId],
+          (error, result) => {
+            if (error) {
+              reject({ message: "Something went wrong, Please try again!" });
+              return;
+            }
+            resolve({ message: "Supplier updated successfully!" });
+          }
+        );
+      }
+    );
   });
 };
