@@ -15,21 +15,17 @@ const Login = () => {
   const onSubmit = async (values, { resetForm }) => {
     try {
       const response = await axios.post("/api/auth/login", values);
-      console.log("Login response:", response.data);
       toast.success(response.data.message);
-      console.log("User:", response.data.data);
       localStorage.setItem("User", JSON.stringify(response.data.data));
       resetForm();
-      if (response.data.data?.role === "customer") {
-        setTimeout(() => {
+      const user = response.data.data;
+      setTimeout(() => {
+        if (user?.role === "customer") {
           navigate("/ceramic/home");
-        }, 2000);
-      }
-      if (response.data.data?.role === "Admin") {
-        setTimeout(() => {
+        } else if (user?.role === "Admin") {
           navigate("/app/dashboard");
-        }, 2000);
-      }
+        }
+      }, 2000);
     } catch (error) {
       toast.error(error.response?.data?.error);
       console.error("Login failed:", error.response?.data || error.message);

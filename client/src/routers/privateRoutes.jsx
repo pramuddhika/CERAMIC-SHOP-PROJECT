@@ -24,6 +24,20 @@ import Stages from "../app/UI/Products/Stages";
 import Creation from "../app/UI/Products/Creation";
 import Cart from "../store/UI/Cart";
 import Profile from "../store/UI/Profile";
+import { Navigate } from "react-router-dom";
+
+const user = JSON.parse(localStorage.getItem("User"));
+const isAdmin = user?.role === "Admin"; 
+
+// eslint-disable-next-line react/prop-types
+const ProtectedRoute = ({ children, role }) => {
+  if (role === "Admin" && isAdmin) {
+    return children;
+  } else if (role === "customer" && user?.role === "customer") {
+    return children;
+  }
+  return <Navigate to="/login" replace />;
+};
 
 const router = createBrowserRouter([
   { path: "/", element: <WebLayout /> },
@@ -32,7 +46,11 @@ const router = createBrowserRouter([
   { path: "/registration", element: <Registration /> },
   {
     path: "/app",
-    element: <Layout />,
+    element: (
+      <ProtectedRoute role="Admin">
+        <Layout />
+      </ProtectedRoute>
+    ),
     children: [
       { path: "dashboard", element: <DashBoard /> },
       { path: "Product_Management", element: <ProductManagemnet /> },
@@ -53,8 +71,11 @@ const router = createBrowserRouter([
   },
   {
     path: "/ceramic",
-    //TODO: change the layout to new shop layout
-    element: <Storelayout />,
+    element: (
+      <ProtectedRoute role="customer">
+        <Storelayout />
+      </ProtectedRoute>
+    ),
     children: [
       { path: "home", element: <Home /> },
       { path: "cart", element: <Cart /> },
