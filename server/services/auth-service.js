@@ -447,3 +447,62 @@ export const RegisterService = (
     );
   });
 };
+
+// get customer data
+export const getCustomerDataService = async (
+  page = 1,
+  limit = 5,
+  search = ""
+) => {
+  return new Promise((resolve, reject) => {
+    const offset = (page - 1) * limit;
+    let queryParams = [parseInt(limit), parseInt(offset)];
+    let countQueryParams = [];
+
+    let searchCondition = " WHERE (USER_TYPE = 'customer' OR USER_TYPE = 'Whole Customer')";
+    if (search) {
+      searchCondition += ` AND (user.USER_ID LIKE ? OR user.FIRST_NAME LIKE ? OR user.LAST_NAME LIKE ?)`;
+      queryParams = [`%${search}%`, `%${search}%`, `%${search}%`, ...queryParams];
+      countQueryParams = [`%${search}%`, `%${search}%`, `%${search}%`];
+    }
+
+    const query = `SELECT user.USER_ID, user.FIRST_NAME, user.LAST_NAME, user.EMAIL, user.STATUS, user.USER_TYPE
+      FROM user
+      ${searchCondition}
+      LIMIT ? OFFSET ?`;
+
+    db.query(query, queryParams, (error, result) => {
+      if (error) {
+        reject({ message: "Something went wrong, Please try again!", error });
+        return;
+      }
+
+      // Count total members
+      let countQuery = `SELECT COUNT(*) AS total FROM user ${searchCondition}`;
+      db.query(
+        countQuery,
+        countQueryParams.length ? countQueryParams : [],
+        (error, countResult) => {
+          if (error) {
+            reject({
+              message: "Something went wrong, Please try again!",
+              error,
+            });
+            return;
+          }
+
+          const total = countResult[0].total;
+          const totalPages = Math.ceil(total / limit);
+
+          resolve({
+            data: result,
+            total,
+            page: parseInt(page),
+            limit: parseInt(limit),
+            totalPages,
+          });
+        }
+      );
+    });
+  });
+};

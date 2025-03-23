@@ -11,7 +11,8 @@ import {
   getMemberDataController,
   editMemberDataController,
   getRegisterPageDataController,
-  RegisterController
+  RegisterController,
+  getCustomerDataController
 } from "../controllers/auth-controller.js";
 
 const router = express.Router();
@@ -40,5 +41,7 @@ router.post("/editMemberData", editMemberDataController);
 router.get("/getRegisterPageData/:id", getRegisterPageDataController);
 //register user
 router.post("/registerUser", RegisterController);
+//get customer data
+router.post("/getCustomerData", getCustomerDataController);
 
 export default router;
