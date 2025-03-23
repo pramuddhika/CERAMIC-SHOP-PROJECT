@@ -9,7 +9,8 @@ import {
   getSupplierDataService,
   editSupplierService,
   getMemberDataService,
-  editMemberService
+  editMemberService,
+  getRegisterPageDataService
 } from "../services/auth-service.js";
 
 // generate user ID
@@ -126,6 +127,17 @@ export const editMemberDataController = async (req, res) => {
   try {
     const editMemberResponse = await editMemberService(userId,firstName,lastName,email,status, userType);
     res.status(200).json(editMemberResponse);
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
+
+// get register page data
+export const getRegisterPageDataController = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const registerPageData = await getRegisterPageDataService(id);
+    res.status(200).json(registerPageData);
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }

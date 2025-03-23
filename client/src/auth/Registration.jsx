@@ -2,10 +2,18 @@ import hero6 from "../assets/hero6.png";
 import { Formik, Form } from "formik";
 import { Row } from "react-bootstrap";
 import * as Yup from "yup";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import axios from "axios";
+import CommonLoading from "../utils/CommonLoading";
+import { EyeIcon, EyeOffIcon } from "lucide-react";
 
 const Registration = () => {
-  const initialValues = {
+  const [loading, setLoading] = useState(false);
+  const [formValues, setFormValues] = useState(null);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showRePassword, setShowRePassword] = useState(false);
+
+  const initialValues = formValues || {
     firstName: "",
     lastName: "",
     email: "",
@@ -18,11 +26,34 @@ const Registration = () => {
     console.log(values);
   };
 
+  const getRegisterPageData = async (token) => {
+    setLoading(true);
+    try {
+      const response = await axios.get(
+        `/api/auth/getRegisterPageData/${token}`
+      );
+      setFormValues({
+        firstName: response.data.FIRST_NAME || "",
+        lastName: response.data.LAST_NAME || "",
+        email: response.data.EMAIL || "",
+        userType: response.data.USER_TYPE || "",
+        password: "",
+        reEnterPassword: "",
+      });
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setTimeout(() => {
+        setLoading(false);
+      }, 1000);
+    }
+  };
+
   useEffect(() => {
     const queryParams = new URLSearchParams(window.location.search);
     const token = queryParams.get("token");
     if (token) {
-      console.log("Token:", token);
+      getRegisterPageData(token);
     }
   }, []);
 
@@ -55,6 +86,7 @@ const Registration = () => {
           <p className="text-gray-500 text-center mb-8">Welcome to Our Shop.</p>
 
           <Formik
+            enableReinitialize
             initialValues={initialValues}
             validationSchema={RegisterSchema}
             onSubmit={handleSubmit}
@@ -67,6 +99,7 @@ const Registration = () => {
                     <input
                       type="text"
                       name="firstName"
+                      readOnly
                       {...getFieldProps("firstName")}
                       style={{ width: "100%" }}
                       className="bg-gray-100 border border-gray-300 focus:ring-2 focus:ring-teal-500 focus:outline-none rounded-lg w-full h-14 px-4"
@@ -77,6 +110,7 @@ const Registration = () => {
                     <input
                       type="text"
                       name="lastName"
+                      readOnly
                       {...getFieldProps("lastName")}
                       style={{ width: "100%" }}
                       className="bg-gray-100 border border-gray-300 focus:ring-2 focus:ring-teal-500 focus:outline-none rounded-lg w-full h-14 px-4"
@@ -89,6 +123,7 @@ const Registration = () => {
                     <input
                       type="text"
                       name="email"
+                      readOnly
                       {...getFieldProps("email")}
                       style={{ width: "100%" }}
                       className="bg-gray-100 border border-gray-300 focus:ring-2 focus:ring-teal-500 focus:outline-none rounded-lg w-full h-14 px-4"
@@ -99,6 +134,7 @@ const Registration = () => {
                     <input
                       type="text"
                       name="userType"
+                      readOnly
                       {...getFieldProps("userType")}
                       style={{ width: "100%" }}
                       className="bg-gray-100 border border-gray-300 focus:ring-2 focus:ring-teal-500 focus:outline-none rounded-lg w-full h-14 px-4"
@@ -107,15 +143,28 @@ const Registration = () => {
                 </Row>
 
                 <div>
-                  <input
-                    placeholder="Password"
-                    {...getFieldProps("password")}
-                    type="password"
-                    name="password"
-                    autoComplete="on"
-                    style={{ width: "100%" }}
-                    className="bg-gray-100 border border-gray-300 focus:ring-2 focus:ring-teal-500 focus:outline-none rounded-lg w-full h-14 px-4"
-                  />
+                  <div className="relative w-full">
+                    <input
+                      placeholder="Password"
+                      {...getFieldProps("password")}
+                      type={showPassword ? "text" : "password"}
+                      name="password"
+                      autoComplete="on"
+                      style={{ width: "100%" }}
+                      className="bg-gray-100 border border-gray-300 focus:ring-2 focus:ring-teal-500 focus:outline-none rounded-lg w-full h-14 px-4"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword((prev) => !prev)} // Toggle the visibility
+                      className="absolute inset-y-0 right-3 flex items-center"
+                    >
+                      {showPassword ? (
+                        <EyeOffIcon className="w-5 h-5 text-gray-500" />
+                      ) : (
+                        <EyeIcon className="w-5 h-5 text-gray-500" />
+                      )}
+                    </button>
+                  </div>
                   {touched.password && errors.password && (
                     <div className="text-red-600 text-sm mt-1">
                       {errors.password}
@@ -124,15 +173,28 @@ const Registration = () => {
                 </div>
 
                 <div>
-                  <input
-                    placeholder="Re-enter Password"
-                    {...getFieldProps("reEnterPassword")}
-                    type="password"
-                    name="reEnterPassword"
-                    autoComplete="on"
-                    style={{ width: "100%" }}
-                    className="bg-gray-100 border border-gray-300 focus:ring-2 focus:ring-teal-500 focus:outline-none rounded-lg w-full h-14 px-4"
-                  />
+                  <div className="relative w-full">
+                    <input
+                      placeholder="Re-enter Password"
+                      {...getFieldProps("reEnterPassword")}
+                      type={showRePassword ? "text" : "password"}
+                      name="reEnterPassword"
+                      autoComplete="on"
+                      style={{ width: "100%" }}
+                      className="bg-gray-100 border border-gray-300 focus:ring-2 focus:ring-teal-500 focus:outline-none rounded-lg w-full h-14 px-4"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowRePassword((prev) => !prev)} // Toggle the visibility
+                      className="absolute inset-y-0 right-3 flex items-center"
+                    >
+                      {showRePassword ? (
+                        <EyeOffIcon className="w-5 h-5 text-gray-500" />
+                      ) : (
+                        <EyeIcon className="w-5 h-5 text-gray-500" />
+                      )}
+                    </button>
+                  </div>
                   {touched.reEnterPassword && errors.reEnterPassword && (
                     <div className="text-red-600 text-sm mt-1">
                       {errors.reEnterPassword}
@@ -154,6 +216,7 @@ const Registration = () => {
           </Formik>
         </div>
       </div>
+      {loading && <CommonLoading />}
     </div>
   );
 };

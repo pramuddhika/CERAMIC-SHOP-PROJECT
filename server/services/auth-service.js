@@ -408,3 +408,21 @@ export const editMemberService = (
     );
   });
 };
+
+// get register page data
+export const getRegisterPageDataService = async (id) => {
+  return new Promise((resolve, reject) => {
+    const query = `SELECT USER_ID, FIRST_NAME, LAST_NAME, EMAIL,USER_TYPE FROM user WHERE PASSWORD = ?`;
+    db.query(query, [id], (error, result) => {
+      if (error) {
+        reject({ message: "Something went wrong, Please try again!" });
+        return;
+      }
+      if (result.length === 0) {
+        reject({ message: "Invalid Link!" });
+        return;
+      }
+      resolve(result[0]);
+    });
+  });
+};
