@@ -384,7 +384,6 @@ export const getMemberDataService = async (
   });
 };
 
-
 // edit member data
 export const editMemberService = (
   userId,
