@@ -1,26 +1,41 @@
 import axios from "axios";
 import { useState, useEffect } from "react";
+import StorePagination from "./StorePagination";
+import { useNavigate } from "react-router-dom";
 
 const Home = () => {
   const [products, setProducts] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(12);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchProducts = async () => {
+    const fetchProducts = async (page, limit) => {
       try {
         const response = await axios.get(
-          "/api/productdata/get/shop/product?page=1&limit=10"
+          `/api/productdata/get/shop/product?page${page}=&limit=${limit}`
         );
         setProducts(response.data.data);
+        setTotalPages(response?.data?.totalPages);
       } catch (error) {
         console.error("Error fetching products:", error);
       }
     };
 
-    fetchProducts();
-  }, []);
+    fetchProducts(currentPage, itemsPerPage);
+  }, [currentPage, itemsPerPage]);
 
   const handleProductClick = (product) => {
     console.log("Product Details:", product);
+    navigate('/ceramic/product', { state: { product } });
+  };
+
+  const handlePageChange = (page) => setCurrentPage(page);
+
+  const handleItemsPerPageChange = (items) => {
+    setItemsPerPage(items);
+    setCurrentPage(1);
   };
 
   return (
@@ -29,9 +44,14 @@ const Home = () => {
         {products.map((product) => (
           <div
             key={product.PRODUCT_CODE}
-            className="bg-white rounded-lg shadow-md overflow-hidden cursor-pointer transform transition-transform duration-300 hover:scale-105"
+            className="relative bg-white rounded-lg shadow-md overflow-hidden cursor-pointer transform transition-transform duration-300 hover:scale-105"
             onClick={() => handleProductClick(product)}
           >
+            {product.QUANTITY === 0 && (
+              <div className="absolute top-2 right-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded">
+                Sold Out
+              </div>
+            )}
             <div className="aspect-w-1 aspect-h-1">
               <img
                 src={`http://localhost:8080/images/${product.IMAGE}`}
@@ -55,6 +75,13 @@ const Home = () => {
           </div>
         ))}
       </div>
+      <StorePagination
+                totalPages={totalPages}
+                currentPage={currentPage}
+                onPageChange={handlePageChange}
+                itemsPerPage={itemsPerPage}
+                onItemsPerPageChange={handleItemsPerPageChange}
+              />
     </div>
   );
 };

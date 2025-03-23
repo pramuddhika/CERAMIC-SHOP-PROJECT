@@ -405,15 +405,17 @@ export const getProductService = async (subcategory) => {
 };
 
 //get active product data
-export const getShopProductService = async (page, limit) => {
+export const getShopProductService = async (page = 1, limit= 12) => {
   return new Promise((resolve, reject) => {
     const query =
      `SELECT
       product.PRODUCT_CODE,product.SUB_CATAGORY_CODE,product.CATAGORY_CODE,product.NAME,product.DESCRIPTION,product.IMAGE,product.PRICE,
-      sub_category.NAME AS SUB_CATAGORY_NAME,category.NAME AS CATAGORY_NAME
+      sub_category.NAME AS SUB_CATAGORY_NAME,category.NAME AS CATAGORY_NAME,
+      production.QUANTITY
       FROM product
       JOIN sub_category ON product.SUB_CATAGORY_CODE = sub_category.SUB_CATAGORY_CODE
       JOIN category ON product.CATAGORY_CODE = category.CATAGORY_CODE
+      JOIN production ON product.PRODUCT_CODE = production.PRODUCT_CODE
       WHERE product.STATUS = 1 LIMIT ? OFFSET ?`;
     
     const offset = (page - 1) * limit;

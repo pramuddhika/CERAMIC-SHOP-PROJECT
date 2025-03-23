@@ -25,6 +25,7 @@ import Stages from "../app/UI/Products/Stages";
 import Creation from "../app/UI/Products/Creation";
 import Cart from "../store/UI/Cart";
 import Profile from "../store/UI/Profile";
+import ProductView from "../store/UI/ProductViewPage";
 import { Navigate } from "react-router-dom";
 
 const ProtectedRoute = ({ children, role }) => {
@@ -84,6 +85,7 @@ const router = createBrowserRouter([
       { path: "home", element: <Home /> },
       { path: "cart", element: <Cart /> },
       { path: "profile", element: <Profile /> },
+      { path: "product", element: <ProductView /> },
     ],
   },
 ]);
