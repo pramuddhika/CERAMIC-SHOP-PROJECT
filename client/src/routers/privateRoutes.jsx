@@ -29,11 +29,13 @@ import { Navigate } from "react-router-dom";
 
 const ProtectedRoute = ({ children, role }) => {
   const user = JSON.parse(localStorage.getItem("User")); 
-  const isAdmin = user?.role === "Admin";
+  const isAdmin = user?.role === "Admin" || user?.role === "Sales Manager" || user?.role === "Stock Manager";
 
   if (role === "Admin" && isAdmin) {
     return children;
   } else if (role === "customer" && user?.role === "customer") {
+    return children;
+  } else if (role === "customer" && user?.role === "Whole Customer") {
     return children;
   } else {
     console.warn("Unauthorized access attempt or invalid role:", user?.role);

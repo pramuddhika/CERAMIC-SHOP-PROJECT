@@ -26,9 +26,9 @@ const Login = () => {
         throw new Error("Invalid user data received.");
       }
       setTimeout(() => {
-        if (user.role === "customer") {
+        if (user.role === "customer" || user.role === "Whole Customer") {
           navigate("/ceramic/home");
-        } else if (user.role === "Admin") {
+        } else if (user.role === "Admin" || user.role === "Sales Manager" || user.role === "Stock Manager") {
           navigate("/app/dashboard");
         } else {
           console.warn("Unexpected role:", user.role);
