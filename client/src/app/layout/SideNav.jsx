@@ -214,12 +214,18 @@ const SideNav = ({ setActiveTopic }) => {
         )}
 
         <div className="fixed bottom-4 w-[180px]">
-          <NavItem
-            to="/"
-            Icon={() => <i className="bi bi-door-open-fill"></i>}
-            label="Logout"
-            onClick={() => localStorage.clear()}
-          />
+          <div
+            className="flex pl-7 gap-2 items-center hover:text-white hover:bg-text-primary rounded-lg p-2 cursor-pointer text-gray-300"
+            onClick={() => {
+              localStorage.clear();
+              setTimeout(() => {
+                window.location.href = "/";
+              }, 0);
+            }}
+          >
+            <i className="bi bi-door-open-fill"></i>
+            <p>Logout</p>
+          </div>
         </div>
       </div>
     </div>
