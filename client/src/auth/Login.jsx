@@ -4,9 +4,12 @@ import { FaChevronLeft } from "react-icons/fa";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { EyeIcon, EyeOffIcon } from "lucide-react";
 
 const Login = () => {
   const navigate = useNavigate();
+  const [showPassword, setShowPassword] = useState(false);
   const initialValues = {
     email: "",
     password: "",
@@ -19,15 +22,23 @@ const Login = () => {
       localStorage.setItem("User", JSON.stringify(response.data.data));
       resetForm();
       const user = response.data.data;
+      if (!user || !user.role) {
+        throw new Error("Invalid user data received.");
+      }
       setTimeout(() => {
-        if (user?.role === "customer") {
+        if (user.role === "customer") {
           navigate("/ceramic/home");
-        } else if (user?.role === "Admin") {
+        } else if (user.role === "Admin") {
           navigate("/app/dashboard");
+        } else {
+          console.warn("Unexpected role:", user.role);
+          navigate("/login");
         }
       }, 2000);
     } catch (error) {
-      toast.error(error.response?.data?.error);
+      toast.error(
+        error.response?.data?.error || "Login failed. Please try again."
+      );
       console.error("Login failed:", error.response?.data || error.message);
     }
   };
@@ -78,15 +89,28 @@ const Login = () => {
                 </div>
 
                 <div>
-                  <input
-                    placeholder="Password"
-                    {...getFieldProps("password")}
-                    type="password"
-                    name="password"
-                    autoComplete="on"
-                    style={{ width: "100%" }}
-                    className="bg-gray-100 border border-gray-300 focus:ring-2 focus:ring-teal-500 focus:outline-none rounded-lg w-full h-14 px-4"
-                  />
+                  <div className="relative w-full">
+                    <input
+                      placeholder="Password"
+                      {...getFieldProps("password")}
+                      type={showPassword ? "text" : "password"}
+                      name="password"
+                      autoComplete="on"
+                      style={{ width: "100%" }}
+                      className="bg-gray-100 border border-gray-300 focus:ring-2 focus:ring-teal-500 focus:outline-none rounded-lg w-full h-14 px-4"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword((prev) => !prev)}
+                      className="absolute inset-y-0 right-3 flex items-center"
+                    >
+                      {showPassword ? (
+                        <EyeOffIcon className="w-5 h-5 text-gray-500" />
+                      ) : (
+                        <EyeIcon className="w-5 h-5 text-gray-500" />
+                      )}
+                    </button>
+                  </div>
                   {touched.password && errors.password && (
                     <div className="text-red-600 text-sm mt-1">
                       {errors.password}

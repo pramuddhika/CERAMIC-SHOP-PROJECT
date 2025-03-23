@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 
 import WebLayout from "../web/Layout";
@@ -26,17 +27,18 @@ import Cart from "../store/UI/Cart";
 import Profile from "../store/UI/Profile";
 import { Navigate } from "react-router-dom";
 
-const user = JSON.parse(localStorage.getItem("User"));
-const isAdmin = user?.role === "Admin"; 
-
-// eslint-disable-next-line react/prop-types
 const ProtectedRoute = ({ children, role }) => {
+  const user = JSON.parse(localStorage.getItem("User")); 
+  const isAdmin = user?.role === "Admin";
+
   if (role === "Admin" && isAdmin) {
     return children;
   } else if (role === "customer" && user?.role === "customer") {
     return children;
+  } else {
+    console.warn("Unauthorized access attempt or invalid role:", user?.role);
+    return <Navigate to="/login" replace />;
   }
-  return <Navigate to="/login" replace />;
 };
 
 const router = createBrowserRouter([
