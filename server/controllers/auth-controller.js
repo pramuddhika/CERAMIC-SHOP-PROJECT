@@ -10,7 +10,8 @@ import {
   editSupplierService,
   getMemberDataService,
   editMemberService,
-  getRegisterPageDataService
+  getRegisterPageDataService,
+  RegisterService
 } from "../services/auth-service.js";
 
 // generate user ID
@@ -138,6 +139,22 @@ export const getRegisterPageDataController = async (req, res) => {
   try {
     const registerPageData = await getRegisterPageDataService(id);
     res.status(200).json(registerPageData);
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
+
+// register user
+export const RegisterController = async (req, res) => {
+  const { userId, password } = req.body;
+  if (!userId || !password ) {
+    return res.status(400).json({ error: "All data required!" });
+  }
+  try {
+    const saltRounds = 10;
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
+    const registerResponse = await RegisterService(userId,hashedPassword);
+    res.status(200).json(registerResponse);
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }

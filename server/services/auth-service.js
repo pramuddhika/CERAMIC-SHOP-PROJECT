@@ -426,3 +426,24 @@ export const getRegisterPageDataService = async (id) => {
     });
   });
 };
+
+// register user
+export const RegisterService = (
+  userId,
+  password,
+) => {
+  return new Promise((resolve, reject) => {
+    const query = `UPDATE user SET PASSWORD = ? WHERE USER_ID = ?`;
+    db.query(
+      query,
+      [password, userId ],
+      (error, result) => {
+        if (error) {
+          reject({ message: "Something went wrong, Please try again!" });
+          return;
+        }
+        resolve({ message: "User registered successfully!" });
+      }
+    );
+  });
+};

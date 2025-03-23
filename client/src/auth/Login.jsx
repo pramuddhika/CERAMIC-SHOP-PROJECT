@@ -25,6 +25,11 @@ const Login = () => {
           navigate("/ceramic/home");
         }, 2000);
       }
+      if (response.data.data?.role === "Admin") {
+        setTimeout(() => {
+          navigate("/app/dashboard");
+        }, 2000);
+      }
     } catch (error) {
       toast.error(error.response?.data?.error);
       console.error("Login failed:", error.response?.data || error.message);

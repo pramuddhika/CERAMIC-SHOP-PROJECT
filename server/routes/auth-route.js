@@ -10,7 +10,8 @@ import {
   supplierEditController,
   getMemberDataController,
   editMemberDataController,
-  getRegisterPageDataController
+  getRegisterPageDataController,
+  RegisterController
 } from "../controllers/auth-controller.js";
 
 const router = express.Router();
@@ -37,5 +38,7 @@ router.post("/getMemberData", getMemberDataController);
 router.post("/editMemberData", editMemberDataController);
 //get register page data
 router.get("/getRegisterPageData/:id", getRegisterPageDataController);
+//register user
+router.post("/registerUser", RegisterController);
 
 export default router;

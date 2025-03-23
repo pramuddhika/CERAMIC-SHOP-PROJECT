@@ -2,18 +2,22 @@ import hero6 from "../assets/hero6.png";
 import { Formik, Form } from "formik";
 import { Row } from "react-bootstrap";
 import * as Yup from "yup";
+import { toast } from "react-toastify";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import CommonLoading from "../utils/CommonLoading";
 import { EyeIcon, EyeOffIcon } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const Registration = () => {
   const [loading, setLoading] = useState(false);
   const [formValues, setFormValues] = useState(null);
   const [showPassword, setShowPassword] = useState(false);
   const [showRePassword, setShowRePassword] = useState(false);
+  const navigate = useNavigate();
 
   const initialValues = formValues || {
+    userId: "",
     firstName: "",
     lastName: "",
     email: "",
@@ -22,8 +26,23 @@ const Registration = () => {
     reEnterPassword: "",
   };
 
-  const handleSubmit = (values) => {
-    console.log(values);
+  const handleSubmit = async(values) => {
+     const data = {
+      userId: values.userId,
+      password: values.password,
+    }
+    try {
+      const response = await axios.post("/api/auth/registerUser", data);
+      toast.success(response.data.message);
+      navigate("/login");
+    } catch (error) {
+      console.log(error);
+      toast.error(error?.response?.data?.error || "Something went wrong");
+    } finally {
+      setTimeout(() => {
+        setLoading(false);
+      }, 1000);
+    }
   };
 
   const getRegisterPageData = async (token) => {
@@ -33,6 +52,7 @@ const Registration = () => {
         `/api/auth/getRegisterPageData/${token}`
       );
       setFormValues({
+        userId: response.data.USER_ID || "",
         firstName: response.data.FIRST_NAME || "",
         lastName: response.data.LAST_NAME || "",
         email: response.data.EMAIL || "",
@@ -42,6 +62,7 @@ const Registration = () => {
       });
     } catch (error) {
       console.log(error);
+      toast.error(error?.response?.data?.error || "Invalid token");
     } finally {
       setTimeout(() => {
         setLoading(false);
@@ -61,7 +82,7 @@ const Registration = () => {
     password: Yup.string()
       .min(8, "Password must be at least 8 characters")
       .required("required"),
-    repassword: Yup.string()
+    reEnterPassword: Yup.string()
       .oneOf([Yup.ref("password"), null], "Passwords must match")
       .required("required"),
   });
@@ -155,7 +176,7 @@ const Registration = () => {
                     />
                     <button
                       type="button"
-                      onClick={() => setShowPassword((prev) => !prev)} // Toggle the visibility
+                      onClick={() => setShowPassword((prev) => !prev)} 
                       className="absolute inset-y-0 right-3 flex items-center"
                     >
                       {showPassword ? (
@@ -185,7 +206,7 @@ const Registration = () => {
                     />
                     <button
                       type="button"
-                      onClick={() => setShowRePassword((prev) => !prev)} // Toggle the visibility
+                      onClick={() => setShowRePassword((prev) => !prev)}
                       className="absolute inset-y-0 right-3 flex items-center"
                     >
                       {showRePassword ? (
