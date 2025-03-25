@@ -25,15 +25,19 @@ import Stages from "../app/UI/Products/Stages";
 import Creation from "../app/UI/Products/Creation";
 import Cart from "../store/UI/Cart";
 import Profile from "../store/UI/Profile";
+import ProductView from "../store/UI/ProductViewPage";
+import Checkout from "../store/UI/Checkout";
 import { Navigate } from "react-router-dom";
 
 const ProtectedRoute = ({ children, role }) => {
   const user = JSON.parse(localStorage.getItem("User")); 
-  const isAdmin = user?.role === "Admin";
+  const isAdmin = user?.role === "Admin" || user?.role === "Sales Manager" || user?.role === "Stock Manager";
 
   if (role === "Admin" && isAdmin) {
     return children;
   } else if (role === "customer" && user?.role === "customer") {
+    return children;
+  } else if (role === "customer" && user?.role === "Whole Customer") {
     return children;
   } else {
     console.warn("Unauthorized access attempt or invalid role:", user?.role);
@@ -82,6 +86,8 @@ const router = createBrowserRouter([
       { path: "home", element: <Home /> },
       { path: "cart", element: <Cart /> },
       { path: "profile", element: <Profile /> },
+      { path: "product", element: <ProductView /> },
+      { path: "checkout", element: <Checkout /> },
     ],
   },
 ]);

@@ -11,7 +11,8 @@ import {
   getMemberDataService,
   editMemberService,
   getRegisterPageDataService,
-  RegisterService
+  RegisterService,
+  getCustomerDataService
 } from "../services/auth-service.js";
 
 // generate user ID
@@ -155,6 +156,17 @@ export const RegisterController = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, saltRounds);
     const registerResponse = await RegisterService(userId,hashedPassword);
     res.status(200).json(registerResponse);
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
+
+// get customer data
+export const getCustomerDataController = async (req, res) => {
+  const { page, limit , search } = req.query;
+  try {
+    const customerData = await getCustomerDataService( page, limit , search);
+    res.status(200).json(customerData);
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }

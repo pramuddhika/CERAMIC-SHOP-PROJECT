@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 const StoreTopNav = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const navigate = useNavigate();
+  const currentUser = JSON.parse(localStorage.getItem("User"));
 
   const toggleDropdown = () => {
     setDropdownOpen(!dropdownOpen);
@@ -34,15 +35,15 @@ const StoreTopNav = () => {
               className="text-white bg-slate-700 font-bold flex items-center px-2 gap-2"
               onClick={toggleDropdown}
             >
+              {currentUser?.firstName}{' '}{currentUser?.lastName}
               <img
                 src={user}
                 alt="User"
                 className="w-8 h-8 rounded-full object-cover"
               />
-              User Name
             </button>
             {dropdownOpen && (
-              <div className="absolute right-0 mt-2 w-40 bg-white shadow-lg rounded-lg">
+              <div className="absolute right-0 mt-2 w-40 bg-white shadow-lg rounded-lg" style={{ zIndex: 9999, top: "100%"}} >
                 <ul className="py-2 text-gray-700">
                   <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
                     onClick={()=> {
