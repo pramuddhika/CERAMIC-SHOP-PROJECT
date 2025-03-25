@@ -1,8 +1,27 @@
 import { useState } from "react";
+import { Formik, Form } from "formik";
+import * as Yup from "yup";
+import { EyeIcon, EyeOffIcon } from "lucide-react";
+import axios from "axios";
+import { toast } from "react-toastify";
 
 const Profile = () => {
   const [openAccordion, setOpenAccordion] = useState(null);
   const currentUser = JSON.parse(localStorage.getItem("User"));
+  const [showPassword, setShowPassword] = useState(false);
+  const [showRePassword, setShowRePassword] = useState(false);
+
+  const settingFormInitialValues = {
+    password: "",
+    reEnterPassword: "",
+  };
+
+  const settingormSchema = Yup.object().shape({
+    password: Yup.string().required("Password is required"),
+    reEnterPassword: Yup.string()
+      .oneOf([Yup.ref("password"), null], "Passwords must match")
+      .required("Password is required"),
+  });
 
   const toggleAccordion = (index) => {
     setOpenAccordion(openAccordion === index ? null : index);
@@ -30,7 +49,103 @@ const Profile = () => {
   };
 
   const Settings = () => {
-    return <p>password change here</p>;
+    return (
+      <div className="mb-4">
+        <Formik
+          enableReinitialize
+          initialValues={settingFormInitialValues}
+          validationSchema={settingormSchema}
+          onSubmit={async (values) => {
+            const data = {
+              userId: currentUser.id,
+              password: values.password,
+            };
+            try {
+              await axios.post("/api/auth/registerUser", data);
+              toast.success("Password updated successfully");
+              values.password = "";
+              values.reEnterPassword = "";
+            } catch (error) {
+              console.log(error);
+              toast.error("Something went wrong");
+            }
+          }}
+        >
+          {({ getFieldProps, touched, errors, }) => (
+            <Form className="space-y-6">
+              <div className="flex gap-3 items-center justify-center">
+                <div className="col-5">
+                  <div className="relative w-full">
+                    <input
+                      placeholder="Password"
+                      {...getFieldProps("password")}
+                      type={showPassword ? "text" : "password"}
+                      name="password"
+                      autoComplete="on"
+                      style={{ width: "100%" }}
+                      className="bg-gray-100 border border-gray-300 focus:ring-2 focus:ring-teal-500 focus:outline-none rounded-lg w-full h-14 px-4"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword((prev) => !prev)}
+                      className="absolute inset-y-0 right-3 flex items-center"
+                    >
+                      {showPassword ? (
+                        <EyeOffIcon className="w-5 h-5 text-gray-500" />
+                      ) : (
+                        <EyeIcon className="w-5 h-5 text-gray-500" />
+                      )}
+                    </button>
+                  </div>
+                  {touched.password && errors.password && (
+                    <div className="text-red-600 text-sm mt-1">
+                      {errors.password}
+                    </div>
+                  )}
+                </div>
+                <div className="col-5">
+                  <div className="relative w-full">
+                    <input
+                      placeholder="Re-enter Password"
+                      {...getFieldProps("reEnterPassword")}
+                      type={showRePassword ? "text" : "password"}
+                      name="reEnterPassword"
+                      autoComplete="on"
+                      style={{ width: "100%" }}
+                      className="bg-gray-100 border border-gray-300 focus:ring-2 focus:ring-teal-500 focus:outline-none rounded-lg w-full h-14 px-4"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowRePassword((prev) => !prev)}
+                      className="absolute inset-y-0 right-3 flex items-center"
+                    >
+                      {showRePassword ? (
+                        <EyeOffIcon className="w-5 h-5 text-gray-500" />
+                      ) : (
+                        <EyeIcon className="w-5 h-5 text-gray-500" />
+                      )}
+                    </button>
+                  </div>
+                  {touched.reEnterPassword && errors.reEnterPassword && (
+                    <div className="text-red-600 text-sm mt-1">
+                      {errors.reEnterPassword}
+                    </div>
+                  )}
+                </div>
+                <div className="col-1">
+                  <button
+                    type="submit"
+                    className="min-w-full bg-indigo-600 hover:bg-indigo-500 text-white font-semibold p-2 rounded-md"
+                  >
+                    Save
+                  </button>
+                </div>
+              </div>
+            </Form>
+          )}
+        </Formik>
+      </div>
+    );
   };
 
   const accordionData = [
