@@ -26,6 +26,7 @@ import Creation from "../app/UI/Products/Creation";
 import Cart from "../store/UI/Cart";
 import Profile from "../store/UI/Profile";
 import ProductView from "../store/UI/ProductViewPage";
+import Checkout from "../store/UI/Checkout";
 import { Navigate } from "react-router-dom";
 
 const ProtectedRoute = ({ children, role }) => {
@@ -86,6 +87,7 @@ const router = createBrowserRouter([
       { path: "cart", element: <Cart /> },
       { path: "profile", element: <Profile /> },
       { path: "product", element: <ProductView /> },
+      { path: "checkout", element: <Checkout /> },
     ],
   },
 ]);

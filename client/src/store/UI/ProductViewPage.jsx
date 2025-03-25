@@ -11,6 +11,7 @@ const ProductViewPage = () => {
   const navigate = useNavigate();
   const product = location.state?.product;
   const [isZoomed, setIsZoomed] = useState(false);
+  const currentUser = JSON.parse(localStorage.getItem("User"));
 
   if (!product) {
     return <p>Product not found.</p>;
@@ -20,7 +21,7 @@ const ProductViewPage = () => {
     <Container className="py-4 product-view-container">
       <Button
         variant="outline-secondary"
-        className="mb-4 back-button"
+        className="mb-4 back-button flex items-center"
         onClick={() => navigate(-1)}
       >
         <IoArrowBack className="me-2" />
@@ -32,7 +33,7 @@ const ProductViewPage = () => {
           <Col md={6}>
             <div className="position-relative product-image-container">
               <div
-                className={`image-wrapper ${isZoomed ? 'zoomed' : ''}`}
+                className={`image-wrapper ${isZoomed ? "zoomed" : ""}`}
                 onMouseEnter={() => setIsZoomed(true)}
                 onMouseLeave={() => setIsZoomed(false)}
               >
@@ -42,11 +43,8 @@ const ProductViewPage = () => {
                   className="product-image"
                 />
               </div>
-              {product.QUANTITY === 0 && (
-                <Badge
-                  bg="danger"
-                  className="sold-out-badge"
-                >
+              {product.QUANTITY === 0 && currentUser?.role === "customer" && (
+                <Badge bg="danger" className="sold-out-badge">
                   Sold Out
                 </Badge>
               )}
@@ -58,34 +56,25 @@ const ProductViewPage = () => {
               <h2 className="product-price">
                 Rs. {product.PRICE.toLocaleString()}
               </h2>
+              <h4>({product.PRODUCT_CODE})</h4>
               <div className="mb-4">
                 <p className="mb-2">
-                  <strong>Category:</strong> {product.CATAGORY_NAME}
-                </p>
-                <p className="mb-2">
-                  <strong>Sub Category:</strong> {product.SUB_CATAGORY_NAME}
-                </p>
-                <p className="mb-2">
-                  <strong>Stock:</strong> {product.QUANTITY} units
-                </p>
-                <p className="mb-2">
-                  <strong>Product Code:</strong> {product.PRODUCT_CODE}
-                </p>
-                <p className="mb-2">
-                  <strong>Category Code:</strong> {product.CATAGORY_CODE}
+                  {product.CATAGORY_NAME}
+                  {" ---> "}
+                  {product.SUB_CATAGORY_NAME}
                 </p>
               </div>
               <div className="mb-4">
                 <h3 className="h5 mb-3">Description</h3>
-                <p className="product-description">{product.DESCRIPTIOn}</p>
+                <p className="product-description">{product.DESCRIPTION}</p>
               </div>
               <div className="action-buttons">
-                {product.QUANTITY > 0 ? (
+                {product.QUANTITY > 0 && currentUser?.role === "customer" && (
                   <>
                     <Button
                       variant="outline-primary"
                       className="cart-button"
-                      onClick={() => console.log('Add to cart')}
+                      onClick={() => console.log("Add to cart")}
                     >
                       <IoCartOutline className="me-2" />
                       Add to Cart
@@ -93,20 +82,24 @@ const ProductViewPage = () => {
                     <Button
                       variant="primary"
                       className="buy-button"
-                      onClick={() => console.log('Buy now')}
+                      onClick={() => console.log("Buy now")}
                     >
                       <BsHandbag className="me-2" />
                       Buy Now
                     </Button>
                   </>
-                ) : (
-                  <Button
-                    variant="secondary"
-                    className="notify-button"
-                    onClick={() => console.log('Notify when available')}
-                  >
-                    Notify When Available
-                  </Button>
+                )}
+                {currentUser?.role === "Whole Customer" && (
+                  <>
+                    <Button
+                      variant="outline-primary"
+                      className="cart-button"
+                      onClick={() => console.log("Add to cart")}
+                    >
+                      <IoCartOutline className="me-2" />
+                      Add to Cart
+                    </Button>
+                  </>
                 )}
               </div>
             </Card.Body>

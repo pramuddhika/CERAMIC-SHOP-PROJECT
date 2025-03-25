@@ -9,6 +9,7 @@ const Home = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(12);
   const navigate = useNavigate();
+  const currentUser = JSON.parse(localStorage.getItem("User"));
 
   useEffect(() => {
     const fetchProducts = async (page, limit) => {
@@ -28,7 +29,7 @@ const Home = () => {
 
   const handleProductClick = (product) => {
     console.log("Product Details:", product);
-    navigate('/ceramic/product', { state: { product } });
+    navigate("/ceramic/product", { state: { product } });
   };
 
   const handlePageChange = (page) => setCurrentPage(page);
@@ -47,7 +48,7 @@ const Home = () => {
             className="relative bg-white rounded-lg shadow-md overflow-hidden cursor-pointer transform transition-transform duration-300 hover:scale-105"
             onClick={() => handleProductClick(product)}
           >
-            {product.QUANTITY === 0 && (
+            {product.QUANTITY === 0 && currentUser?.role === 'customer' && (
               <div className="absolute top-2 right-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded">
                 Sold Out
               </div>
@@ -76,12 +77,12 @@ const Home = () => {
         ))}
       </div>
       <StorePagination
-                totalPages={totalPages}
-                currentPage={currentPage}
-                onPageChange={handlePageChange}
-                itemsPerPage={itemsPerPage}
-                onItemsPerPageChange={handleItemsPerPageChange}
-              />
+        totalPages={totalPages}
+        currentPage={currentPage}
+        onPageChange={handlePageChange}
+        itemsPerPage={itemsPerPage}
+        onItemsPerPageChange={handleItemsPerPageChange}
+      />
     </div>
   );
 };
