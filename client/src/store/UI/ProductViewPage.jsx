@@ -17,6 +17,23 @@ const ProductViewPage = () => {
     return <p>Product not found.</p>;
   }
 
+  const handaleAddToCart = () => { 
+    const data = {
+      userId: currentUser.id,
+      productCode: product.PRODUCT_CODE,
+      quantity: 1,
+    }
+    console.log("Add to cart", data);
+  }
+
+  const handleBuyNow = () => {
+    const data = {
+      productCode: product.PRODUCT_CODE,
+      quantity: 1,
+    }
+    console.log("Buy Now", data);
+  }
+
   return (
     <Container className="py-4 product-view-container">
       <Button
@@ -74,7 +91,7 @@ const ProductViewPage = () => {
                     <Button
                       variant="outline-primary"
                       className="cart-button"
-                      onClick={() => console.log("Add to cart")}
+                      onClick={() => handaleAddToCart()}
                     >
                       <IoCartOutline className="me-2" />
                       Add to Cart
@@ -82,7 +99,7 @@ const ProductViewPage = () => {
                     <Button
                       variant="primary"
                       className="buy-button"
-                      onClick={() => console.log("Buy now")}
+                      onClick={() => handleBuyNow()}
                     >
                       <BsHandbag className="me-2" />
                       Buy Now
