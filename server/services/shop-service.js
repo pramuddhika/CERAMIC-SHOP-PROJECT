@@ -120,3 +120,26 @@ export const getAddressDataByTagService = async (userId, tag) => {
     });
   });
 };
+
+//get order id
+export const getOrderIdService = async () => {
+  return new Promise((resolve, reject) => {
+    const query = `SELECT MAX(ORDER_ID) AS ORDER_ID FROM orders`;
+    db.query(query, (err, result) => {
+      if (err) {
+        reject({ message: "Something went wrong, Please try again!" });
+      } else {
+        const code = result[0].ORDER_ID;
+        let id;
+        if (code) {
+          const numberpart = parseInt(code.split("-")[1], 10);
+          const newnumberpart = String(numberpart + 1).padStart(6, "0");
+          id = `ORD-${newnumberpart}`;
+        } else {
+          id = `ORD-000001`;
+        }
+        resolve({ newid: id });
+      }
+    });
+  });
+};

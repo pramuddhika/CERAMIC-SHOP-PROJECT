@@ -5,7 +5,8 @@ import {
   getAddressDataService,
   deleteCartDataService,
   getAddressTagsService,
-  getAddressDataByTagService
+  getAddressDataByTagService,
+  getOrderIdService
 } from "../services/shop-service.js";
 
 export const addCartDataController = async (req, res) => {
@@ -130,6 +131,16 @@ export const getAddressDataByTagController = async (req, res) => {
   try {
     const addressData = await getAddressDataByTagService(userId, tag);
     res.status(200).json(addressData);
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
+
+//get order id
+export const getorderIdController = async (req, res) => {
+  try {
+    const orderId = await getOrderIdService();
+    res.status(200).json(orderId);
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }

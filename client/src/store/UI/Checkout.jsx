@@ -8,6 +8,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { FaCreditCard, FaLock } from "react-icons/fa";
 import { SiMastercard, SiVisa } from "react-icons/si";
 import { toast } from "react-toastify";
+import moment from "moment";
 
 const Checkout = () => {
   const location = useLocation();
@@ -17,11 +18,12 @@ const Checkout = () => {
   const [addressTags, setAddressTags] = useState([]);
   const [paymentType, setPaymentType] = useState("Card");
   const [billingAddressTag, setbillingAddressTagTag] = useState("");
-  const [shippingAddressTag, setshippingAddressTag] = useState([]);
+  const [shippingAddressTag, setshippingAddressTag] = useState("");
   const [billingAddressData, setBillingAddressData] = useState({});
   const [shippingAddressData, setShippingAddressData] = useState({});
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isThankYouModalOpen, setIsThankYouModalOpen] = useState(false);
+  const [orderID, setOrderID] = useState();
   const navigate = useNavigate();
 
   const cardPaymentSchema = Yup.object().shape({
@@ -98,9 +100,51 @@ const Checkout = () => {
     }
   };
 
+  const getOrderID = async () => {
+    try {
+      const response = await axios.get("/api/shopdata/getOrderId");
+      setOrderID(response?.data?.newid);
+    } catch (error) {
+      console.error("Error fetching order ID:", error);
+    }
+  };
+
   useEffect(() => {
+    getOrderID();
     fetachAddressTag();
   }, []);
+
+  const handleOrder = async () => {
+    const orders = {
+      orderID: orderID,
+      userId: currentUser.id,
+      date: moment().format("YYYY-MM-DD"),
+      orderType: currentUser.role === "customer" ? "normal" : "whole",
+      totalAmount: calculateTotal(),
+      billingTag: billingAddressTag,
+      shippingTag: shippingAddressTag,
+    };
+    const order_data = {
+      orderID: orderID,
+      product: checkoutItems.map((item) => ({
+        productCode: item.PRODUCT_CODE,
+        quantity: item.QUANTITY,
+        price: item.PRICE,
+      })),
+    };
+    const payment = {
+      orderID: orderID,
+      date: moment().format("YYYY-MM-DD"),
+      paid:
+        currentUser.role === "customer"
+          ? calculateTotal()
+          : calculateTotal() * 0.3,
+      paymentType: paymentType,
+    };
+    console.log(orders);
+    console.log(order_data);
+    console.log(payment);
+  };
 
   return (
     <div className="container mx-auto p-6">
@@ -233,7 +277,9 @@ const Checkout = () => {
           )}
           {addressTags.length === 0 && (
             <div className="flex justify-between items-center mt-4 p-4 bg-gray-50 rounded-lg min-w-full">
-              <p className="text-gray-500">No address found. Please add an address.</p>
+              <p className="text-gray-500">
+                No address found. Please add an address.
+              </p>
               <button
                 className="px-4 py-2 bg-slate-700 text-white rounded-lg"
                 onClick={() => navigate("/ceramic/profile")}
@@ -246,12 +292,16 @@ const Checkout = () => {
       </div>
       <div className="flex justify-end mt-6">
         <button
+          disabled={billingAddressTag === "" || shippingAddressTag === ""}
           className="min-w-full p-2 bg-slate-700 text-white font-semibold rounded-lg"
-          onClick={
-            paymentType === "Card"
-              ? () => setIsModalOpen(true)
-              : handlePlaceOrder
-          }
+          onClick={() => {
+            if (paymentType === "Card") {
+              setIsModalOpen(true);
+            } else {
+              handlePlaceOrder();
+            }
+            handleOrder();
+          }}
         >
           {paymentType === "Card" ? "Pay Now" : "Place Order"}
         </button>
