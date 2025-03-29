@@ -32,13 +32,49 @@ export const addCartDataService = async (productCode, quantity, userId) => {
 //add address data
 export const addAddressDataService = async (userId, city, district, line1, line2, phoneNumber, state, tag, zipCode) => {
   return new Promise((resolve, reject) => {
-    const insertSql = `INSERT INTO address (USER_ID, CITY, DISTRICT, LINE_1, LINE_2, TELEPHONE_NUMBER, PROVINCE, TAG, POSTAL_CODE) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+    const insertSql = `INSERT INTO address_book (USER_ID, CITY, DISTRICT, LINE_1, LINE_2, TELEPHONE_NUMBER, PROVINCE, TAG, POSTAL_CODE) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`;
     db.query(insertSql, [userId, city, district, line1, line2, phoneNumber, state, tag, zipCode], function (err) {
       if (err) {
         reject({ message: "Something went wrong!" });
         return;
       }
       resolve({ message: "Address added successfully!" });
+    });
+  });
+};
+
+//get address data
+export const getAddressDataService = async (userId) => {
+  return new Promise((resolve, reject) => {
+    const selectSql = `SELECT * FROM address_book WHERE USER_ID = ?`;
+    db.query(selectSql, [userId], function (err, result) {
+      if (err) {
+        reject({ message: "Something went wrong!" });
+        return;
+      }
+      resolve(result);
+    });
+  });
+};
+
+//get cart data
+export const getCartDataService = async (userId) => {
+  return new Promise((resolve, reject) => {
+    const selectSql = `SELECT 
+     cart.PRODUCT_CODE,cart.QUANTITY,
+     product.NAME,product.IMAGE,product.PRICE,
+     (production.QUANTITY - IFNULL(order_data.QUANTITY, 0)) AS STOCK_QUANTITY
+     FROM cart
+     INNER JOIN product ON cart.PRODUCT_CODE = product.PRODUCT_CODE
+     INNER JOIN production ON product.PRODUCT_CODE = production.PRODUCT_CODE
+     LEFT JOIN order_data ON product.PRODUCT_CODE = order_data.PRODUCT_CODE
+     WHERE cart.USER_ID = ?`;
+    db.query(selectSql, [userId], function (err, result) {
+      if (err) {
+        reject({ message: err });
+        return;
+      }
+      resolve(result);
     });
   });
 };

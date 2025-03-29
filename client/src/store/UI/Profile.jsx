@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Formik, Form } from "formik";
 import * as Yup from "yup";
 import { EyeIcon, EyeOffIcon } from "lucide-react";
@@ -10,7 +10,23 @@ const Profile = () => {
   const currentUser = JSON.parse(localStorage.getItem("User"));
   const [showPassword, setShowPassword] = useState(false);
   const [showRePassword, setShowRePassword] = useState(false);
-  const [isModalOpen, setIsModalOpen] = useState(false); // State for modal
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [addressData, setAddressData] = useState([]);
+
+  const fetchAddressData = async () => {
+    try {
+      const response = await axios.get(
+        `/api/shopdata/getAddressData/${currentUser.id}`
+      );
+      setAddressData(response.data);
+    } catch (error) {
+      console.error("Error fetching address data:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchAddressData();
+  }, []);
 
   const settingFormInitialValues = {
     password: "",
@@ -229,7 +245,36 @@ const Profile = () => {
                 </th>
               </tr>
             </thead>
-            <tbody></tbody>
+            <tbody>
+              {addressData.map((address, index) => (
+                <tr key={index} className="border-b border-gray-200">
+                  <td className="py-2 px-4 text-gray-700 font-medium">
+                    {address.TAG}
+                  </td>
+                  <td className="py-2 px-4 text-gray-700 font-medium">
+                    {address.TELEPHONE_NUMBER}
+                  </td>
+                  <td className="py-2 px-4 text-gray-700 font-medium">
+                    {address.LINE_1}
+                  </td>
+                  <td className="py-2 px-4 text-gray-700 font-medium">
+                    {address.LINE_2}
+                  </td>
+                  <td className="py-2 px-4 text-gray-700 font-medium">
+                    {address.CITY}
+                  </td>
+                  <td className="py-2 px-4 text-gray-700 font-medium">
+                    {address.DISTRICT}
+                  </td>
+                  <td className="py-2 px-4 text-gray-700 font-medium">
+                    {address.PROVINCE}
+                  </td>
+                  <td className="py-2 px-4 text-gray-700 font-medium">
+                    {address.POSTAL_CODE}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
           </table>
         </div>
         {isModalOpen && (
@@ -242,7 +287,7 @@ const Profile = () => {
                 <h2 className="text-lg font-bold">Add New Address</h2>
                 <button
                   className="text-slate-600 hover:text-main"
-                  onClick={() => setIsModalOpen(false)} // Close modal
+                  onClick={() => setIsModalOpen(false)} 
                 >
                   ✖
                 </button>
@@ -250,9 +295,20 @@ const Profile = () => {
               <Formik
                 initialValues={addressFormInitialValues}
                 validationSchema={addressFormSchema}
-                onSubmit={(values) => {
-                  console.log(values); // Log form values
-                  setIsModalOpen(false); // Close modal on submit
+                onSubmit= {async (values) => {
+                  const data = {
+                    userId: currentUser.id,
+                    ...values
+                  }
+                  try {
+                    const addAddressData = await axios.post("/api/shopdata/addAddressData", data);
+                    toast.success(addAddressData.data.message);
+                    fetchAddressData();
+                    setIsModalOpen(false);
+                  } catch (error) {
+                    console.log(error);
+                    toast.error("Something went wrong");
+                  }
                 }}
               >
                 {({ getFieldProps, touched, errors }) => (
@@ -433,7 +489,7 @@ const Profile = () => {
                 <span className="font-medium text-lg">{item.title}</span>
               </div>
               <div>
-                {!isModalOpen && ( // Prevent rendering when the modal is open
+                {!isModalOpen && ( 
                   <svg
                     className={`w-6 h-6 transform transition-transform duration-200 ${
                       openAccordion === index ? "rotate-180" : ""
@@ -456,7 +512,7 @@ const Profile = () => {
           <div
             className={`transition-all duration-200 ease-in-out ${
               openAccordion === index
-                ? "max-h-40 opacity-100"
+                ? "opacity-100"
                 : "max-h-0 opacity-0"
             } overflow-hidden`}
           >
