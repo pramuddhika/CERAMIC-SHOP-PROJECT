@@ -35,11 +35,14 @@ const ProductViewPage = () => {
   }
 
   const handleBuyNow = () => {
-    const data = {
-      productCode: product.PRODUCT_CODE,
-      quantity: 1,
-    }
-    console.log("Buy Now", data);
+    const checkoutItems = [{
+      PRODUCT_CODE: product.PRODUCT_CODE,
+      NAME: product.NAME,
+      PRICE: product.PRICE,
+      IMAGE: product.IMAGE,
+      QUANTITY: 1,
+    }]
+    navigate("/ceramic/checkout", { state: { checkoutItems } });
   }
 
   return (
@@ -119,7 +122,7 @@ const ProductViewPage = () => {
                     <Button
                       variant="outline-primary"
                       className="cart-button"
-                      onClick={() => console.log("Add to cart")}
+                      onClick={() => handaleAddToCart()}
                     >
                       <IoCartOutline className="me-2" />
                       Add to Cart

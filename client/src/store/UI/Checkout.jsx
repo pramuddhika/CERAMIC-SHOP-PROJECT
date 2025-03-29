@@ -1,13 +1,14 @@
 import { useLocation } from "react-router-dom";
-import { useEffect } from "react";
 
 const Checkout = () => {
   const location = useLocation();
   const { checkoutItems } = location.state || {};
 
-  useEffect(() => {
-    console.log("Checkout items:", checkoutItems);
-  }, [checkoutItems]);
+  console.log("Checkout Items:", checkoutItems);
+
+  const calculateTotal = () => {
+    return checkoutItems?.reduce((total, item) => total + item.PRICE * item.QUANTITY, 0) || 0;
+  };
 
   return (
     <div className="container mx-auto p-6">
@@ -21,19 +22,16 @@ const Checkout = () => {
         <div className="bg-white p-6 shadow-md rounded">
           <h2 className="text-2xl font-semibold mb-4">Order Summary</h2>
           <ul className="mb-4">
-            {/* Example items */}
-            <li className="flex justify-between mb-2">
-              <span>Item 1</span>
-              <span>$20.00</span>
-            </li>
-            <li className="flex justify-between mb-2">
-              <span>Item 2</span>
-              <span>$15.00</span>
-            </li>
+            {checkoutItems?.map((item) => (
+              <li key={item.PRODUCT_CODE} className="flex justify-between mb-2">
+                <span>{item.NAME} (x{item.QUANTITY})</span>
+                <span>Rs.{(item.PRICE * item.QUANTITY).toFixed(2)}</span>
+              </li>
+            ))}
           </ul>
           <div className="flex justify-between font-bold text-lg">
             <span>Total</span>
-            <span>$35.00</span>
+            <span>Rs.{calculateTotal().toFixed(2)}</span>
           </div>
         </div>
 

@@ -463,10 +463,6 @@ const Profile = () => {
       content: "View your past orders and purchase history.",
     },
     {
-      title: "To Ship",
-      content: "View your past orders and purchase history.",
-    },
-    {
       title: "Order History",
       content: "View your past orders and purchase history.",
     },
