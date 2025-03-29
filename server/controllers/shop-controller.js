@@ -3,7 +3,9 @@ import {
   getCartDataService,
   addAddressDataService,
   getAddressDataService,
-  deleteCartDataService
+  deleteCartDataService,
+  getAddressTagsService,
+  getAddressDataByTagService
 } from "../services/shop-service.js";
 
 export const addCartDataController = async (req, res) => {
@@ -100,6 +102,34 @@ export const deleteCartDataController = async (req, res) => {
   try {
     const cartData = await deleteCartDataService(userId, productCode);
     res.status(200).json(cartData);
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
+
+//get address tags
+export const getAddressTagController = async (req, res) => {
+  const { userId } = req.params;
+  if (!userId) {
+    return res.status(400).json({ error: "Something went wrong!" });
+  }
+  try {
+    const addressTagData = await getAddressTagsService(userId);
+    res.status(200).json(addressTagData);
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
+
+//get address data by tag
+export const getAddressDataByTagController = async (req, res) => {
+  const { userId, tag } = req.params;
+  if (!userId || !tag) {
+    return res.status(400).json({ error: "Something went wrong!" });
+  }
+  try {
+    const addressData = await getAddressDataByTagService(userId, tag);
+    res.status(200).json(addressData);
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }

@@ -92,3 +92,31 @@ export const deleteCartDataService = async (userId, productCode) => {
     });
   });
 };
+
+//get address tags
+export const getAddressTagsService = async (userId) => {
+  return new Promise((resolve, reject) => {
+    const selectSql = `SELECT DISTINCT TAG FROM address_book WHERE USER_ID = ?`;
+    db.query(selectSql, [userId], function (err, result) {
+      if (err) {
+        reject({ message: "Something went wrong!" });
+        return;
+      }
+      resolve(result);
+    });
+  });
+};
+
+//get address data by tag
+export const getAddressDataByTagService = async (userId, tag) => {
+  return new Promise((resolve, reject) => {
+    const selectSql = `SELECT * FROM address_book WHERE USER_ID = ? AND TAG = ?`;
+    db.query(selectSql, [userId, tag], function (err, result) {
+      if (err) {
+        reject({ message: "Something went wrong!" });
+        return;
+      }
+      resolve(result);
+    });
+  });
+};

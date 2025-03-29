@@ -5,6 +5,8 @@ import {
   getAddressDataController,
   getCartDataController,
   deleteCartDataController,
+  getAddressTagController,
+  getAddressDataByTagController
 } from "../controllers/shop-controller.js";
 
 const router = express.Router();
@@ -19,5 +21,9 @@ router.get('/getAddressData/:userId', getAddressDataController);
 router.get('/getCartData/:userId', getCartDataController);
 // cart data delete
 router.put('/deleteCartData', deleteCartDataController);
+// get address tags
+router.get('/getAddressTags/:userId', getAddressTagController);
+// get address data
+router.get('/getAddressData/:userId/:tag', getAddressDataByTagController);
 
 export default router;

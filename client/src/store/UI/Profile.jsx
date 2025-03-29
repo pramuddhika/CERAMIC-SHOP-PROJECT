@@ -458,10 +458,14 @@ const Profile = () => {
       title: "Address Book",
       content: Addressbook(),
     },
-    {
-      title: "To Pay",
-      content: "View your past orders and purchase history.",
-    },
+    ...(currentUser.role === "Whole Customer"
+      ? [
+          {
+            title: "To Pay",
+            content: "View your past orders and purchase history.",
+          },
+        ]
+      : []),
     {
       title: "Order History",
       content: "View your past orders and purchase history.",
@@ -471,6 +475,7 @@ const Profile = () => {
       content: Settings(),
     },
   ];
+  
 
   return (
     <div className="max-w-full mx-auto p-4 space-y-4">

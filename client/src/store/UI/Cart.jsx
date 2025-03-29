@@ -11,8 +11,6 @@ const Cart = () => {
   const currentUser = JSON.parse(localStorage.getItem("User"));
   const [isLoading, setIsLoading] = useState(true);
 
-  console.log("Current User:", currentUser.role);
-
   const fetchCartItems = async () => {
     setIsLoading(true);
     try {
@@ -98,7 +96,7 @@ const Cart = () => {
               Add items to your cart to see them here.
             </p>
             <button
-              className="min-w-full p-2 bg-violet-700 text-white font-semibold rounded-lg"
+              className="min-w-full p-2 bg-slate-700 text-white font-semibold rounded-lg"
               onClick={() => navigate("/ceramic/home")}
             >
               Continue Shopping
@@ -143,7 +141,7 @@ const Cart = () => {
                       parseInt(e.target.value, 10)
                     )
                   }
-                  className="w-16 p-2 border rounded-lg text-center"
+                  className="w-16 p-2 border rounded-lg text-center outline-none"
                 />
                 <button
                   onClick={() => handleDeleteItem(item.PRODUCT_CODE)}
@@ -177,7 +175,7 @@ const Cart = () => {
               </div>
             </div>
             <button
-              className="min-w-full p-2 bg-violet-700 text-white font-semibold rounded-lg"
+              className="min-w-full p-2 bg-slate-700 text-white font-semibold rounded-lg"
               onClick={() => handleCheckout()}
             >
               Checkout
