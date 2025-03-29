@@ -473,7 +473,7 @@ export const getCustomerDataService = async (
 
     db.query(query, queryParams, (error, result) => {
       if (error) {
-        reject({ message: "Something went wrong, Please try again!", error });
+        reject({ message: "Something went wrong, Please try again!"});
         return;
       }
 
@@ -484,10 +484,7 @@ export const getCustomerDataService = async (
         countQueryParams.length ? countQueryParams : [],
         (error, countResult) => {
           if (error) {
-            reject({
-              message: "Something went wrong, Please try again!",
-              error,
-            });
+            reject({message: "Something went wrong, Please try again!"});
             return;
           }
 

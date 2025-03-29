@@ -5,6 +5,8 @@ import { IoArrowBack, IoCartOutline } from "react-icons/io5";
 import { BsHandbag } from "react-icons/bs";
 import { useState } from "react";
 import "./ProductViewPage.css";
+import axios from "axios";
+import { toast } from "react-toastify";
 
 const ProductViewPage = () => {
   const location = useLocation();
@@ -17,13 +19,19 @@ const ProductViewPage = () => {
     return <p>Product not found.</p>;
   }
 
-  const handaleAddToCart = () => { 
+  const handaleAddToCart = async() => { 
     const data = {
       userId: currentUser.id,
       productCode: product.PRODUCT_CODE,
       quantity: 1,
     }
-    console.log("Add to cart", data);
+    try {
+      const response = await axios.post('/api/shopdata/addCartData', data,)
+      toast.success(response.data.message ?? "Item added to cart successfully!");
+    } catch (error) {
+      toast.error(error.response?.data?.error ?? "Failed to add item to cart.");
+      console.error("Error adding to cart:", error.message);
+    }
   }
 
   const handleBuyNow = () => {
