@@ -10,6 +10,7 @@ const Profile = () => {
   const currentUser = JSON.parse(localStorage.getItem("User"));
   const [showPassword, setShowPassword] = useState(false);
   const [showRePassword, setShowRePassword] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false); // State for modal
 
   const settingFormInitialValues = {
     password: "",
@@ -26,6 +27,40 @@ const Profile = () => {
   const toggleAccordion = (index) => {
     setOpenAccordion(openAccordion === index ? null : index);
   };
+
+  const addressFormInitialValues = {
+    tag: "",
+    phoneNumber: "",
+    line1: "",
+    line2: "",
+    city: "",
+    district: "",
+    state: "",
+    zipCode: "",
+  };
+
+  const addressFormSchema = Yup.object().shape({
+    tag: Yup.string()
+      .max(20, "Too long!")
+      .required("Tag is required"),
+    phoneNumber: Yup.string()
+      .matches(/^\d{10}$/, "Phone number must be 10 digits")
+      .required("Phone number is required"),
+    line1: Yup.string()
+      .max(15, "Too long!")
+      .required("Line 1 is required"),
+    line2: Yup.string().max(15, "Too long!"),
+    city: Yup.string()
+      .max(30, "Too long!")
+      .required("City is required"),
+    district: Yup.string()
+      .max(25, "Too long!")
+      .required("District is required"),
+    state: Yup.string().required("State is required"),
+    zipCode: Yup.string()
+      .matches(/^\d{5}$/, "Zip code must be 5 digits")
+      .required("Zip code is required"),
+  });
 
   const PersonalInformation = () => {
     return (
@@ -71,7 +106,7 @@ const Profile = () => {
             }
           }}
         >
-          {({ getFieldProps, touched, errors, }) => (
+          {({ getFieldProps, touched, errors }) => (
             <Form className="space-y-6">
               <div className="flex gap-3 items-center justify-center">
                 <div className="col-5">
@@ -148,6 +183,216 @@ const Profile = () => {
     );
   };
 
+  const Addressbook = () => {
+    return (
+      <div>
+        <div className="flex justify-between items-center mb-4">
+          <p>
+            <span className="text-lg font-semibold text-gray-700">
+              Manage your address book
+            </span>
+          </p>
+          <button
+            onClick={() => setIsModalOpen(true)} 
+            className="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold p-2 rounded-md"
+          >
+            Add New Address
+          </button>
+        </div>
+        <div className="mt-2">
+          <table className="min-w-full bg-white border border-gray-300 rounded-lg shadow-sm">
+            <thead className="bg-gray-100">
+              <tr>
+                <th className="min-w-[70px] py-2 px-4 text-left text-gray-600 font-medium">
+                  Tag
+                </th>
+                <th className="min-w-[100px] py-2 px-4 text-left text-gray-600 font-medium">
+                  Phone Number
+                </th>
+                <th className="min-w-[120px] py-2 px-4 text-left text-gray-600 font-medium">
+                  Line 1
+                </th>
+                <th className="min-w-[120px] py-2 px-4 text-left text-gray-600 font-medium">
+                  Line 2
+                </th>
+                <th className="min-w-[80px] py-2 px-4 text-left text-gray-600 font-medium">
+                  City
+                </th>
+                <th className="min-w-[90px] py-2 px-4 text-left text-gray-600 font-medium">
+                  District
+                </th>
+                <th className="min-w-[90px] py-2 px-4 text-left text-gray-600 font-medium">
+                  State
+                </th>
+                <th className="min-w-[60px] py-2 px-4 text-left text-gray-600 font-medium">
+                  Zip Code
+                </th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        {isModalOpen && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+            <div
+              className="bg-white rounded-lg shadow-lg p-4 overflow-auto"
+              style={{ width: "1000px", height: "50vh" }}
+            >
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-lg font-bold">Add New Address</h2>
+                <button
+                  className="text-slate-600 hover:text-main"
+                  onClick={() => setIsModalOpen(false)} // Close modal
+                >
+                  ✖
+                </button>
+              </div>
+              <Formik
+                initialValues={addressFormInitialValues}
+                validationSchema={addressFormSchema}
+                onSubmit={(values) => {
+                  console.log(values); // Log form values
+                  setIsModalOpen(false); // Close modal on submit
+                }}
+              >
+                {({ getFieldProps, touched, errors }) => (
+                  <Form>
+                    <div className="grid grid-cols-4 gap-4 mb-2">
+                      <div className="mb-4">
+                        <label className="block text-sm text-gray-600">
+                          Tag
+                        </label>
+                        <input
+                          {...getFieldProps("tag")}
+                          className="border rounded-lg px-3 py-2 mt-1 w-full"
+                        />
+                        {touched.tag && errors.tag && (
+                          <span className="text-red-500 text-sm block">
+                            {errors.tag}
+                          </span>
+                        )}
+                      </div>
+                      <div className="mb-4">
+                        <label className="block text-sm text-gray-600">
+                          Phone Number
+                        </label>
+                        <input
+                          {...getFieldProps("phoneNumber")}
+                          className="border rounded-lg px-3 py-2 mt-1 w-full"
+                        />
+                        {touched.phoneNumber && errors.phoneNumber && (
+                          <span className="text-red-500 text-sm block">
+                            {errors.phoneNumber}
+                          </span>
+                        )}
+                      </div>
+                      <div className="mb-4">
+                        <label className="block text-sm text-gray-600">
+                          Line 1
+                        </label>
+                        <input
+                          {...getFieldProps("line1")}
+                          className="border rounded-lg px-3 py-2 mt-1 w-full"
+                        />
+                        {touched.line1 && errors.line1 && (
+                          <span className="text-red-500 text-sm block">
+                            {errors.line1}
+                          </span>
+                        )}
+                      </div>
+                      <div className="mb-4">
+                        <label className="block text-sm text-gray-600">
+                          Line 2
+                        </label>
+                        <input
+                          {...getFieldProps("line2")}
+                          className="border rounded-lg px-3 py-2 mt-1 w-full"
+                        />
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-4 gap-4 mb-2">
+                      <div className="mb-4">
+                        <label className="block text-sm text-gray-600">
+                          City
+                        </label>
+                        <input
+                          {...getFieldProps("city")}
+                          className="border rounded-lg px-3 py-2 mt-1 w-full"
+                        />
+                        {touched.city && errors.city && (
+                          <span className="text-red-500 text-sm block">
+                            {errors.city}
+                          </span>
+                        )}
+                      </div>
+                      <div className="mb-4">
+                        <label className="block text-sm text-gray-600">
+                          District
+                        </label>
+                        <input
+                          {...getFieldProps("district")}
+                          className="border rounded-lg px-3 py-2 mt-1 w-full"
+                        />
+                        {touched.district && errors.district && (
+                          <span className="text-red-500 text-sm block">
+                            {errors.district}
+                          </span>
+                        )}
+                      </div>
+                      <div className="mb-4">
+                        <label className="block text-sm text-gray-600">
+                          State
+                        </label>
+                        <input
+                          {...getFieldProps("state")}
+                          className="border rounded-lg px-3 py-2 mt-1 w-full"
+                        />
+                        {touched.state && errors.state && (
+                          <span className="text-red-500 text-sm block">
+                            {errors.state}
+                          </span>
+                        )}
+                      </div>
+                      <div className="mb-4">
+                        <label className="block text-sm text-gray-600">
+                          Zip Code
+                        </label>
+                        <input
+                          {...getFieldProps("zipCode")}
+                          className="border rounded-lg px-3 py-2 mt-1 w-full"
+                        />
+                        {touched.zipCode && errors.zipCode && (
+                          <span className="text-red-500 text-sm block">
+                            {errors.zipCode}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex justify-end space-x-4">
+                      <button
+                        type="button"
+                        onClick={() => setIsModalOpen(false)}
+                        className="bg-gray-300 hover:bg-gray-400 text-gray-700 font-semibold p-2 rounded-md"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="submit"
+                        className="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold p-2 rounded-md"
+                      >
+                        Submit
+                      </button>
+                    </div>
+                  </Form>
+                )}
+              </Formik>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
+
   const accordionData = [
     {
       title: "Personal Information",
@@ -155,7 +400,7 @@ const Profile = () => {
     },
     {
       title: "Address Book",
-      content: "View your past orders and purchase history.",
+      content: Addressbook(),
     },
     {
       title: "To Pay",

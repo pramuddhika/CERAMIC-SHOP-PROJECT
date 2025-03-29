@@ -1,7 +1,9 @@
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 
 const Cart = () => {
   const navigate = useNavigate();
+  const [selectedItems, setSelectedItems] = useState([]);
   const cartItems = [
     {
       id: 1,
@@ -29,6 +31,21 @@ const Cart = () => {
     console.log(`Delete item ${id}`);
   };
 
+  const handleSelectItem = (id) => {
+    setSelectedItems((prevSelected) =>
+      prevSelected.includes(id)
+        ? prevSelected.filter((itemId) => itemId !== id)
+        : [...prevSelected, id]
+    );
+  };
+
+  const calculateSelectedTotal = () => {
+    return cartItems
+      .filter((item) => selectedItems.includes(item.id))
+      .reduce((total, item) => total + item.price * item.quantity, 0)
+      .toFixed(2);
+  };
+
   return (
     <div className="flex gap-8">
       <div className="col-8">
@@ -41,6 +58,13 @@ const Cart = () => {
               key={item.id}
               className="flex items-center justify-between bg-white p-4 rounded-lg shadow-sm"
             >
+              <input
+                type="checkbox"
+                checked={selectedItems.includes(item.id)}
+                onChange={() => handleSelectItem(item.id)}
+                className="m-4 w-4 h-4 border-gray-300 rounded-xl"
+                style={{ cursor: "pointer" }}
+              />
               <img
                 src={item.image}
                 alt={item.name}
@@ -75,15 +99,7 @@ const Cart = () => {
           <div className="space-y-4 mb-6">
             <div className="flex justify-between text-lg text-gray-600">
               <span>Subtotal</span>
-              <span>
-                $
-                {cartItems
-                  .reduce(
-                    (total, item) => total + item.price * item.quantity,
-                    0
-                  )
-                  .toFixed(2)}
-              </span>
+              <span>${calculateSelectedTotal()}</span>
             </div>
             <div className="flex justify-between text-lg text-gray-600">
               <span>Shipping</span>
@@ -92,15 +108,7 @@ const Cart = () => {
             <div className="border-t pt-4 mt-4">
               <div className="flex justify-between font-semibold text-2xl">
                 <span>Total</span>
-                <span>
-                  $
-                  {cartItems
-                    .reduce(
-                      (total, item) => total + item.price * item.quantity,
-                      0
-                    )
-                    .toFixed(2)}
-                </span>
+                <span>${calculateSelectedTotal()}</span>
               </div>
             </div>
           </div>
