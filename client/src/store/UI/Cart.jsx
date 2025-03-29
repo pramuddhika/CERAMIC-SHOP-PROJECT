@@ -61,9 +61,9 @@ const Cart = () => {
               />
               <button
                 onClick={() => handleDeleteItem(item.id)}
-                className="text-red-500 hover:text-red-700 ml-4"
+                className='text-red-500 hover:text-red-700 transition duration-200 bg-red-200 rounded-2xl p-2 ml-1'
               >
-                &#x1F5D1;
+                <i className="bi bi-trash3"></i>
               </button>
             </div>
           ))}
