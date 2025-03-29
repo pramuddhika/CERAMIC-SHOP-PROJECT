@@ -1,4 +1,14 @@
+import { useLocation } from "react-router-dom";
+import { useEffect } from "react";
+
 const Checkout = () => {
+  const location = useLocation();
+  const { checkoutItems } = location.state || {};
+
+  useEffect(() => {
+    console.log("Checkout items:", checkoutItems);
+  }, [checkoutItems]);
+
   return (
     <div className="container mx-auto p-6">
       <div className="col-8">

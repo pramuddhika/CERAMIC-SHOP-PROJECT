@@ -71,10 +71,24 @@ export const getCartDataService = async (userId) => {
      WHERE cart.USER_ID = ?`;
     db.query(selectSql, [userId], function (err, result) {
       if (err) {
-        reject({ message: err });
+        reject({ message: "Something went wrong!" });
         return;
       }
       resolve(result);
+    });
+  });
+};
+
+//delete cart data
+export const deleteCartDataService = async (userId, productCode) => {
+  return new Promise((resolve, reject) => {
+    const deleteSql = `DELETE FROM cart WHERE USER_ID = ? AND PRODUCT_CODE = ?`;
+    db.query(deleteSql, [userId, productCode], function (err) {
+      if (err) {
+        reject({ message: "Something went wrong!" });
+        return;
+      }
+      resolve({ message: "Item removed from cart successfully!" });
     });
   });
 };

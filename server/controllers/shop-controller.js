@@ -2,7 +2,8 @@ import {
   addCartDataService,
   getCartDataService,
   addAddressDataService,
-  getAddressDataService
+  getAddressDataService,
+  deleteCartDataService
 } from "../services/shop-service.js";
 
 export const addCartDataController = async (req, res) => {
@@ -84,6 +85,20 @@ export const getCartDataController = async (req, res) => {
   }
   try {
     const cartData = await getCartDataService(userId);
+    res.status(200).json(cartData);
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
+
+//delete cart data
+export const deleteCartDataController = async (req, res) => {
+  const { userId, productCode } = req.body;
+  if (!userId || !productCode) {
+    return res.status(400).json({ error: "Something went wrong!" });
+  }
+  try {
+    const cartData = await deleteCartDataService(userId, productCode);
     res.status(200).json(cartData);
   } catch (error) {
     return res.status(500).json({ error: error.message });

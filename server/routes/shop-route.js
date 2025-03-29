@@ -4,6 +4,7 @@ import {
   addAddressDataController,
   getAddressDataController,
   getCartDataController,
+  deleteCartDataController,
 } from "../controllers/shop-controller.js";
 
 const router = express.Router();
@@ -16,5 +17,7 @@ router.post("/addAddressData", addAddressDataController);
 router.get('/getAddressData/:userId', getAddressDataController);
 //get cart data
 router.get('/getCartData/:userId', getCartDataController);
+// cart data delete
+router.put('/deleteCartData', deleteCartDataController);
 
 export default router;
