@@ -5,6 +5,8 @@ import { IoArrowBack, IoCartOutline } from "react-icons/io5";
 import { BsHandbag } from "react-icons/bs";
 import { useState } from "react";
 import "./ProductViewPage.css";
+import axios from "axios";
+import { toast } from "react-toastify";
 
 const ProductViewPage = () => {
   const location = useLocation();
@@ -15,6 +17,32 @@ const ProductViewPage = () => {
 
   if (!product) {
     return <p>Product not found.</p>;
+  }
+
+  const handaleAddToCart = async() => { 
+    const data = {
+      userId: currentUser.id,
+      productCode: product.PRODUCT_CODE,
+      quantity: 1,
+    }
+    try {
+      const response = await axios.post('/api/shopdata/addCartData', data,)
+      toast.success(response.data.message ?? "Item added to cart successfully!");
+    } catch (error) {
+      toast.error(error.response?.data?.error ?? "Failed to add item to cart.");
+      console.error("Error adding to cart:", error.message);
+    }
+  }
+
+  const handleBuyNow = () => {
+    const checkoutItems = [{
+      PRODUCT_CODE: product.PRODUCT_CODE,
+      NAME: product.NAME,
+      PRICE: product.PRICE,
+      IMAGE: product.IMAGE,
+      QUANTITY: 1,
+    }]
+    navigate("/ceramic/checkout", { state: { checkoutItems } });
   }
 
   return (
@@ -74,7 +102,7 @@ const ProductViewPage = () => {
                     <Button
                       variant="outline-primary"
                       className="cart-button"
-                      onClick={() => console.log("Add to cart")}
+                      onClick={() => handaleAddToCart()}
                     >
                       <IoCartOutline className="me-2" />
                       Add to Cart
@@ -82,7 +110,7 @@ const ProductViewPage = () => {
                     <Button
                       variant="primary"
                       className="buy-button"
-                      onClick={() => console.log("Buy now")}
+                      onClick={() => handleBuyNow()}
                     >
                       <BsHandbag className="me-2" />
                       Buy Now
@@ -94,7 +122,7 @@ const ProductViewPage = () => {
                     <Button
                       variant="outline-primary"
                       className="cart-button"
-                      onClick={() => console.log("Add to cart")}
+                      onClick={() => handaleAddToCart()}
                     >
                       <IoCartOutline className="me-2" />
                       Add to Cart

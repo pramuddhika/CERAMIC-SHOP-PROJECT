@@ -7,6 +7,7 @@ import masterDataRouter from "./routes/masterData-route.js";
 import productDataRouter from "./routes/productdata-route.js";
 import materialDataRouter from "./routes/materialData-route.js";
 import productcreationDataRouter from "./routes/productcreationData-route.js";
+import shopRouter from "./routes/shop-route.js";
 
 import authRouter from "./routes/auth-route.js";
 
@@ -24,6 +25,8 @@ app.use("/api/masterdata", masterDataRouter);
 //part - product data
 app.use("/api/productdata", productDataRouter);
 app.use("/api/productcreationdata", productcreationDataRouter);
+// parth - shop data
+app.use("/api/shopdata", shopRouter);
 
 //part - material data
 app.use("/api/materialdata", materialDataRouter);
