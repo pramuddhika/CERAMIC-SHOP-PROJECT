@@ -433,21 +433,23 @@ const Profile = () => {
                 <span className="font-medium text-lg">{item.title}</span>
               </div>
               <div>
-                <svg
-                  className={`w-6 h-6 transform transition-transform duration-200 ${
-                    openAccordion === index ? "rotate-180" : ""
-                  }`}
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M19 9l-7 7-7-7"
-                  />
-                </svg>
+                {!isModalOpen && ( // Prevent rendering when the modal is open
+                  <svg
+                    className={`w-6 h-6 transform transition-transform duration-200 ${
+                      openAccordion === index ? "rotate-180" : ""
+                    }`}
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M19 9l-7 7-7-7"
+                    />
+                  </svg>
+                )}
               </div>
             </div>
           </button>
