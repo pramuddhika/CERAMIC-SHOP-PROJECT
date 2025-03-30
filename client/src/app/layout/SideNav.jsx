@@ -234,6 +234,13 @@ const SideNav = ({ setActiveTopic }) => {
           topic="Contact Us"
         />
 
+        <NavItem
+          to="/app/profile"
+          Icon={() => <i className="bi bi-person-circle"></i>}
+          label="Profile"
+          topic="Profile"
+        />
+
         <div className="fixed bottom-4 w-[180px]">
           <div
             className="flex pl-7 gap-2 items-center hover:text-white hover:bg-text-primary rounded-lg p-2 cursor-pointer text-gray-300"

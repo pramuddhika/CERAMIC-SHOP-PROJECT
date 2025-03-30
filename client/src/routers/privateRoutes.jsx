@@ -24,6 +24,7 @@ import Stages from "../app/UI/Products/Stages";
 import ContactUs from "../app/UI/ContactUs";
 import Income from "../app/UI/Income";
 import OrderData from "../app/UI/OrderData";
+import AppProfile from "../app/UI/Profile";
 
 import Creation from "../app/UI/Products/Creation";
 import Cart from "../store/UI/Cart";
@@ -79,6 +80,7 @@ const router = createBrowserRouter([
       { path: "contact-us", element: <ContactUs /> },
       { path: "income", element: <Income /> },
       { path: "order-data", element: <OrderData /> },
+      { path: "profile", element: <AppProfile /> },
     ],
   },
   {
