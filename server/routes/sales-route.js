@@ -1,8 +1,9 @@
 import express from "express";
 import {
   getPaymentDataController,
-    updatePaymentDataController,
-    getOrderDataController,
+  updatePaymentDataController,
+  getOrderDataController,
+  updateOrderDataController,
 } from "../controllers/sales-controller.js";
 
 const router = express.Router();
@@ -14,5 +15,7 @@ router.post("/updatePaymentData", updatePaymentDataController);
 
 //get order data
 router.post("/getOrderData", getOrderDataController);
+//update order data
+router.post("/updateOrderData", updateOrderDataController);
 
 export default router;

@@ -49,12 +49,12 @@ const Income = () => {
   };
 
   useEffect(() => {
-    fetchPaymentData(1, itemsPerPage);
+    fetchPaymentData(1, itemsPerPage,searchQuery);
   }, []);
 
   useEffect(() => {
-    fetchPaymentData(currentPage, itemsPerPage);
-  }, [currentPage, itemsPerPage]);
+    fetchPaymentData(currentPage, itemsPerPage,searchQuery);
+  }, [currentPage, itemsPerPage,searchQuery]);
 
   const handlePageChange = (page) => setCurrentPage(page);
 
@@ -63,18 +63,16 @@ const Income = () => {
     setCurrentPage(1);
   };
 
-  const handleSearch = (event) => {
-    if (event.key === "Enter") {
+  const handleSearch = () => {
       setCurrentPage(1);
       fetchPaymentData(1, itemsPerPage, searchQuery);
-    }
   };
 
   const handleInputChange = (event) => {
     setSearchQuery(event.target.value);
     if (event.target.value === "") {
       setCurrentPage(1);
-      fetchPaymentData(1, itemsPerPage);
+      fetchPaymentData(1, itemsPerPage,searchQuery);
     }
   };
 
@@ -114,7 +112,7 @@ const Income = () => {
       setSelectedItem(null);
       setNewPayment("");
       setPaymentStatus("");
-      fetchPaymentData(currentPage, itemsPerPage);
+      fetchPaymentData(currentPage, itemsPerPage,searchQuery);
     } catch (error) {
       toast.error(
         error?.response?.data?.error ||

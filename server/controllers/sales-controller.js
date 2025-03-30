@@ -2,6 +2,7 @@ import {
   getPaymentDataService,
   updatePaymentDataService,
   getOrderDataService,
+  updateOrderDataService,
 } from "../services/sales-service.js";
 
 //get payment data
@@ -35,6 +36,17 @@ export const getOrderDataController = async (req, res) => {
   const { page, limit, search } = req.query;
   try {
     const orderData = await getOrderDataService(page, limit, search);
+    res.status(200).json(orderData);
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
+
+//update order data
+export const updateOrderDataController = async (req, res) => {
+  const { orderId, orderStatus, orderUpdate } = req.body;
+  try {
+    const orderData = await updateOrderDataService(orderId, orderStatus, orderUpdate);
     res.status(200).json(orderData);
   } catch (error) {
     return res.status(500).json({ error: error.message });

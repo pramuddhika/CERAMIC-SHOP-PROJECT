@@ -139,6 +139,7 @@ export const getOrderDataService = async (
                 createdDate: row.createdDate,
                 orderStatus: row.orderStatus,
                 paymentStatus: row.paymentStatus,
+                value: row.VALUE,
                 orderData: [],
               };
               acc.push(order);
@@ -168,3 +169,50 @@ export const getOrderDataService = async (
     });
   });
 };
+
+//update order data
+export const updateOrderDataService = async (orderId, orderStatus, orderUpdate) => {
+  return new Promise((resolve, reject) => {
+    const updateOrderSql = `UPDATE orders SET STATUS = ? WHERE ORDER_ID = ?`;
+    const updateOrderDataSql = `UPDATE order_data SET COMPLETED_QUANTITY = COMPLETED_QUANTITY + ? WHERE ORDER_ID = ? AND PRODUCT_CODE = ?`;
+    const updateProductionSql = `UPDATE production SET UPDATE_DATE = ?, QUANTITY = QUANTITY - ? WHERE PRODUCT_CODE = ?`;
+
+    // Update order status
+    db.query(updateOrderSql, [orderStatus, orderId], (err) => {
+      if (err) {
+        return reject({ message: "Error updating order status!", error: err });
+      }
+
+      // Update order_data and production tables
+      const updatePromises = orderUpdate.map((item) => {
+        return new Promise((res, rej) => {
+          db.query(
+            updateOrderDataSql,
+            [item.addedQuantity, orderId, item.productCode],
+            (err) => {
+              if (err) {
+                return rej(err);
+              }
+
+              db.query(updateProductionSql, [new Date(), item.addedQuantity, item.productCode], (err) => {
+                if (err) {
+                  return rej(err);
+                }
+                res();
+              });
+            }
+          );
+        });
+      });
+
+      Promise.all(updatePromises)
+        .then(() => {
+          resolve({ message: "Order data updated successfully!" });
+        })
+        .catch((err) => {
+          reject({ message: "Error updating order data!", error: err });
+        });
+    });
+  });
+};
+
