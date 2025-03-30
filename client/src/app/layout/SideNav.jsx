@@ -1,6 +1,7 @@
 import { Link, useLocation } from "react-router-dom";
 import PropTypes from "prop-types";
 import { useState } from "react";
+import "../../utils/SlideBar.css";
 
 const SideNav = ({ setActiveTopic }) => {
   const location = useLocation();
@@ -67,10 +68,11 @@ const SideNav = ({ setActiveTopic }) => {
 
   return (
     <div className="flex h-screen">
-      <div className="w-[180px] bg-slate-700">
-        <div className="flex items-center justify-center h-16 bg-slate-700 mb-4">
+      <div className="w-[180px] bg-slate-700 flex flex-col h-full">
+        <div className="flex-shrink-0 flex items-center justify-center h-16 bg-slate-700 mb-4">
           <h1 className="text-white font-bold text-lg">GLEAM CERAMIC</h1>
         </div>
+        <div className="flex-1 overflow-y-auto sidebar">
         <NavItem
           to="/app/dashboard"
           Icon={() => <i className="bi bi-card-text"></i>}
@@ -241,7 +243,8 @@ const SideNav = ({ setActiveTopic }) => {
           topic="Profile"
         />
 
-        <div className="fixed bottom-4 w-[180px]">
+        </div>
+        <div className="flex-shrink-0 w-full bg-slate-700 py-4">
           <div
             className="flex pl-7 gap-2 items-center hover:text-white hover:bg-text-primary rounded-lg p-2 cursor-pointer text-gray-300"
             onClick={() => {

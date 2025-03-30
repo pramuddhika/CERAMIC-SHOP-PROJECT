@@ -11,7 +11,7 @@ import * as Yup from "yup";
 import CommonLoading from "../../utils/CommonLoading";
 
 const Masterdata = () => {
-  const [activeTab, setActiveTab] = useState(1);
+  const [activeTab, setActiveTab] = useState(3);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentData, setCurrentData] = useState([]);
   const [isEditing, setIsEditing] = useState(false);
@@ -104,7 +104,7 @@ const Masterdata = () => {
       <div className="card rounded-lg h-full w-full">
         <div className="card-header flex justify-between items-center border-b py-2 bg-gray-100">
           <ul className="flex space-x-4">
-            {["Payment", "Order", "Stock"].map((tabName, index) => (
+            {["Stock"].map((tabName, index) => (
               <li key={index}>
                 <button
                   className={`px-4 py-2 text-sm font-semibold ${
