@@ -8,6 +8,8 @@ import productDataRouter from "./routes/productdata-route.js";
 import materialDataRouter from "./routes/materialData-route.js";
 import productcreationDataRouter from "./routes/productcreationData-route.js";
 import shopRouter from "./routes/shop-route.js";
+import saleDataRouter from "./routes/sales-route.js";
+import dashboardRouter from "./routes/dashboard-route.js";
 
 import authRouter from "./routes/auth-route.js";
 
@@ -27,7 +29,10 @@ app.use("/api/productdata", productDataRouter);
 app.use("/api/productcreationdata", productcreationDataRouter);
 // parth - shop data
 app.use("/api/shopdata", shopRouter);
-
+// path - sales
+app.use("/api/sales", saleDataRouter);
+//parth - dashboard
+app.use("/api/dashboard", dashboardRouter);
 //part - material data
 app.use("/api/materialdata", materialDataRouter);
 //part - auth
