@@ -191,15 +191,13 @@ export const addOrderPaymentController = async (req, res) => {
 
 //get order data
 export const getOrderDataController = async (req, res) => {
-  const { userId, page, limit } = req.params;
-  console.log("userId", userId);
-  console.log("page8", page);
-  console.log("limit8", limit);
+  const { userId } = req.params;
+  const { page, limit } = req.query;
   if (!userId) {
     return res.status(400).json({ error: "Something went wrong!" });
   }
   try {
-    const orderData = await getOrderDataService(userId,page,limit);
+    const orderData = await getOrderDataService(userId, page, limit);
     res.status(200).json(orderData);
   } catch (error) {
     return res.status(500).json({ error: error.message });

@@ -226,13 +226,7 @@ export const addOrderPaymentService = async (date, orderID, paid, paymentType , 
 
 //get order data
 export const getOrderDataService = async (userId, page = 1, limit = 5) => {
-  console.log("userId", userId);
-  console.log("page", page);
-  console.log("limit", limit);
   return new Promise((resolve, reject) => {
-    const offset = (page - 1) * limit;
-
-    // First get total count of distinct orders
     const countQuery = `SELECT COUNT(DISTINCT o.ORDER_ID) AS total FROM orders o WHERE o.USER_ID = ?`;
     
     db.query(countQuery, [userId], (err, countResult) => {
@@ -254,25 +248,22 @@ export const getOrderDataService = async (userId, page = 1, limit = 5) => {
         });
       }
 
-      // Query to fetch paginated order data with LEFT JOINs to ensure all order data is retrieved
+      // Query to fetch all order data first
       const selectSql = `
-        WITH OrderDetails AS (
-          SELECT DISTINCT o.ORDER_ID,
+        WITH OrderData AS (
+          SELECT DISTINCT 
+            o.ORDER_ID,
             o.DATE AS ORDER_DATE,
             o.VALUE AS ORDER_VALUE,
             o.STATUS AS ORDER_STATUS,
             o.SHIPPING_TAG,
             o.BILLING_TAG,
             p.PAYMENT_STATUS,
-            GROUP_CONCAT(
-              JSON_OBJECT(
-                'productCode', od.PRODUCT_CODE,
-                'productName', pr.NAME,
-                'productImage', pr.IMAGE,
-                'productPrice', od.UNIT_PRICE,
-                'productQty', od.QUANTITY
-              )
-            ) as product_details,
+            od.PRODUCT_CODE,
+            pr.NAME AS PRODUCT_NAME,
+            pr.IMAGE AS PRODUCT_IMAGE,
+            od.UNIT_PRICE,
+            od.QUANTITY,
             shipping.CITY AS SHIPPING_CITY,
             shipping.DISTRICT AS SHIPPING_DISTRICT,
             shipping.LINE_1 AS SHIPPING_LINE1,
@@ -286,7 +277,8 @@ export const getOrderDataService = async (userId, page = 1, limit = 5) => {
             billing.LINE_2 AS BILLING_LINE2,
             billing.PROVINCE AS BILLING_STATE,
             billing.POSTAL_CODE AS BILLING_ZIP,
-            billing.TELEPHONE_NUMBER AS BILLING_PHONE
+            billing.TELEPHONE_NUMBER AS BILLING_PHONE,
+            ROW_NUMBER() OVER (ORDER BY o.ORDER_ID DESC) as row_num
           FROM orders o
           LEFT JOIN payment p ON o.ORDER_ID = p.ORDER_ID
           LEFT JOIN order_data od ON o.ORDER_ID = od.ORDER_ID
@@ -294,14 +286,13 @@ export const getOrderDataService = async (userId, page = 1, limit = 5) => {
           LEFT JOIN address_book shipping ON o.SHIPPING_TAG = shipping.TAG AND o.USER_ID = shipping.USER_ID
           LEFT JOIN address_book billing ON o.BILLING_TAG = billing.TAG AND o.USER_ID = billing.USER_ID
           WHERE o.USER_ID = ?
-          GROUP BY o.ORDER_ID
-          ORDER BY o.ORDER_ID DESC
-          LIMIT ? OFFSET ?
         )
-        SELECT * FROM OrderDetails`;
+        SELECT * FROM OrderData 
+        WHERE row_num > ? AND row_num <= ?
+        ORDER BY ORDER_ID DESC`;
 
-
-      db.query(selectSql, [userId, parseInt(limit), parseInt(offset)], (err, results) => {
+      const offset = (page - 1) * limit;
+      db.query(selectSql, [userId, offset, offset + parseInt(limit)], (err, results) => {
         if (err) {
           return reject({ message: "Something went wrong!", error: err });
         }
