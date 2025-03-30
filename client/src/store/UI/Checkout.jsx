@@ -484,13 +484,6 @@ const Checkout = () => {
 
                     <div className="flex justify-end space-x-3 mt-6">
                       <button
-                        type="button"
-                        onClick={() => setIsModalOpen(false)}
-                        className="px-6 py-3 text-gray-600 hover:text-gray-800 font-medium transition-colors"
-                      >
-                        Cancel
-                      </button>
-                      <button
                         type="submit"
                         className="px-6 py-3 bg-slate-600 text-white rounded-lg hover:bg-slate-700 font-medium transition-colors flex items-center gap-2"
                       >

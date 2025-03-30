@@ -458,14 +458,6 @@ const Profile = () => {
       title: "Address Book",
       content: Addressbook(),
     },
-    ...(currentUser.role === "Whole Customer"
-      ? [
-          {
-            title: "To Pay",
-            content: "View your past orders and purchase history.",
-          },
-        ]
-      : []),
     {
       title: "Order History",
       content: "View your past orders and purchase history.",
