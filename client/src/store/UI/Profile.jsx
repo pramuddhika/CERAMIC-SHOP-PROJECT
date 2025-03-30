@@ -4,6 +4,7 @@ import * as Yup from "yup";
 import { EyeIcon, EyeOffIcon } from "lucide-react";
 import axios from "axios";
 import { toast } from "react-toastify";
+import CommonPagination from "../../utils/CommonPagination";
 
 const Profile = () => {
   const [openAccordion, setOpenAccordion] = useState(null);
@@ -56,19 +57,13 @@ const Profile = () => {
   };
 
   const addressFormSchema = Yup.object().shape({
-    tag: Yup.string()
-      .max(20, "Too long!")
-      .required("Tag is required"),
+    tag: Yup.string().max(20, "Too long!").required("Tag is required"),
     phoneNumber: Yup.string()
       .matches(/^\d{10}$/, "Phone number must be 10 digits")
       .required("Phone number is required"),
-    line1: Yup.string()
-      .max(15, "Too long!")
-      .required("Line 1 is required"),
+    line1: Yup.string().max(15, "Too long!").required("Line 1 is required"),
     line2: Yup.string().max(15, "Too long!"),
-    city: Yup.string()
-      .max(30, "Too long!")
-      .required("City is required"),
+    city: Yup.string().max(30, "Too long!").required("City is required"),
     district: Yup.string()
       .max(25, "Too long!")
       .required("District is required"),
@@ -209,7 +204,7 @@ const Profile = () => {
             </span>
           </p>
           <button
-            onClick={() => setIsModalOpen(true)} 
+            onClick={() => setIsModalOpen(true)}
             className="bg-slate-600 hover:bg-slate-500 text-white font-semibold p-2 rounded-md"
           >
             Add New Address
@@ -287,7 +282,7 @@ const Profile = () => {
                 <h2 className="text-lg font-bold">Add New Address</h2>
                 <button
                   className="text-slate-600 hover:text-main"
-                  onClick={() => setIsModalOpen(false)} 
+                  onClick={() => setIsModalOpen(false)}
                 >
                   ✖
                 </button>
@@ -295,13 +290,16 @@ const Profile = () => {
               <Formik
                 initialValues={addressFormInitialValues}
                 validationSchema={addressFormSchema}
-                onSubmit= {async (values) => {
+                onSubmit={async (values) => {
                   const data = {
                     userId: currentUser.id,
-                    ...values
-                  }
+                    ...values,
+                  };
                   try {
-                    const addAddressData = await axios.post("/api/shopdata/addAddressData", data);
+                    const addAddressData = await axios.post(
+                      "/api/shopdata/addAddressData",
+                      data
+                    );
                     toast.success(addAddressData.data.message);
                     fetchAddressData();
                     setIsModalOpen(false);
@@ -449,6 +447,279 @@ const Profile = () => {
     );
   };
 
+  const OrderHistory = () => {
+    const [orderData, setOrderData] = useState([]);
+    const [selectedOrder, setSelectedOrder] = useState(null);
+    const [showAddressModal, setShowAddressModal] = useState(false);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const [itemsPerPage, setItemsPerPage] = useState(5);
+
+    const fetchOrderData = async (page, limit) => {
+      try {
+        const response = await axios.get(
+          `/api/shopdata/getOrderData/${currentUser.id}?page=${page}&limit=${limit}`
+        );
+        setOrderData(response.data.data);
+        setTotalPages(response?.data?.totalPages);
+      } catch (error) {
+        console.error("Error fetching order data:", error);
+      }
+    };
+
+    useEffect(() => {
+      fetchOrderData(currentPage, itemsPerPage);
+    }, [currentPage, itemsPerPage]);
+
+    const handleViewClick = (order) => {
+      setSelectedOrder(order);
+      setShowAddressModal(true);
+    };
+
+    const handlePageChange = (page) => setCurrentPage(page);
+
+    const handleItemsPerPageChange = (items) => {
+      setItemsPerPage(items);
+      setCurrentPage(1);
+    };
+
+    if (!orderData || orderData.length === 0) {
+      return (
+        <div className="flex flex-col items-center justify-center h-full">
+          <p className="text-gray-500">No orders found.</p>
+        </div>
+      );
+    }
+
+    return (
+      <>
+        <div className="overflow-x-auto">
+          <table className="min-w-full bg-white border border-gray-300 rounded-lg shadow-sm">
+            <thead className="bg-gray-100">
+              <tr>
+                <th className="py-3 px-6 text-left text-gray-600 font-medium">
+                  Order ID
+                </th>
+                <th className="py-3 px-6 text-left text-gray-600 font-medium">
+                  Order Value
+                </th>
+                <th className="py-3 px-6 text-left text-gray-600 font-medium">
+                  Order Date
+                </th>
+                <th className="py-3 px-6 text-left text-gray-600 font-medium">
+                  Order Status
+                </th>
+                <th className="py-3 px-6 text-left text-gray-600 font-medium">
+                  Payment Status
+                </th>
+                <th className="py-3 px-6 text-left text-gray-600 font-medium">
+                  View
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {orderData.map((order, index) => (
+                <tr
+                  key={index}
+                  className="border-b border-gray-200 hover:bg-gray-50"
+                >
+                  <td className="py-3 px-6 text-gray-700 font-medium">
+                    {order.orderID}
+                  </td>
+                  <td className="py-3 px-6 text-gray-700 font-medium">
+                    Rs.{order.orderValue}
+                  </td>
+                  <td className="py-3 px-6 text-gray-700 font-medium">
+                    {new Date(order.orderDate).toLocaleDateString()}
+                  </td>
+                  <td className="py-3 px-6">
+                    <span
+                      className={`px-2 py-1 rounded-full text-xs font-semibold 
+                      ${
+                        order.orderStatus === "complete"
+                          ? "bg-green-100 text-green-800"
+                          : order.orderStatus === "shipped"
+                          ? "bg-blue-100 text-blue-800"
+                          : "bg-yellow-100 text-yellow-800"
+                      }`}
+                    >
+                      {order.orderStatus.charAt(0).toUpperCase() +
+                        order.orderStatus.slice(1)}
+                    </span>
+                  </td>
+                  <td className="py-3 px-6">
+                    <span
+                      className={`px-2 py-1 rounded-full text-xs font-semibold 
+                      ${
+                        order.paymentStatus === "complete"
+                          ? "bg-green-100 text-green-800"
+                          : order.paymentStatus === "pending"
+                          ? "bg-yellow-100 text-yellow-800"
+                          : "bg-red-100 text-red-800"
+                      }`}
+                    >
+                      {order.paymentStatus
+                        ? order.paymentStatus.charAt(0).toUpperCase() +
+                          order.paymentStatus.slice(1)
+                        : "N/A"}
+                    </span>
+                  </td>
+                  <td className="py-3 px-6 text-gray-700 font-medium">
+                    <button
+                      onClick={() => handleViewClick(order)}
+                      className="text-blue-600 hover:text-blue-800"
+                    >
+                      <i className="bi bi-eye-fill"></i>
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <CommonPagination
+          totalPages={totalPages}
+          currentPage={currentPage}
+          onPageChange={handlePageChange}
+          itemsPerPage={itemsPerPage}
+          onItemsPerPageChange={handleItemsPerPageChange}
+        />
+
+        {showAddressModal && selectedOrder && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+            <div className="bg-white rounded-lg p-6 min-w-2xl w-full mx-4">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-semibold">Order Details</h2>
+                <button
+                  onClick={() => setShowAddressModal(false)}
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  ✕
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-4">
+                  <h3 className="font-semibold text-gray-700">
+                    Shipping Address
+                  </h3>
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <p className="text-sm text-gray-600">
+                      {selectedOrder.shippingAddress?.line1}
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      {selectedOrder.shippingAddress?.line2}
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      {selectedOrder.shippingAddress?.city},{" "}
+                      {selectedOrder.shippingAddress?.district}
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      {selectedOrder.shippingAddress?.state} -{" "}
+                      {selectedOrder.shippingAddress?.zipCode}
+                    </p>
+                    <p className="text-sm text-gray-600 mt-2">
+                      Phone: {selectedOrder.shippingAddress?.phoneNumber}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <h3 className="font-semibold text-gray-700">
+                    Billing Address
+                  </h3>
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <p className="text-sm text-gray-600">
+                      {selectedOrder.billingAddress?.line1}
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      {selectedOrder.billingAddress?.line2}
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      {selectedOrder.billingAddress?.city},{" "}
+                      {selectedOrder.billingAddress?.district}
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      {selectedOrder.billingAddress?.state} -{" "}
+                      {selectedOrder.billingAddress?.zipCode}
+                    </p>
+                    <p className="text-sm text-gray-600 mt-2">
+                      Phone: {selectedOrder.billingAddress?.phoneNumber}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-6">
+                <h3 className="font-semibold text-gray-700 mb-4">
+                  Order Items
+                </h3>
+                <div className="overflow-x-auto">
+                  <table className="min-w-full bg-white border border-gray-300 rounded-lg shadow-sm">
+                    <thead className="bg-gray-100">
+                      <tr>
+                        <th className="py-3 px-4 text-left text-gray-600 font-medium">
+                          Product Code
+                        </th>
+                        <th className="py-3 px-4 text-left text-gray-600 font-medium">
+                          Product
+                        </th>
+                        <th className="py-3 px-4 text-left text-gray-600 font-medium">
+                          Price
+                        </th>
+                        <th className="py-3 px-4 text-left text-gray-600 font-medium">
+                          Quantity
+                        </th>
+                        <th className="py-3 px-4 text-left text-gray-600 font-medium">
+                          Total
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {selectedOrder.details.map((item, index) => (
+                        <tr key={index} className="border-b border-gray-200">
+                          <td className="flex items-center gap-2 py-3 px-4 text-gray-700 font-medium">
+                            <img
+                              src={`http://localhost:8080/images/${item.productImage}`}
+                              alt={item.productName}
+                              className="w-8 h-8 object-cover rounded-full"
+                            />
+                            {item.productCode}
+                          </td>
+                          <td className="py-3 px-4 text-gray-700">
+                            {item.productName}
+                          </td>
+                          <td className="py-3 px-4 text-gray-700">
+                            Rs.{item.productPrice.toFixed(2)}
+                          </td>
+                          <td className="py-3 px-4 text-gray-700">
+                            {item.productQty}
+                          </td>
+                          <td className="py-3 px-4 text-gray-700">
+                            Rs.
+                            {(item.productPrice * item.productQty).toFixed(2)}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                <div className="mt-4 flex justify-end">
+                  <button
+                    onClick={() => setShowAddressModal(false)}
+                    className="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300"
+                  >
+                    Close
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </>
+    );
+  };
+
   const accordionData = [
     {
       title: "Personal Information",
@@ -460,14 +731,13 @@ const Profile = () => {
     },
     {
       title: "Order History",
-      content: "View your past orders and purchase history.",
+      content: OrderHistory(),
     },
     {
       title: "Settings",
       content: Settings(),
     },
   ];
-  
 
   return (
     <div className="max-w-full mx-auto p-4 space-y-4">
@@ -482,7 +752,7 @@ const Profile = () => {
                 <span className="font-medium text-lg">{item.title}</span>
               </div>
               <div>
-                {!isModalOpen && ( 
+                {!isModalOpen && (
                   <svg
                     className={`w-6 h-6 transform transition-transform duration-200 ${
                       openAccordion === index ? "rotate-180" : ""
@@ -504,9 +774,7 @@ const Profile = () => {
           </button>
           <div
             className={`transition-all duration-200 ease-in-out ${
-              openAccordion === index
-                ? "opacity-100"
-                : "max-h-0 opacity-0"
+              openAccordion === index ? "opacity-100" : "max-h-0 opacity-0"
             } overflow-hidden`}
           >
             <div className="p-4 bg-gray-50">{item.content}</div>

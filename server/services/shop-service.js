@@ -223,3 +223,132 @@ export const addOrderPaymentService = async (date, orderID, paid, paymentType , 
     });
   });
 };
+
+//get order data
+export const getOrderDataService = async (userId, page = 1, limit = 5) => {
+  return new Promise((resolve, reject) => {
+    const countQuery = `SELECT COUNT(DISTINCT o.ORDER_ID) AS total FROM orders o WHERE o.USER_ID = ?`;
+    
+    db.query(countQuery, [userId], (err, countResult) => {
+      if (err) {
+        return reject({ message: "Something went wrong!", error: err });
+      }
+
+      const total = countResult[0].total;
+      const totalPages = Math.ceil(total / limit);
+
+      // If no orders found, return empty result
+      if (total === 0) {
+        return resolve({
+          data: [],
+          total: 0,
+          page: parseInt(page),
+          limit: parseInt(limit),
+          totalPages: 0
+        });
+      }
+
+      // Query to fetch all order data first
+      const selectSql = `
+        WITH OrderData AS (
+          SELECT DISTINCT 
+            o.ORDER_ID,
+            o.DATE AS ORDER_DATE,
+            o.VALUE AS ORDER_VALUE,
+            o.STATUS AS ORDER_STATUS,
+            o.SHIPPING_TAG,
+            o.BILLING_TAG,
+            p.PAYMENT_STATUS,
+            od.PRODUCT_CODE,
+            pr.NAME AS PRODUCT_NAME,
+            pr.IMAGE AS PRODUCT_IMAGE,
+            od.UNIT_PRICE,
+            od.QUANTITY,
+            shipping.CITY AS SHIPPING_CITY,
+            shipping.DISTRICT AS SHIPPING_DISTRICT,
+            shipping.LINE_1 AS SHIPPING_LINE1,
+            shipping.LINE_2 AS SHIPPING_LINE2,
+            shipping.PROVINCE AS SHIPPING_STATE,
+            shipping.POSTAL_CODE AS SHIPPING_ZIP,
+            shipping.TELEPHONE_NUMBER AS SHIPPING_PHONE,
+            billing.CITY AS BILLING_CITY,
+            billing.DISTRICT AS BILLING_DISTRICT,
+            billing.LINE_1 AS BILLING_LINE1,
+            billing.LINE_2 AS BILLING_LINE2,
+            billing.PROVINCE AS BILLING_STATE,
+            billing.POSTAL_CODE AS BILLING_ZIP,
+            billing.TELEPHONE_NUMBER AS BILLING_PHONE,
+            ROW_NUMBER() OVER (ORDER BY o.ORDER_ID DESC) as row_num
+          FROM orders o
+          LEFT JOIN payment p ON o.ORDER_ID = p.ORDER_ID
+          LEFT JOIN order_data od ON o.ORDER_ID = od.ORDER_ID
+          LEFT JOIN product pr ON od.PRODUCT_CODE = pr.PRODUCT_CODE
+          LEFT JOIN address_book shipping ON o.SHIPPING_TAG = shipping.TAG AND o.USER_ID = shipping.USER_ID
+          LEFT JOIN address_book billing ON o.BILLING_TAG = billing.TAG AND o.USER_ID = billing.USER_ID
+          WHERE o.USER_ID = ?
+        )
+        SELECT * FROM OrderData 
+        WHERE row_num > ? AND row_num <= ?
+        ORDER BY ORDER_ID DESC`;
+
+      const offset = (page - 1) * limit;
+      db.query(selectSql, [userId, offset, offset + parseInt(limit)], (err, results) => {
+        if (err) {
+          return reject({ message: "Something went wrong!", error: err });
+        }
+
+        // Transform results into required format
+        const ordersMap = new Map();
+
+        results.forEach((row) => {
+          if (!ordersMap.has(row.ORDER_ID)) {
+            ordersMap.set(row.ORDER_ID, {
+              orderID: row.ORDER_ID,
+              orderValue: row.ORDER_VALUE,
+              orderDate: row.ORDER_DATE,
+              paymentStatus: row.PAYMENT_STATUS,
+              orderStatus: row.ORDER_STATUS,
+              shippingAddress: row.SHIPPING_TAG ? {
+                city: row.SHIPPING_CITY,
+                district: row.SHIPPING_DISTRICT,
+                line1: row.SHIPPING_LINE1,
+                line2: row.SHIPPING_LINE2,
+                state: row.SHIPPING_STATE,
+                zipCode: row.SHIPPING_ZIP,
+                phoneNumber: row.SHIPPING_PHONE,
+              } : null,
+              billingAddress: row.BILLING_TAG ? {
+                city: row.BILLING_CITY,
+                district: row.BILLING_DISTRICT,
+                line1: row.BILLING_LINE1,
+                line2: row.BILLING_LINE2,
+                state: row.BILLING_STATE,
+                zipCode: row.BILLING_ZIP,
+                phoneNumber: row.BILLING_PHONE,
+              } : null,
+              details: [],
+            });
+          }
+
+          if (row.PRODUCT_CODE) {
+            ordersMap.get(row.ORDER_ID).details.push({
+              productCode: row.PRODUCT_CODE,
+              productName: row.PRODUCT_NAME,
+              productImage: row.PRODUCT_IMAGE,
+              productPrice: row.UNIT_PRICE,
+              productQty: row.QUANTITY,
+            });
+          }
+        });
+
+        resolve({
+          data: Array.from(ordersMap.values()),
+          total,
+          page: parseInt(page),
+          limit: parseInt(limit),
+          totalPages,
+        });
+      });
+    });
+  });
+};
