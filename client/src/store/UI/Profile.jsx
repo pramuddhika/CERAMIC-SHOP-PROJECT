@@ -210,7 +210,7 @@ const Profile = () => {
           </p>
           <button
             onClick={() => setIsModalOpen(true)} 
-            className="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold p-2 rounded-md"
+            className="bg-slate-600 hover:bg-slate-500 text-white font-semibold p-2 rounded-md"
           >
             Add New Address
           </button>
@@ -320,7 +320,7 @@ const Profile = () => {
                         </label>
                         <input
                           {...getFieldProps("tag")}
-                          className="border rounded-lg px-3 py-2 mt-1 w-full"
+                          className="border rounded-lg px-3 py-2 mt-1 w-full outline-none"
                         />
                         {touched.tag && errors.tag && (
                           <span className="text-red-500 text-sm block">
@@ -334,7 +334,7 @@ const Profile = () => {
                         </label>
                         <input
                           {...getFieldProps("phoneNumber")}
-                          className="border rounded-lg px-3 py-2 mt-1 w-full"
+                          className="border rounded-lg px-3 py-2 mt-1 w-full outline-none"
                         />
                         {touched.phoneNumber && errors.phoneNumber && (
                           <span className="text-red-500 text-sm block">
@@ -348,7 +348,7 @@ const Profile = () => {
                         </label>
                         <input
                           {...getFieldProps("line1")}
-                          className="border rounded-lg px-3 py-2 mt-1 w-full"
+                          className="border rounded-lg px-3 py-2 mt-1 w-full outline-none"
                         />
                         {touched.line1 && errors.line1 && (
                           <span className="text-red-500 text-sm block">
@@ -362,7 +362,7 @@ const Profile = () => {
                         </label>
                         <input
                           {...getFieldProps("line2")}
-                          className="border rounded-lg px-3 py-2 mt-1 w-full"
+                          className="border rounded-lg px-3 py-2 mt-1 w-full outline-none"
                         />
                       </div>
                     </div>
@@ -373,7 +373,7 @@ const Profile = () => {
                         </label>
                         <input
                           {...getFieldProps("city")}
-                          className="border rounded-lg px-3 py-2 mt-1 w-full"
+                          className="border rounded-lg px-3 py-2 mt-1 w-full outline-none outline-none"
                         />
                         {touched.city && errors.city && (
                           <span className="text-red-500 text-sm block">
@@ -387,7 +387,7 @@ const Profile = () => {
                         </label>
                         <input
                           {...getFieldProps("district")}
-                          className="border rounded-lg px-3 py-2 mt-1 w-full"
+                          className="border rounded-lg px-3 py-2 mt-1 w-full outline-none"
                         />
                         {touched.district && errors.district && (
                           <span className="text-red-500 text-sm block">
@@ -401,7 +401,7 @@ const Profile = () => {
                         </label>
                         <input
                           {...getFieldProps("state")}
-                          className="border rounded-lg px-3 py-2 mt-1 w-full"
+                          className="border rounded-lg px-3 py-2 mt-1 w-full outline-none"
                         />
                         {touched.state && errors.state && (
                           <span className="text-red-500 text-sm block">
@@ -415,7 +415,7 @@ const Profile = () => {
                         </label>
                         <input
                           {...getFieldProps("zipCode")}
-                          className="border rounded-lg px-3 py-2 mt-1 w-full"
+                          className="border rounded-lg px-3 py-2 mt-1 w-full outline-none"
                         />
                         {touched.zipCode && errors.zipCode && (
                           <span className="text-red-500 text-sm block">
@@ -434,7 +434,7 @@ const Profile = () => {
                       </button>
                       <button
                         type="submit"
-                        className="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold p-2 rounded-md"
+                        className="bg-slate-600 hover:bg-slate-500 text-white font-semibold p-2 rounded-md"
                       >
                         Submit
                       </button>
@@ -458,10 +458,14 @@ const Profile = () => {
       title: "Address Book",
       content: Addressbook(),
     },
-    {
-      title: "To Pay",
-      content: "View your past orders and purchase history.",
-    },
+    ...(currentUser.role === "Whole Customer"
+      ? [
+          {
+            title: "To Pay",
+            content: "View your past orders and purchase history.",
+          },
+        ]
+      : []),
     {
       title: "Order History",
       content: "View your past orders and purchase history.",
@@ -471,6 +475,7 @@ const Profile = () => {
       content: Settings(),
     },
   ];
+  
 
   return (
     <div className="max-w-full mx-auto p-4 space-y-4">

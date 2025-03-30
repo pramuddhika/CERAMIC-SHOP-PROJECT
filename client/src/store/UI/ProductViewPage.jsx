@@ -4,7 +4,6 @@ import { Button, Container, Badge, Row, Col, Card } from "react-bootstrap";
 import { IoArrowBack, IoCartOutline } from "react-icons/io5";
 import { BsHandbag } from "react-icons/bs";
 import { useState } from "react";
-import "./ProductViewPage.css";
 import axios from "axios";
 import { toast } from "react-toastify";
 
@@ -46,10 +45,10 @@ const ProductViewPage = () => {
   }
 
   return (
-    <Container className="py-4 product-view-container">
+    <Container className="py-4 max-w-[1200px] mx-auto">
       <Button
         variant="outline-secondary"
-        className="mb-4 back-button flex items-center"
+        className="mb-4 flex items-center transition-all duration-300 ease-in-out hover:-translate-x-1"
         onClick={() => navigate(-1)}
       >
         <IoArrowBack className="me-2" />
@@ -59,32 +58,32 @@ const ProductViewPage = () => {
       <Card className="border-0 shadow-sm">
         <Row className="g-0">
           <Col md={6}>
-            <div className="position-relative product-image-container">
+            <div className="relative overflow-hidden rounded-lg shadow-md">
               <div
-                className={`image-wrapper ${isZoomed ? "zoomed" : ""}`}
+                className={`relative h-[500px] transition-transform duration-300 ease-in-out ${isZoomed ? 'scale-110' : ''}`}
                 onMouseEnter={() => setIsZoomed(true)}
                 onMouseLeave={() => setIsZoomed(false)}
               >
                 <img
                   src={`http://localhost:8080/images/${product.IMAGE}`}
                   alt={product.NAME}
-                  className="product-image"
+                  className="w-full h-full object-cover"
                 />
               </div>
               {product.QUANTITY === 0 && currentUser?.role === "customer" && (
-                <Badge bg="danger" className="sold-out-badge">
+                <Badge bg="danger" className="absolute top-5 right-5 px-5 py-2.5 text-lg animate-fadeIn">
                   Sold Out
                 </Badge>
               )}
             </div>
           </Col>
           <Col md={6}>
-            <Card.Body className="p-4 product-details">
-              <h1 className="product-title">{product.NAME}</h1>
-              <h2 className="product-price">
+            <Card.Body className="p-4 h-full flex flex-col">
+              <h1 className="text-4xl font-semibold mb-4 text-slate-800">{product.NAME}</h1>
+              <h2 className="text-3xl text-red-500 mb-6">
                 Rs. {product.PRICE.toLocaleString()}
               </h2>
-              <h4>({product.PRODUCT_CODE})</h4>
+              <h4 className="mb-4">({product.PRODUCT_CODE})</h4>
               <div className="mb-4">
                 <p className="mb-2">
                   {product.CATAGORY_NAME}
@@ -93,15 +92,15 @@ const ProductViewPage = () => {
                 </p>
               </div>
               <div className="mb-4">
-                <h3 className="h5 mb-3">Description</h3>
-                <p className="product-description">{product.DESCRIPTION}</p>
+                <h3 className="text-xl font-medium mb-3">Description</h3>
+                <p className="text-gray-600 leading-relaxed text-lg">{product.DESCRIPTION}</p>
               </div>
-              <div className="action-buttons">
+              <div className="mt-auto flex gap-4">
                 {product.QUANTITY > 0 && currentUser?.role === "customer" && (
                   <>
                     <Button
                       variant="outline-primary"
-                      className="cart-button"
+                      className="flex-1 flex items-center justify-center py-3 px-6 text-lg border-2 border-slate-500 text-slate-500 hover:bg-slate-500 hover:text-white transition-all duration-300 ease-in-out hover:-translate-y-0.5 hover:shadow-md"
                       onClick={() => handaleAddToCart()}
                     >
                       <IoCartOutline className="me-2" />
@@ -109,7 +108,7 @@ const ProductViewPage = () => {
                     </Button>
                     <Button
                       variant="primary"
-                      className="buy-button"
+                      className="flex-1 flex items-center justify-center py-3 px-6 text-lg bg-slate-700 hover:bg-slate-600 transition-all duration-300 ease-in-out hover:-translate-y-0.5 hover:shadow-md"
                       onClick={() => handleBuyNow()}
                     >
                       <BsHandbag className="me-2" />
@@ -118,16 +117,14 @@ const ProductViewPage = () => {
                   </>
                 )}
                 {currentUser?.role === "Whole Customer" && (
-                  <>
-                    <Button
-                      variant="outline-primary"
-                      className="cart-button"
-                      onClick={() => handaleAddToCart()}
-                    >
-                      <IoCartOutline className="me-2" />
-                      Add to Cart
-                    </Button>
-                  </>
+                  <Button
+                    variant="outline-primary"
+                    className="flex-1 flex items-center justify-center py-3 px-6 text-lg border-2 border-slate-500 text-slate-500 hover:bg-slate-500 hover:text-white transition-all duration-300 ease-in-out hover:-translate-y-0.5 hover:shadow-md"
+                    onClick={() => handaleAddToCart()}
+                  >
+                    <IoCartOutline className="me-2" />
+                    Add to Cart
+                  </Button>
                 )}
               </div>
             </Card.Body>

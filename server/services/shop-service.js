@@ -92,3 +92,135 @@ export const deleteCartDataService = async (userId, productCode) => {
     });
   });
 };
+
+//get address tags
+export const getAddressTagsService = async (userId) => {
+  return new Promise((resolve, reject) => {
+    const selectSql = `SELECT DISTINCT TAG FROM address_book WHERE USER_ID = ?`;
+    db.query(selectSql, [userId], function (err, result) {
+      if (err) {
+        reject({ message: "Something went wrong!" });
+        return;
+      }
+      resolve(result);
+    });
+  });
+};
+
+//get address data by tag
+export const getAddressDataByTagService = async (userId, tag) => {
+  return new Promise((resolve, reject) => {
+    const selectSql = `SELECT * FROM address_book WHERE USER_ID = ? AND TAG = ?`;
+    db.query(selectSql, [userId, tag], function (err, result) {
+      if (err) {
+        reject({ message: "Something went wrong!" });
+        return;
+      }
+      resolve(result);
+    });
+  });
+};
+
+//get order id
+export const getOrderIdService = async () => {
+  return new Promise((resolve, reject) => {
+    const query = `SELECT MAX(ORDER_ID) AS ORDER_ID FROM orders`;
+    db.query(query, (err, result) => {
+      if (err) {
+        reject({ message: "Something went wrong, Please try again!" });
+      } else {
+        const code = result[0].ORDER_ID;
+        let id;
+        if (code) {
+          const numberpart = parseInt(code.split("-")[1], 10);
+          const newnumberpart = String(numberpart + 1).padStart(6, "0");
+          id = `ORD-${newnumberpart}`;
+        } else {
+          id = `ORD-000001`;
+        }
+        resolve({ newid: id });
+      }
+    });
+  });
+};
+
+//add order
+export const addOrderService = async (orderID, userId, date, orderType,totalAmount ,billingTag, shippingTag) => {
+  return new Promise((resolve, reject) => {
+    const insertSql = `INSERT INTO orders (ORDER_ID, USER_ID, DATE, ORDER_TYPE ,VALUE ,BILLING_TAG, SHIPPING_TAG) VALUES (?, ?, ?, ?, ?, ?, ?)`;
+    db.query(insertSql, [orderID,userId,date,orderType,totalAmount,billingTag,shippingTag  ], function (err) {
+      if (err) {
+        reject({ message: "Something went wrong!" });
+        return;
+      }
+      resolve({ message: "Order placed successfully!" });
+    });
+  });
+};
+
+//add order data
+export const addOrderDataService = async (orderID, product, userId) => {
+  return new Promise((resolve, reject) => {
+    const insertSql = `INSERT INTO order_data (ORDER_ID, PRODUCT_CODE, QUANTITY, UNIT_PRICE) VALUES (?, ?, ?, ?)`;
+    const deleteSql = `DELETE FROM cart WHERE USER_ID = ? AND PRODUCT_CODE = ?`;
+
+    // Insert products one by one
+    const insertPromises = product.map((item) => {
+      return new Promise((res, rej) => {
+        db.query(
+          insertSql,
+          [orderID, item.productCode, item.quantity, item.price],
+          function (err) {
+            if (err) {
+              rej(err);
+              return;
+            }
+            res();
+          }
+        );
+      });
+    });
+
+    Promise.all(insertPromises)
+      .then(() => {
+        // After successful insert, delete products from cart
+        const deletePromises = product.map((item) => {
+          return new Promise((res, rej) => {
+            db.query(
+              deleteSql,
+              [userId, item.productCode],
+              function (err) {
+                if (err) {
+                  rej(err);
+                  return;
+                }
+                res();
+              }
+            );
+          });
+        });
+
+        return Promise.all(deletePromises);
+      })
+      .then(() => {
+        resolve({ message: "Order data added and cart cleared successfully!" });
+      })
+      .catch((err) => {
+        reject({ message: "Something went wrong!", error: err });
+      });
+  });
+};
+
+//add order payment
+export const addOrderPaymentService = async (date, orderID, paid, paymentType , paymentStatus) => {
+  return new Promise((resolve, reject) => {
+    const insertSql = `INSERT INTO payment (DATE, ORDER_ID, PAID_VALUE, PATMENT_TYPE , PAYMENT_STATUS) VALUES (?, ?, ?, ?, ?)`;
+    db.query(insertSql, [date, orderID, paid, paymentType, paymentStatus], function (err) {
+      if (err) {
+        reject({ message: "Something went wrong!" });
+        return;
+      }
+      resolve({ message: "Order payment added successfully!" });
+    });
+  });
+};

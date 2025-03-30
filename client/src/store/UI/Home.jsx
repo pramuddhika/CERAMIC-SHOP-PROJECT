@@ -28,7 +28,6 @@ const Home = () => {
   }, [currentPage, itemsPerPage]);
 
   const handleProductClick = (product) => {
-    console.log("Product Details:", product);
     navigate("/ceramic/product", { state: { product } });
   };
 

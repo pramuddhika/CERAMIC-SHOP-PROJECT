@@ -213,6 +213,13 @@ const SideNav = ({ setActiveTopic }) => {
           </div>
         )}
 
+        <NavItem
+          to="/app/contact-us"
+          Icon={() => <i className="bi bi-person-rolodex"></i>}
+          label="Contact Us"
+          topic="Contact Us"
+        />
+
         <div className="fixed bottom-4 w-[180px]">
           <div
             className="flex pl-7 gap-2 items-center hover:text-white hover:bg-text-primary rounded-lg p-2 cursor-pointer text-gray-300"
