@@ -60,15 +60,18 @@ const contactUs = () => {
       reply: replyText,
     };
     try {
+      setIsLoading(true);
       const response = await axios.post("/api/contactus/sendReply", data);
       toast.success(response?.data?.message);
       setIsModalOpen(false);
       setSelectedItem(null);
       setReplyText("");
-      fetchContactUsData(currentPage, itemsPerPage);
     } catch (error) {
       console.log(error);
       toast.error("Something went wrong, please try again!");
+    } finally {
+      setIsLoading(false);
+      fetchContactUsData(currentPage, itemsPerPage);
     }
   };
 
@@ -86,7 +89,12 @@ const contactUs = () => {
             className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center "
             style={{ zIndex: 9998 }}
           >
-            <div className="bg-white rounded-lg p-6 shadow-lg min-w-[400px]">
+            <div className="bg-white rounded-lg p-6 shadow-lg min-w-[400px] relative">
+              {isLoading && (
+                <div className="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center rounded-lg">
+                  <CommonLoading />
+                </div>
+              )}
               <h2 className="text-lg font-semibold mb-4">Reply to Email</h2>
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700">
@@ -215,7 +223,7 @@ const contactUs = () => {
           onItemsPerPageChange={handleItemsPerPageChange}
         />
       </div>
-      {isLoading && <CommonLoading />}
+      {isLoading && <CommonLoading style={{ zIndex: 10000 }}/>}
     </>
   );
 };
