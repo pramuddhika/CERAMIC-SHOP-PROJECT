@@ -10,7 +10,8 @@ import {
   getorderIdController,
   addOrderController,
   addOrderDataController,
-  addOrderPaymentController
+  addOrderPaymentController,
+  getOrderDataController
 } from "../controllers/shop-controller.js";
 
 const router = express.Router();
@@ -37,5 +38,7 @@ router.post('/addOrderData', addOrderController);
 router.post('/addOrderAllData', addOrderDataController);
 //add order payment
 router.post('/addOrderPayment', addOrderPaymentController);
+//get order data
+router.get('/getOrderData/:userId', getOrderDataController);
 
 export default router;
