@@ -20,19 +20,12 @@ const Contact_us = () => {
   });
   const onSubmit = async (values, { resetForm, setErrors }) => {
     try {
-      const user = JSON.parse(localStorage.getItem('User'));
-      if (!user || !user.id) {
-        toast.error('Please login to send a message');
-        return;
-      }
       // Send the POST request
       const response = await axios.post("/api/contactus/add", {
-        userId: user.id,
         fullName: values.fullname,
         email: values.email,
         message: values.message,
       });
-
       resetForm();
       toast.success(response.data.message || "Message sent successfully!");
     } catch (error) {

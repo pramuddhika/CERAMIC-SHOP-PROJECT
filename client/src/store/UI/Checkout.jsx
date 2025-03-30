@@ -9,6 +9,7 @@ import { FaCreditCard, FaLock } from "react-icons/fa";
 import { SiMastercard, SiVisa } from "react-icons/si";
 import { toast } from "react-toastify";
 import moment from "moment";
+import { use } from "react";
 
 const Checkout = () => {
   const location = useLocation();
@@ -125,6 +126,7 @@ const Checkout = () => {
       shippingTag: shippingAddressTag,
     };
     const order_data = {
+      userId: currentUser.id,
       orderID: orderID,
       product: checkoutItems.map((item) => ({
         productCode: item.PRODUCT_CODE,
@@ -137,13 +139,51 @@ const Checkout = () => {
       date: moment().format("YYYY-MM-DD"),
       paid:
         currentUser.role === "customer"
-          ? calculateTotal()
+          ? paymentType === "Card"
+            ? calculateTotal()
+            : 0
           : calculateTotal() * 0.3,
       paymentType: paymentType,
+      paymentStatus:
+        currentUser.role === "customer"
+          ? paymentType === "Card"
+            ? "complete"
+            : "pending"
+          : "basic",
     };
-    console.log(orders);
-    console.log(order_data);
-    console.log(payment);
+
+    try {
+      const response = await axios.post("/api/shopdata/addOrderData", orders);
+      // console.log(response?.data?.message);
+      try {
+        const response = await axios.post(
+          "/api/shopdata/addOrderAllData",
+          order_data
+        );
+        // console.log(response?.data?.message);
+        try {
+          const response = await axios.post(
+            "/api/shopdata/addOrderPayment",
+            payment
+          );
+          // console.log(response?.data?.message);
+          if (paymentType === "Card") {
+            setIsModalOpen(true);
+          } else {
+            handlePlaceOrder();
+          }
+        } catch (error) {
+          console.error("Error placing order:", error);
+          toast.error("Something went wrong. Please try again.");
+        }
+      } catch (error) {
+        console.error("Error placing order:", error);
+        toast.error("Something went wrong. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error placing order:", error);
+      toast.error("Something went wrong. Please try again.");
+    }
   };
 
   return (
@@ -290,16 +330,21 @@ const Checkout = () => {
           )}
         </div>
       </div>
+      {currentUser.role === "Whole Customer" && (
+        <div className="justify-between items-center mt-4 p-4 bg-gray-50 rounded-lg min-w-full">
+          <p className="text-gray-500">
+            * A 30% advance payment is required to place an order.
+          </p>
+          <p className="text-gray-500">
+            * Once your order is ready, our agent will contact you to settle the remaining balance.
+          </p>
+        </div>
+      )}
       <div className="flex justify-end mt-6">
         <button
           disabled={billingAddressTag === "" || shippingAddressTag === ""}
           className="min-w-full p-2 bg-slate-700 text-white font-semibold rounded-lg"
           onClick={() => {
-            if (paymentType === "Card") {
-              setIsModalOpen(true);
-            } else {
-              handlePlaceOrder();
-            }
             handleOrder();
           }}
         >
