@@ -9,6 +9,8 @@ const router = express.Router();
 //senddata to db
 router.post("/add", addContactUsController);
 //get contact us
-router.get("/get" , getContactUsController);
+router.get("/get", getContactUsController);
+//send reply to email
+
 
 export default router;

@@ -186,7 +186,7 @@ const Profile = () => {
                 <div className="col-1">
                   <button
                     type="submit"
-                    className="min-w-full bg-indigo-600 hover:bg-indigo-500 text-white font-semibold p-2 rounded-md"
+                    className="min-w-full bg-slate-600 hover:bg-slate-500 text-white font-semibold p-2 rounded-md"
                   >
                     Save
                   </button>
