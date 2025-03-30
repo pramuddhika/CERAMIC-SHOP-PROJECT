@@ -35,10 +35,7 @@ const contactUs = () => {
   };
 
   useEffect(() => {
-    fetchContactUsData(1, itemsPerPage, {
-      material: null,
-      supplier: null,
-    });
+    fetchContactUsData(1, itemsPerPage)
   }, []);
 
   useEffect(() => {
@@ -52,19 +49,27 @@ const contactUs = () => {
     setCurrentPage(1);
   };
 
-  const handleReplySubmit = () => {
+  const handleReplySubmit =async () => {
     if (!replyText.trim()) {
       toast.error("Reply message is required");
       return;
     }
-    console.log({
+    const data = {
       id: selectedItem?.ID,
       email: selectedItem?.EMAIL,
       reply: replyText,
-    });
-    setIsModalOpen(false);
-    setSelectedItem(null);
-    setReplyText("");
+    };
+    try {
+      const response = await axios.post("/api/contactus/sendReply", data);
+      toast.success(response?.data?.message);
+      setIsModalOpen(false);
+      setSelectedItem(null);
+      setReplyText("");
+      fetchContactUsData(currentPage, itemsPerPage);
+    } catch (error) {
+      console.log(error);
+      toast.error("Something went wrong, please try again!");
+    }
   };
 
   return (
@@ -167,8 +172,8 @@ const contactUs = () => {
                     <td className="border py-3">Rs. {item.MESSAGE}</td>
 
                     <td className="border py-2">
-                      {item.REPLY ? (
-                        <span className="text-green-500">{item.REPLY}</span>
+                      {item.Reply_MESSAGE ? (
+                        <span className="">{item.Reply_MESSAGE}</span>
                       ) : (
                         <span className="text-red-500">Not replied</span>
                       )}
@@ -176,6 +181,7 @@ const contactUs = () => {
                     <td className="border py-2">
                       <button
                         className="border-none text-slate-500 hover:text-slate-800"
+                        disabled={item.Reply_MESSAGE}
                         onClick={() => {
                           setSelectedItem(item);
                           setIsModalOpen(true);

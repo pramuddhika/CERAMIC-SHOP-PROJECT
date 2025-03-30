@@ -1,7 +1,8 @@
 import express from "express";
 import {
     addContactUsController,
-    getContactUsController
+    getContactUsController,
+    sendConrtactUsReplyController
  } from "../controllers/contactUs-controller.js";
 
 const router = express.Router();
@@ -11,6 +12,6 @@ router.post("/add", addContactUsController);
 //get contact us
 router.get("/get", getContactUsController);
 //send reply to email
-
+router.post("/sendReply", sendConrtactUsReplyController);
 
 export default router;
