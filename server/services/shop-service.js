@@ -63,11 +63,10 @@ export const getCartDataService = async (userId) => {
     const selectSql = `SELECT 
      cart.PRODUCT_CODE,cart.QUANTITY,
      product.NAME,product.IMAGE,product.PRICE,
-     (production.QUANTITY - IFNULL(order_data.QUANTITY, 0)) AS STOCK_QUANTITY
+     production.QUANTITY AS STOCK_QUANTITY
      FROM cart
      INNER JOIN product ON cart.PRODUCT_CODE = product.PRODUCT_CODE
      INNER JOIN production ON product.PRODUCT_CODE = production.PRODUCT_CODE
-     LEFT JOIN order_data ON product.PRODUCT_CODE = order_data.PRODUCT_CODE
      WHERE cart.USER_ID = ?`;
     db.query(selectSql, [userId], function (err, result) {
       if (err) {
