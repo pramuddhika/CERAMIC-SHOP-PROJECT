@@ -271,6 +271,10 @@ ADD PRIMARY KEY (`ORDER_ID`),
 ADD UNIQUE INDEX `ORDER_ID_UNIQUE` (`ORDER_ID` ASC) VISIBLE;
 ;
 
+DROP TABLE IF EXISTS `ceramic`.`payment_status`;
+
+
+
 
   
   
