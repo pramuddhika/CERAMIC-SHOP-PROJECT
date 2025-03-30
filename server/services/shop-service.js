@@ -217,7 +217,7 @@ export const addOrderPaymentService = async (date, orderID, paid, paymentType , 
     const insertSql = `INSERT INTO payment (DATE, ORDER_ID, PAID_VALUE, PATMENT_TYPE , PAYMENT_STATUS) VALUES (?, ?, ?, ?, ?)`;
     db.query(insertSql, [date, orderID, paid, paymentType, paymentStatus], function (err) {
       if (err) {
-        reject({ message: "Something went wrong!" });
+        reject({ message: err });
         return;
       }
       resolve({ message: "Order payment added successfully!" });

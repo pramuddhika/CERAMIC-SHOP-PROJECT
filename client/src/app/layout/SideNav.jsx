@@ -214,6 +214,20 @@ const SideNav = ({ setActiveTopic }) => {
         )}
 
         <NavItem
+          to="/app/income"
+          Icon={() => <i className="bi bi-cash-coin"></i>}
+          label="Income"
+          topic="Income"
+        />
+
+        <NavItem
+          to="/app/order-data"
+          Icon={() => <i className="bi bi-file-earmark-text"></i>}
+          label="Order Data"
+          topic="Order Data"
+        />
+
+        <NavItem
           to="/app/contact-us"
           Icon={() => <i className="bi bi-person-rolodex"></i>}
           label="Contact Us"

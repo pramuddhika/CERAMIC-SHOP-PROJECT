@@ -180,9 +180,6 @@ export const addOrderDataController = async (req, res) => {
 //add order payment
 export const addOrderPaymentController = async (req, res) => {
   const { date, orderID, paid, paymentType, paymentStatus } = req.body;
-  if (!date || !orderID || !paid || !paymentType || !paymentStatus) {
-    return res.status(400).json({ error: "Something went wrong!" });
-  }
   try {
     const orderData = await addOrderPaymentService(date, orderID, paid, paymentType, paymentStatus);
     res.status(200).json(orderData);

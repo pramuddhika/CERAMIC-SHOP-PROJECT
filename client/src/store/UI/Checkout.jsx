@@ -141,7 +141,7 @@ const Checkout = () => {
         currentUser.role === "customer"
           ? paymentType === "Card"
             ? calculateTotal()
-            : 0
+            : 0.00
           : calculateTotal() * 0.3,
       paymentType: paymentType,
       paymentStatus:
