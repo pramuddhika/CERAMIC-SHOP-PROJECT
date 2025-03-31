@@ -131,7 +131,7 @@ export const getStrockPieChartService = async () => {
 export const getPast30DaysOrdersService = async () => {
   return new Promise((resolve, reject) => {
     const query = `
-      SELECT DATE_FORMAT(DATE, '%Y-%m-%d') AS ORDER_DATE, COUNT(*) AS ORDER_COUNT
+      SELECT DATE_FORMAT(DATE, '%m-%d') AS ORDER_DATE, COUNT(*) AS ORDER_COUNT
       FROM orders
       WHERE DATE >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
       GROUP BY ORDER_DATE
@@ -144,13 +144,18 @@ export const getPast30DaysOrdersService = async () => {
         return;
       }
 
-      // Generate an array of past 30 days
+      // Generate an array of past 30 days in MM-DD format
       const datesMap = new Map();
       const today = new Date();
       for (let i = 29; i >= 0; i--) {
         const date = new Date();
         date.setDate(today.getDate() - i);
-        const formattedDate = date.toISOString().split("T")[0]; // Format: YYYY-MM-DD
+        const formattedDate = date
+          .toLocaleDateString("en-US", {
+            month: "2-digit",
+            day: "2-digit",
+          })
+          .replace("/", "-"); // Convert MM/DD to MM-DD
         datesMap.set(formattedDate, 0); // Default to 0
       }
 
@@ -171,4 +176,68 @@ export const getPast30DaysOrdersService = async () => {
   });
 };
 
+//get monthly income and expense data
+export const getMonthlyIncomeExpenseService = async () => {
+  return new Promise((resolve, reject) => {
+    const query = `
+      WITH RECURSIVE months AS (
+        SELECT 1 AS month_num
+        UNION ALL
+        SELECT month_num + 1
+        FROM months
+        WHERE month_num < 12
+      ),
+      last_12_months AS (
+        SELECT 
+          DATE_FORMAT(DATE_SUB(CURDATE(), INTERVAL m.month_num-1 MONTH), '%Y-%m-01') AS start_date,
+          DATE_FORMAT(LAST_DAY(DATE_SUB(CURDATE(), INTERVAL m.month_num-1 MONTH)), '%Y-%m-%d') AS end_date,
+          DATE_FORMAT(DATE_SUB(CURDATE(), INTERVAL m.month_num-1 MONTH), '%M') AS month_name
+        FROM months m
+        ORDER BY start_date ASC -- Changed from DESC to ASC
+      ),
+      income_data AS (
+        SELECT 
+          DATE_FORMAT(orders.DATE, '%Y-%m-01') AS month_date,
+          COALESCE(SUM(payment.PAID_VALUE), 0) AS monthly_income
+        FROM payment
+        JOIN orders ON payment.ORDER_ID = orders.ORDER_ID
+        WHERE orders.DATE >= DATE_SUB(CURDATE(), INTERVAL 12 MONTH)
+        GROUP BY month_date
+      ),
+      expense_data AS (
+        SELECT 
+          DATE_FORMAT(DATE, '%Y-%m-01') AS month_date,
+          COALESCE(SUM(MATERIAL_VALUE), 0) AS monthly_expense
+        FROM material_received_note
+        WHERE DATE >= DATE_SUB(CURDATE(), INTERVAL 12 MONTH)
+        GROUP BY month_date
+      )
+      SELECT 
+        m.month_name,
+        COALESCE(i.monthly_income, 0) AS income,
+        COALESCE(e.monthly_expense, 0) AS expense
+      FROM last_12_months m
+      LEFT JOIN income_data i ON m.start_date = i.month_date
+      LEFT JOIN expense_data e ON m.start_date = e.month_date
+      ORDER BY m.start_date ASC -- Changed from DESC to ASC
+    `;
+
+    db.query(query, (err, result) => {
+      if (err) {
+        reject({ message: "Something went wrong, Please try again!" });
+        return;
+      }
+
+      const months = result.map(row => row.month_name);
+      const income = result.map(row => parseFloat(row.income || 0));
+      const expense = result.map(row => parseFloat(row.expense || 0));
+
+      resolve({
+        months,
+        income,
+        expense
+      });
+    });
+  });
+};
 

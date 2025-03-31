@@ -2,7 +2,8 @@ import {
   getCardDataSerrvice,
   getMeterialPieChartService,
   getStrockPieChartService,
-  getPast30DaysOrdersService
+  getPast30DaysOrdersService,
+  getMonthlyIncomeExpenseService
 } from "../services/dashboard-service.js";
 
 // get card data for dashboard
@@ -39,6 +40,16 @@ export const getStrockPieChartController = async (req, res) => {
 export const getPast30DaysOrdersController = async (req, res) => {
   try {
     const response = await getPast30DaysOrdersService();
+    res.status(200).json(response);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// get monthly income and expense data
+export const getMonthlyIncomeExpenseController = async (req, res) => {
+  try {
+    const response = await getMonthlyIncomeExpenseService();
     res.status(200).json(response);
   } catch (error) {
     res.status(500).json({ error: error.message });

@@ -3,7 +3,8 @@ import {
   getCardDataController,
   getMeterialPieChartController,
   getStrockPieChartController,
-  getPast30DaysOrdersController
+  getPast30DaysOrdersController,
+  getMonthlyIncomeExpenseController
 } from "../controllers/dashboard-controller.js";
 
 const router = express.Router();
@@ -16,5 +17,7 @@ router.get("/materialPieChart", getMeterialPieChartController);
 router.get("/stockPieChart", getStrockPieChartController);
 //past 30 day order
 router.get("/past30DaysOrder", getPast30DaysOrdersController);
+//monthly income and expense
+router.get("/monthlyIncomeExpense", getMonthlyIncomeExpenseController);
 
 export default router;
