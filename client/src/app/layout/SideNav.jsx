@@ -17,6 +17,7 @@ const SideNav = ({ setActiveTopic }) => {
     const savedState = localStorage.getItem("showSubsetProduct");
     return savedState === "true";
   });
+  const currentUser = JSON.parse(localStorage.getItem("User"));
 
   const toggleUserSubset = () => {
     setShowUserSubsetUser((prev) => {
@@ -73,176 +74,192 @@ const SideNav = ({ setActiveTopic }) => {
           <h1 className="text-white font-bold text-lg">GLEAM CERAMIC</h1>
         </div>
         <div className="flex-1 overflow-y-auto sidebar">
-        <NavItem
-          to="/app/dashboard"
-          Icon={() => <i className="bi bi-card-text"></i>}
-          label="Dashboard"
-          topic="Dashboard"
-        />
-        <NavItem
-          to="/app/MasterData"
-          Icon={() => <i className="bi bi-card-text"></i>}
-          label="Master Data"
-          topic="Master Data"
-        />
+          <NavItem
+            to="/app/dashboard"
+            Icon={() => <i className="bi bi-card-text"></i>}
+            label="Dashboard"
+            topic="Dashboard"
+          />
+          {currentUser?.role === "Admin" && (
+            <NavItem
+              to="/app/MasterData"
+              Icon={() => <i className="bi bi-card-text"></i>}
+              label="Master Data"
+              topic="Master Data"
+            />
+          )}
 
-        <div
-          className={`flex pl-7 gap-2 items-center hover:text-white hover:bg-text-primary rounded-lg p-2 cursor-pointer
+          {currentUser?.role === "Admin" && (
+            <div
+              className={`flex pl-7 gap-2 items-center hover:text-white hover:bg-text-primary rounded-lg p-2 cursor-pointer
         ${
           showUserSubsetUser
             ? "text-white border border-gray-300 font-bold"
             : "text-gray-300"
         }`}
-          onClick={toggleUserSubset}
-        >
-          <i className="bi bi-people"></i>
-          <p>User Management</p>
-        </div>
-        {showUserSubsetUser && (
-          <div className="pl-3">
-            <NavItem
-              to="/app/members"
-              Icon={() => <i className="bi bi-person-fill-gear"></i>}
-              label="Members"
-              topic="Member Management"
-            />
-            <NavItem
-              to="/app/suppliers"
-              Icon={() => <i className="bi bi-boxes"></i>}
-              label="Suppliers"
-              topic="Supplier Management"
-            />
-            <NavItem
-              to="/app/customers"
-              Icon={() => <i className="bi bi-diagram-3"></i>}
-              label="Customers"
-              topic="Customer Management"
-            />
-          </div>
-        )}
+              onClick={toggleUserSubset}
+            >
+              <i className="bi bi-people"></i>
+              <p>User Management</p>
+            </div>
+          )}
 
-        <div
-          className={`flex pl-7 gap-2 items-center hover:text-white hover:bg-text-primary rounded-lg p-2 cursor-pointer
+          {showUserSubsetUser && (
+            <div className="pl-3">
+              <NavItem
+                to="/app/members"
+                Icon={() => <i className="bi bi-person-fill-gear"></i>}
+                label="Members"
+                topic="Member Management"
+              />
+              <NavItem
+                to="/app/suppliers"
+                Icon={() => <i className="bi bi-boxes"></i>}
+                label="Suppliers"
+                topic="Supplier Management"
+              />
+              <NavItem
+                to="/app/customers"
+                Icon={() => <i className="bi bi-diagram-3"></i>}
+                label="Customers"
+                topic="Customer Management"
+              />
+            </div>
+          )}
+
+          {currentUser?.role !== "Sales Manager" && (
+            <div
+              className={`flex pl-7 gap-2 items-center hover:text-white hover:bg-text-primary rounded-lg p-2 cursor-pointer
         ${
           showUserSubsetMaterial
             ? "text-white border border-gray-300 font-bold"
             : "text-gray-300"
         }`}
-          onClick={toggleMaterialSubset}
-        >
-          <i className="bi bi-basket2-fill"></i>
-          <p>Material</p>
-        </div>
-        {showUserSubsetMaterial && (
-          <div className="pl-3">
-            <NavItem
-              to="/app/Material"
-              Icon={() => <i className="bi bi-list-task"></i>}
-              label="List"
-              topic="Material List"
-            />
-            <NavItem
-              to="/app/material/receive"
-              Icon={() => <i className="bi bi-box-arrow-in-up"></i>}
-              label="Receive"
-              topic="Material Receive Note"
-            />
-            <NavItem
-              to="/app/materila/payment"
-              Icon={() => <i className="bi bi-credit-card-2-back"></i>}
-              label="Payment"
-              topic="Suppiler Payment Note"
-            />
-            <NavItem
-              to="/app/material/stock"
-              Icon={() => <i className="bi bi-clipboard-plus"></i>}
-              label="Stock"
-              topic="Material Stock"
-            />
-            <NavItem
-              to="/app/material/use"
-              Icon={() => <i className="bi bi-clipboard2-data"></i>}
-              label="Use"
-              topic="Material Send Note"
-            />
-          </div>
-        )}
+              onClick={toggleMaterialSubset}
+            >
+              <i className="bi bi-basket2-fill"></i>
+              <p>Material</p>
+            </div>
+          )}
 
-        <div
-          className={`flex pl-7 gap-2 items-center hover:text-white hover:bg-text-primary rounded-lg p-2 cursor-pointer
-        ${
-          showUserSubsetProduct
-            ? "text-white border border-gray-300 font-bold"
-            : "text-gray-300"
-        }`}
-          onClick={toggleProductSubset}
-        >
-          <i className="bi bi-box-seam"></i>
-          <p>Product</p>
-        </div>
-        {showUserSubsetProduct && (
-          <div className="pl-3">
-            <NavItem
-              to="/app/Product_Management"
-              Icon={() => <i className="bi bi-list-task"></i>}
-              label="List"
-              topic="Product List"
-            />
-            <NavItem
-              to="/app/product/creation"
-              Icon={() => <i className="bi bi-screwdriver"></i>}
-              label="Creation"
-              topic="Product Creation Note"
-            />
-            <NavItem
-              to="/app/product/stages"
-              Icon={() => <i className="bi bi-clipboard2-data"></i>}
-              label="Stages"
-              topic="Product Stages"
-            />
-            {/* <NavItem
+          {showUserSubsetMaterial && (
+            <div className="pl-3">
+              <NavItem
+                to="/app/Material"
+                Icon={() => <i className="bi bi-list-task"></i>}
+                label="List"
+                topic="Material List"
+              />
+              <NavItem
+                to="/app/material/receive"
+                Icon={() => <i className="bi bi-box-arrow-in-up"></i>}
+                label="Receive"
+                topic="Material Receive Note"
+              />
+              <NavItem
+                to="/app/materila/payment"
+                Icon={() => <i className="bi bi-credit-card-2-back"></i>}
+                label="Payment"
+                topic="Suppiler Payment Note"
+              />
+              <NavItem
+                to="/app/material/stock"
+                Icon={() => <i className="bi bi-clipboard-plus"></i>}
+                label="Stock"
+                topic="Material Stock"
+              />
+              <NavItem
+                to="/app/material/use"
+                Icon={() => <i className="bi bi-clipboard2-data"></i>}
+                label="Use"
+                topic="Material Send Note"
+              />
+            </div>
+          )}
+
+          {currentUser?.role !== "Sales Manager" && (
+            <div
+              className={`flex pl-7 gap-2 items-center hover:text-white hover:bg-text-primary rounded-lg p-2 cursor-pointer
+           ${
+             showUserSubsetProduct
+               ? "text-white border border-gray-300 font-bold"
+               : "text-gray-300"
+           }`}
+              onClick={toggleProductSubset}
+            >
+              <i className="bi bi-box-seam"></i>
+              <p>Product</p>
+            </div>
+          )}
+
+          {showUserSubsetProduct && (
+            <div className="pl-3">
+              <NavItem
+                to="/app/Product_Management"
+                Icon={() => <i className="bi bi-list-task"></i>}
+                label="List"
+                topic="Product List"
+              />
+              <NavItem
+                to="/app/product/creation"
+                Icon={() => <i className="bi bi-screwdriver"></i>}
+                label="Creation"
+                topic="Product Creation Note"
+              />
+              <NavItem
+                to="/app/product/stages"
+                Icon={() => <i className="bi bi-clipboard2-data"></i>}
+                label="Stages"
+                topic="Product Stages"
+              />
+              {/* <NavItem
               to="/app/product/quality"
               Icon={() => <i className="bi bi-box-arrow-in-up"></i>}
               label="Quality"
               topic="Product Quality Check Note"
             /> */}
+              <NavItem
+                to="/app/product/stock"
+                Icon={() => <i className="bi bi-clipboard-plus"></i>}
+                label="Stock"
+                topic="Product Stock"
+              />
+            </div>
+          )}
+
+          {currentUser?.role !== "Stock Manager" && (
             <NavItem
-              to="/app/product/stock"
-              Icon={() => <i className="bi bi-clipboard-plus"></i>}
-              label="Stock"
-              topic="Product Stock"
+              to="/app/income"
+              Icon={() => <i className="bi bi-cash-coin"></i>}
+              label="Payments"
+              topic="Order Payments"
             />
-          </div>
-        )}
+          )}
 
-        <NavItem
-          to="/app/income"
-          Icon={() => <i className="bi bi-cash-coin"></i>}
-          label="Income"
-          topic="Income"
-        />
+          {currentUser?.role !== "Stock Manager" && (
+            <NavItem
+              to="/app/order-data"
+              Icon={() => <i className="bi bi-file-earmark-text"></i>}
+              label="Order Data"
+              topic="Order Data"
+            />
+          )}
 
-        <NavItem
-          to="/app/order-data"
-          Icon={() => <i className="bi bi-file-earmark-text"></i>}
-          label="Order Data"
-          topic="Order Data"
-        />
+          {currentUser?.role !== "Stock Manager" && (
+            <NavItem
+              to="/app/contact-us"
+              Icon={() => <i className="bi bi-person-rolodex"></i>}
+              label="Contact Us"
+              topic="Contact Us"
+            />
+          )}
 
-        <NavItem
-          to="/app/contact-us"
-          Icon={() => <i className="bi bi-person-rolodex"></i>}
-          label="Contact Us"
-          topic="Contact Us"
-        />
-
-        <NavItem
-          to="/app/profile"
-          Icon={() => <i className="bi bi-person-circle"></i>}
-          label="Profile"
-          topic="Profile"
-        />
-
+          <NavItem
+            to="/app/profile"
+            Icon={() => <i className="bi bi-person-circle"></i>}
+            label="Profile"
+            topic="Profile"
+          />
         </div>
         <div className="flex-shrink-0 w-full bg-slate-700 py-4">
           <div
