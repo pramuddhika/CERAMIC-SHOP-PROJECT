@@ -113,7 +113,7 @@ export const editProjectcreationDataService = async (
     });
     db.query(query3, (err) => {
       if (err) {
-        reject({ message: err });
+        reject({ message: "Something went wrong, Please try again!" });
       } else {
         resolve({ message: "Project creation data updated successfully" });
       }
