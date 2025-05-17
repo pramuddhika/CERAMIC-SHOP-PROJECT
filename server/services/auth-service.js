@@ -245,6 +245,7 @@ export const getSupplierDataService = async (
       FROM user
       JOIN address_book ON user.USER_ID = address_book.USER_ID
       WHERE USER_TYPE = 'supplier' ${searchCondition}
+      ORDER BY user.USER_ID DESC
       LIMIT ? OFFSET ?`;
 
     db.query(query, queryParams, (error, result) => {
@@ -346,6 +347,7 @@ export const getMemberDataService = async (
     const query = `SELECT user.USER_ID, user.FIRST_NAME, user.LAST_NAME, user.EMAIL, user.STATUS, user.USER_TYPE
       FROM user
       ${searchCondition}
+      ORDER BY user.USER_ID DESC
       LIMIT ? OFFSET ?`;
 
     db.query(query, queryParams, (error, result) => {
@@ -469,6 +471,7 @@ export const getCustomerDataService = async (
     const query = `SELECT user.USER_ID, user.FIRST_NAME, user.LAST_NAME, user.EMAIL, user.STATUS, user.USER_TYPE
       FROM user
       ${searchCondition}
+      ORDER BY user.USER_ID DESC
       LIMIT ? OFFSET ?`;
 
     db.query(query, queryParams, (error, result) => {

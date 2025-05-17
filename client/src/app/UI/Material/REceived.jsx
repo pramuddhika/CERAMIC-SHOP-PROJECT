@@ -473,77 +473,79 @@ const Received = () => {
           </div>
         )}
 
-        <div className="card-body overflow-auto flex justify-center">
-          <table
-            id="stock-table"
-            className="border text-sm table-fixed w-full overflow-auto"
-          >
-            <thead className="bg-slate-400">
-              <tr className="pl-2 text-center">
-                <th className="border py-2 min-w-[300px]">Material Name</th>
-                <th className="border py-2 min-w-[300px]">Supplier</th>
-                <th className="border py-2 min-w-[150px]">Quality</th>
-                <th className="border py-2 min-w-[300px]">Date</th>
-                <th className="border py-2 min-w-[300px]">Quantity</th>
-                <th className="border py-2 min-w-[100px]">Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {receivedData?.length > 0 ? (
-                receivedData?.map((item) => (
-                  <tr key={item.RECEIVED_ID} className="text-center">
-                    <td className="border py-2">{item.NAME}</td>
-                    <td className="border py-2">
-                      {item.FIRST_NAME} {item.LAST_NAME}
-                    </td>
-                    <td className="border py-3">
-                      {item.QUALITY === "checking" ? (
-                        <span className="text-white bg-yellow-600 py-2 px-4 rounded-2xl">
-                          Checking
-                        </span>
-                      ) : item.QUALITY === "failed" ? (
-                        <span className="text-white bg-red-600 py-2 px-4 rounded-2xl">
-                          Failed
-                        </span>
-                      ) : (
-                        <span className="text-white bg-green-600 py-2 px-4 rounded-2xl">
-                          Passed
-                        </span>
-                      )}
-                    </td>
+        <div className="card-body overflow-x-auto">
+          <div className="min-w-full">
+            <table
+              id="stock-table"
+              className="w-full text-sm"
+            >
+              <thead className="bg-slate-400">
+                <tr className="pl-2 text-center">
+                  <th className="border py-2 min-w-[300px]">Material Name</th>
+                  <th className="border py-2 min-w-[300px]">Supplier</th>
+                  <th className="border py-2 min-w-[150px]">Quality</th>
+                  <th className="border py-2 min-w-[300px]">Date</th>
+                  <th className="border py-2 min-w-[300px]">Quantity</th>
+                  <th className="border py-2 min-w-[100px]">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {receivedData?.length > 0 ? (
+                  receivedData?.map((item) => (
+                    <tr key={item.RECEIVED_ID} className="text-center">
+                      <td className="border py-2">{item.NAME}</td>
+                      <td className="border py-2">
+                        {item.FIRST_NAME} {item.LAST_NAME}
+                      </td>
+                      <td className="border py-3">
+                        {item.QUALITY === "checking" ? (
+                          <span className="text-white bg-yellow-600 py-2 px-4 rounded-2xl">
+                            Checking
+                          </span>
+                        ) : item.QUALITY === "failed" ? (
+                          <span className="text-white bg-red-600 py-2 px-4 rounded-2xl">
+                            Failed
+                          </span>
+                        ) : (
+                          <span className="text-white bg-green-600 py-2 px-4 rounded-2xl">
+                            Passed
+                          </span>
+                        )}
+                      </td>
 
-                    <td className="border py-2">
-                      {moment(item.DATE).format("YYYY-MM-DD")}
-                    </td>
-                    <td className="border py-2">{item.QUANTITY} kg</td>
-                    <td className="border py-2">
-                      <button
-                        className="text-slate-500 hover:text-slate-800 border-none"
-                        disabled={item.QUALITY !== "checking"}
-                        onClick={() => {
-                          setSelectedItem(item);
-                          setIsModalOpen(true);
-                        }}
-                      >
-                        <FaEdit />
-                      </button>
+                      <td className="border py-2">
+                        {moment(item.DATE).format("YYYY-MM-DD")}
+                      </td>
+                      <td className="border py-2">{item.QUANTITY} kg</td>
+                      <td className="border py-2">
+                        <button
+                          className="text-slate-500 hover:text-slate-800 border-none"
+                          disabled={item.QUALITY !== "checking"}
+                          onClick={() => {
+                            setSelectedItem(item);
+                            setIsModalOpen(true);
+                          }}
+                        >
+                          <FaEdit />
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="6" className="text-center py-4">
+                      <img
+                        src={Nodata}
+                        alt="No data"
+                        className="w-32 h-52 mx-auto"
+                      />
+                      <p className="text-lg text-gray-500">No data found</p>
                     </td>
                   </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan="6" className="text-center py-4">
-                    <img
-                      src={Nodata}
-                      alt="No data"
-                      className="w-32 h-52 mx-auto"
-                    />
-                    <p className="text-lg text-gray-500">No data found</p>
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
         <CommonPagination
           totalPages={totalPages}

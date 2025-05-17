@@ -211,7 +211,7 @@ export const addSubNewCategoryService = async (
           if (err.code === "ER_DUP_ENTRY") {
             reject({ message: "Data already exists!" });
           } else {
-            reject({ message: err.message });
+            reject({ message: 'Something went wrong, Please try again!' });
           }
         }
         resolve({ message: "Subcategory added successfully" });

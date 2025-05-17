@@ -443,6 +443,7 @@ const CustomerManagement = () => {
                       <button
                         type="submit"
                         className="text-white bg-cyan-950 hover:bg-cyan-900 px-3 py-1 gap-2 rounded-lg flex items-center"
+                        disabled = {Formik.isSubmiting }
                       >
                         Save
                       </button>

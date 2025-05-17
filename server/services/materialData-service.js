@@ -63,7 +63,7 @@ export const addMaterialDataService = async (
 export const getMaterialDataService = async (page = 1, limit = 5) => {
   return new Promise((resolve, reject) => {
     const offset = (page - 1) * limit;
-    const query = `SELECT * FROM material LIMIT ? OFFSET ?`;
+    const query = `SELECT * FROM material ORDER BY MATERIAL_ID DESC LIMIT ? OFFSET ?`;
 
     db.query(query, [parseInt(limit), parseInt(offset)], (err, result) => {
       if (err) {
@@ -304,9 +304,22 @@ export const addMaterialUsageDataService = async (materialId, date, quantity) =>
   return new Promise((resolve, reject) => {
     const today = new Date();
     const formattedDate = today.toISOString().split("T")[0];
+    const checkquantity = `SELECT QUANTITY FROM material_stock WHERE MATERIAL_ID = '${materialId}'`;
     const query = `UPDATE material_stock SET QUANTITY = QUANTITY - ${quantity},UPDATE_DATE = '${formattedDate}' WHERE MATERIAL_ID = '${materialId}'`;
 
-    db.query(query, (err) => {
+    db.query(checkquantity, (err, result) => {
+      if (err) {
+        reject({ message: "Something went wrong, Please try again!" });
+        return;
+      }
+      if (result.length > 0) {
+        const availableQuantity = result[0].QUANTITY;
+        if (availableQuantity < quantity) {
+          reject({ message: "Material quantity is not enough!" });
+          return;
+        }
+      }
+      db.query(query, (err) => {
       if (err) {
         if (err.code === "ER_CHECK_CONSTRAINT_VIOLATED") {
           reject({ message: "Material quantity is not enough!" });
@@ -324,6 +337,7 @@ export const addMaterialUsageDataService = async (materialId, date, quantity) =>
           }
         });
       }
+    });
     });
   });
 };

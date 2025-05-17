@@ -2,7 +2,7 @@ import { useState } from "react";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { FaEdit } from "react-icons/fa";
-import { AiOutlinePlus } from "react-icons/ai";
+// import { AiOutlinePlus } from "react-icons/ai";
 import { useEffect } from "react";
 import axios from "axios";
 import Nodata from "../../assets/Nodata.svg";
@@ -119,13 +119,13 @@ const Masterdata = () => {
               </li>
             ))}
           </ul>
-          <button
+          {/* <button
             className="text-white bg-cyan-950 hover:bg-cyan-900 px-3 py-1 rounded-lg flex items-center"
             onClick={handleModalToggle}
           >
             <AiOutlinePlus className="mr-1" />
             Add New
-          </button>
+          </button> */}
         </div>
 
         <div className="card-body overflow-auto flex justify-center">

@@ -237,6 +237,7 @@ const Payment = () => {
                 validationSchema={Yup.object({
                   newPaidValue: Yup.number()
                     .required("Required")
+                    .min(0, "Value cannot be negative")
                     .max(
                       parseInt(selectedItem?.MATERIAL_VALUE) -
                         parseInt(selectedItem?.PAID_VALUE ?? 0),
@@ -329,6 +330,7 @@ const Payment = () => {
                           className="border rounded-lg px-2 py-1 w-48"
                           value={values.newPaidValue}
                           onChange={handleChange}
+                          min="0"
                           style={{
                             boxShadow: "none",
                             borderColor: "#ced4da",
@@ -364,71 +366,73 @@ const Payment = () => {
           </div>
         )}
 
-        <div className="card-body overflow-auto flex justify-center">
-          <table
-            id="stock-table"
-            className="border text-sm table-fixed w-full overflow-auto"
-          >
-            <thead className="bg-slate-400">
-              <tr className="pl-2 text-center">
-                <th className="border py-2 min-w-[300px]">Material Name</th>
-                <th className="border py-2 min-w-[300px]">Supplier</th>
-                <th className="border py-2 min-w-[150px]">value</th>
-                <th className="border py-2 min-w-[200px]">Received Date</th>
-                <th className="border py-2 min-w-[200px]">Quantity</th>
-                <th className="border py-2 min-w-[150px]">Paid Value</th>
-                <th className="border py-2 min-w-[100px]">Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {receivedData?.length > 0 ? (
-                receivedData?.map((item, index) => (
-                  <tr key={item.RECEIVED_ID || index} className="text-center">
-                    <td className="border py-2">{item.NAME}</td>
-                    <td className="border py-2">
-                      {item.FIRST_NAME} {item.LAST_NAME}
-                    </td>
-                    <td className="border py-3">Rs. {item.MATERIAL_VALUE}</td>
+        <div className="card-body overflow-x-auto">
+          <div className="min-w-full">
+            <table
+              id="stock-table"
+              className="w-full text-sm"
+            >
+              <thead className="bg-slate-400">
+                <tr className="pl-2 text-center">
+                  <th className="border py-2 min-w-[300px]">Material Name</th>
+                  <th className="border py-2 min-w-[300px]">Supplier</th>
+                  <th className="border py-2 min-w-[150px]">value</th>
+                  <th className="border py-2 min-w-[200px]">Received Date</th>
+                  <th className="border py-2 min-w-[200px]">Quantity</th>
+                  <th className="border py-2 min-w-[150px]">Paid Value</th>
+                  <th className="border py-2 min-w-[100px]">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {receivedData?.length > 0 ? (
+                  receivedData?.map((item, index) => (
+                    <tr key={item.RECEIVED_ID || index} className="text-center">
+                      <td className="border py-2">{item.NAME}</td>
+                      <td className="border py-2">
+                        {item.FIRST_NAME} {item.LAST_NAME}
+                      </td>
+                      <td className="border py-3">Rs. {item.MATERIAL_VALUE}</td>
 
-                    <td className="border py-2">
-                      {moment(item.DATE).format("YYYY-MM-DD")}
-                    </td>
-                    <td className="border py-2">{item.QUANTITY} kg</td>
-                    <td className="border py-2">
-                      {item.PAID_VALUE ? `Rs. ${item.PAID_VALUE}` : "-"}
-                    </td>
-                    <td className="border py-2">
-                      <button
-                        className={`border-none ${
-                          item.PAID_VALUE === item.MATERIAL_VALUE
-                            ? "text-red-500 hover:text-red-700 cursor-not-allowed"
-                            : "text-slate-500 hover:text-slate-800"
-                        }`}
-                        disabled={item.PAID_VALUE === item.MATERIAL_VALUE}
-                        onClick={() => {
-                          setSelectedItem(item);
-                          setIsModalOpen(true);
-                        }}
-                      >
-                        <FaEdit />
-                      </button>
+                      <td className="border py-2">
+                        {moment(item.DATE).format("YYYY-MM-DD")}
+                      </td>
+                      <td className="border py-2">{item.QUANTITY} kg</td>
+                      <td className="border py-2">
+                        {item.PAID_VALUE ? `Rs. ${item.PAID_VALUE}` : "-"}
+                      </td>
+                      <td className="border py-2">
+                        <button
+                          className={`border-none ${
+                            item.PAID_VALUE === item.MATERIAL_VALUE
+                              ? "text-red-500 hover:text-red-700 cursor-not-allowed"
+                              : "text-slate-500 hover:text-slate-800"
+                          }`}
+                          disabled={item.PAID_VALUE === item.MATERIAL_VALUE}
+                          onClick={() => {
+                            setSelectedItem(item);
+                            setIsModalOpen(true);
+                          }}
+                        >
+                          <FaEdit />
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="6" className="text-center py-4">
+                      <img
+                        src={Nodata}
+                        alt="No data"
+                        className="w-32 h-52 mx-auto"
+                      />
+                      <p className="text-lg text-gray-500">No data found</p>
                     </td>
                   </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan="6" className="text-center py-4">
-                    <img
-                      src={Nodata}
-                      alt="No data"
-                      className="w-32 h-52 mx-auto"
-                    />
-                    <p className="text-lg text-gray-500">No data found</p>
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
         <CommonPagination
           totalPages={totalPages}

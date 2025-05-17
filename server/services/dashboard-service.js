@@ -8,7 +8,7 @@ export const getCardDataSerrvice = async () => {
     const psdt30OrderCountquery = `SELECT COUNT(*) AS TOTAL_ORDER FROM orders WHERE DATE >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)`;
     const past30DaysActiveCustomerquery = `SELECT COUNT(DISTINCT USER_ID) AS TOTAL_CUSTOMER FROM orders WHERE DATE >= DATE_SUB(CURDATE(), INTERVAL 30 DAY);`;
     const pengingTotalIncomequery = `SELECT (SELECT SUM(VALUE) FROM orders) - (SELECT SUM(PAID_VALUE) FROM payment) AS TOTAL_PENDING_INCOME;`;
-    const pendingTotalExpensequery = `SELECT (SELECT SUM(MATERIAL_VALUE) FROM material_received_note) - (SELECT SUM(PAID_VALUE) FROM material_received_note) AS TOTAL_PENDING_EXPENSE;`;
+    const pendingTotalExpensequery = `SELECT (SELECT SUM(MATERIAL_VALUE) FROM material_received_note WHERE QUALITY = 'passed') - (SELECT SUM(PAID_VALUE) FROM material_received_note WHERE QUALITY = 'passed') AS TOTAL_PENDING_EXPENSE;`;
 
     db.query(past30DaysIncomequery, (err, incomeResult) => {
       if (err) {
