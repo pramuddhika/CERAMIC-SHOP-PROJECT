@@ -238,64 +238,66 @@ const OrderData = () => {
           </div>
         )}
 
-        <div className="card-body overflow-auto flex justify-center">
-          <table
-            id="stock-table"
-            className="border text-sm table-fixed w-full overflow-auto"
-          >
-            <thead className="bg-slate-400">
-              <tr className="pl-2 text-center">
-                <th className="border py-2 min-w-[250px]">Order Id</th>
-                <th className="border py-2 min-w-[270px]">Order Date</th>
-                <th className="border py-2 min-w-[250px]">Order Value</th>
-                <th className="border py-2 min-w-[250px]">Order Status</th>
-                <th className="border py-2 min-w-[250px]">Payment Status</th>
-                <th className="border py-2 min-w-[150px]">Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {paymentData?.length > 0 ? (
-                paymentData?.map((item, index) => (
-                  <tr key={item.RECEIVED_ID || index} className="text-center">
-                    <td className="border py-2">{item.orderId}</td>
-                    <td className="border py-3">
-                      {moment(item.createdDate).format("YYYY-MM-DD")}
-                    </td>
-                    <td className="border py-2">Rs. {item.value}</td>
-                    <td className="border py-2">{item.orderStatus}</td>
-                    <td className="border py-2">{item.paymentStatus}</td>
-                    <td className="border py-2">
-                      <button
-                        className={`border-none text-slate-500 ${
-                          item.orderStatus === "complete"
-                            ? "cursor-not-allowed"
-                            : "hover:text-slate-800"
-                        }`}
-                        disabled={item.orderStatus === "complete"}
-                        onClick={() => {
-                          setSelectedItem(item);
-                          setIsModalOpen(true);
-                        }}
-                      >
-                        <FaEdit />
-                      </button>
+        <div className="card-body overflow-x-auto">
+          <div className="min-w-full">
+            <table
+              id="stock-table"
+              className="w-full text-sm"
+            >
+              <thead className="bg-slate-400">
+                <tr className="pl-2 text-center">
+                  <th className="border py-2 min-w-[250px]">Order Id</th>
+                  <th className="border py-2 min-w-[270px]">Order Date</th>
+                  <th className="border py-2 min-w-[250px]">Order Value</th>
+                  <th className="border py-2 min-w-[250px]">Order Status</th>
+                  <th className="border py-2 min-w-[250px]">Payment Status</th>
+                  <th className="border py-2 min-w-[150px]">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {paymentData?.length > 0 ? (
+                  paymentData?.map((item, index) => (
+                    <tr key={item.RECEIVED_ID || index} className="text-center">
+                      <td className="border py-2">{item.orderId}</td>
+                      <td className="border py-3">
+                        {moment(item.createdDate).format("YYYY-MM-DD")}
+                      </td>
+                      <td className="border py-2">Rs. {item.value}</td>
+                      <td className="border py-2">{item.orderStatus}</td>
+                      <td className="border py-2">{item.paymentStatus}</td>
+                      <td className="border py-2">
+                        <button
+                          className={`border-none text-slate-500 ${
+                            item.orderStatus === "complete"
+                              ? "cursor-not-allowed"
+                              : "hover:text-slate-800"
+                          }`}
+                          disabled={item.orderStatus === "complete"}
+                          onClick={() => {
+                            setSelectedItem(item);
+                            setIsModalOpen(true);
+                          }}
+                        >
+                          <FaEdit />
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="6" className="text-center py-4">
+                      <img
+                        src={Nodata}
+                        alt="No data"
+                        className="w-32 h-52 mx-auto"
+                      />
+                      <p className="text-lg text-gray-500">No data found</p>
                     </td>
                   </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan="6" className="text-center py-4">
-                    <img
-                      src={Nodata}
-                      alt="No data"
-                      className="w-32 h-52 mx-auto"
-                    />
-                    <p className="text-lg text-gray-500">No data found</p>
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
         <CommonPagination
           totalPages={totalPages}

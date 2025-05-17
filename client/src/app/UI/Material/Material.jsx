@@ -117,70 +117,72 @@ const Material = () => {
           </button>
         </div>
 
-        <div className="card-body overflow-auto flex justify-center">
-          <table className="border text-sm table-fixed w-full overflow-auto">
-            <thead className="bg-slate-400">
-              <tr className="pl-2 text-center">
-                <th className="border py-2 min-w-[200px]">ID</th>
-                <th className="border py-2 min-w-[300px]">Material Name</th>
-                <th className="border py-2 min-w-[540px]">Description</th>
-                <th className="border py-2 min-w-[200px]">Status</th>
-                <th className="border py-2 min-w-[200px]">
-                  <div className="flex justify-center">Actions</div>
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y">
-              {currentData.message === "No data found!" ||
-              currentData.length === 0 ? (
-                <tr>
-                  <td colSpan="5" className="text-center py-4">
-                    <img
-                      src={Nodata}
-                      style={{
-                        width: "150px",
-                        margin: "0 auto",
-                        padding: "20px",
-                      }}
-                    />
-                    <span className="text-gray-500">No Data Available</span>
-                  </td>
+        <div className="card-body overflow-x-auto">
+          <div className="min-w-full">
+            <table className="w-full text-sm">
+              <thead className="bg-slate-400">
+                <tr className="pl-2 text-center">
+                  <th className="border py-2 min-w-[200px]">ID</th>
+                  <th className="border py-2 min-w-[300px]">Material Name</th>
+                  <th className="border py-2 min-w-[540px]">Description</th>
+                  <th className="border py-2 min-w-[200px]">Status</th>
+                  <th className="border py-2 min-w-[200px]">
+                    <div className="flex justify-center">Actions</div>
+                  </th>
                 </tr>
-              ) : (
-                Array.isArray(currentData) &&
-                currentData.map((row, index) => (
-                  <tr key={index}>
-                    <td className="border px-6 py-2 text-center">
-                      {row.MATERIAL_ID}
-                    </td>
-                    <td className="border px-6 py-2 text-center">{row.NAME}</td>
-                    <td className="border px-6 py-2">{row.DESCRIPTION}</td>
-                    {row.STATUS === 1 ? (
-                      <td className="border px-6 text-center">
-                        <span className="text-white bg-green-600 py-2 px-4 rounded-2xl">
-                          Active
-                        </span>
-                      </td>
-                    ) : (
-                      <td className="border px-6 py-2 text-center">
-                        <span className="text-white bg-red-600 py-2  px-4 rounded-2xl">
-                          Inactive
-                        </span>
-                      </td>
-                    )}
-                    <td className="border px-6 py-4 flex justify-center items-center">
-                      <button
-                        className="text-slate-500 hover:text-slate-800 border-none"
-                        onClick={() => handleEdit(row)}
-                      >
-                        <FaEdit />
-                      </button>
+              </thead>
+              <tbody className="divide-y">
+                {currentData.message === "No data found!" ||
+                currentData.length === 0 ? (
+                  <tr>
+                    <td colSpan="5" className="text-center py-4">
+                      <img
+                        src={Nodata}
+                        style={{
+                          width: "150px",
+                          margin: "0 auto",
+                          padding: "20px",
+                        }}
+                      />
+                      <span className="text-gray-500">No Data Available</span>
                     </td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+                ) : (
+                  Array.isArray(currentData) &&
+                  currentData.map((row, index) => (
+                    <tr key={index}>
+                      <td className="border px-6 py-2 text-center">
+                        {row.MATERIAL_ID}
+                      </td>
+                      <td className="border px-6 py-2 text-center">{row.NAME}</td>
+                      <td className="border px-6 py-2">{row.DESCRIPTION}</td>
+                      {row.STATUS === 1 ? (
+                        <td className="border px-6 text-center">
+                          <span className="text-white bg-green-600 py-2 px-4 rounded-2xl">
+                            Active
+                          </span>
+                        </td>
+                      ) : (
+                        <td className="border px-6 py-2 text-center">
+                          <span className="text-white bg-red-600 py-2  px-4 rounded-2xl">
+                            Inactive
+                          </span>
+                        </td>
+                      )}
+                      <td className="border px-6 py-4 flex justify-center items-center">
+                        <button
+                          className="text-slate-500 hover:text-slate-800 border-none"
+                          onClick={() => handleEdit(row)}
+                        >
+                          <FaEdit />
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
         <CommonPagination
           totalPages={totalPages}

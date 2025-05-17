@@ -207,83 +207,85 @@ const ProductManagementTab = () => {
             Add New
           </button>
         </div>
-        <div className="card-body overflow-auto flex justify-center">
-          <table className="border text-sm table-fixed w-full overflow-auto">
-            <thead className="bg-slate-400">
-              <tr className="text-center">
-                <th className="border py-2 min-w-[100px]">Image</th>
-                <th className="border py-2 min-w-[130px]">Cat. Code</th>
-                <th className="border py-2 min-w-[130px]">Sub. Code</th>
-                <th className="border py-2 min-w-[130px]">Code</th>
-                <th className="border py-2 min-w-[200px]">Name</th>
-                <th className="border py-2 min-w-[500px]">Description</th>
-                <th className="border py-2 min-w-[100px]">Price</th>
-                <th className="border py-2 min-w-[100px]">Status</th>
-                <th className="border py-2 min-w-[90px]">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="text-gray-800">
-              {productData.length === 0 && (
-                <tr>
-                  <td colSpan="9" className="text-center py-4">
-                    <img
-                      src={Nodata}
-                      style={{
-                        width: "150px",
-                        margin: "0 auto",
-                        padding: "20px",
-                      }}
-                    />
-                    No data found!
-                  </td>
+        <div className="card-body overflow-x-auto">
+          <div className="min-w-full">
+            <table className="w-full text-sm">
+              <thead className="bg-slate-400">
+                <tr className="text-center">
+                  <th className="border py-2 min-w-[100px]">Image</th>
+                  <th className="border py-2 min-w-[130px]">Cat. Code</th>
+                  <th className="border py-2 min-w-[130px]">Sub. Code</th>
+                  <th className="border py-2 min-w-[130px]">Code</th>
+                  <th className="border py-2 min-w-[200px]">Name</th>
+                  <th className="border py-2 min-w-[500px]">Description</th>
+                  <th className="border py-2 min-w-[100px]">Price</th>
+                  <th className="border py-2 min-w-[100px]">Status</th>
+                  <th className="border py-2 min-w-[90px]">Actions</th>
                 </tr>
-              )}
-              {productData.map((row, index) => (
-                <tr key={index}>
-                  <td className="border px-6 py-2 w-24">
-                    <img
-                      src={`http://localhost:8080/images/${row.IMAGE}`}
-                      alt="Preview"
-                      className="w-12 h-12 rounded-full object-cover"
-                    />
-                  </td>
-                  <td className="border px-6 py-2 w-64 text-center">
-                    {row.CATAGORY_CODE}
-                  </td>
-                  <td className="border px-6 py-2 w-64 text-center">
-                    {row.SUB_CATAGORY_CODE}
-                  </td>
-                  <td className="border px-6 py-2 w-64 text-center">
-                    {row.PRODUCT_CODE}
-                  </td>
-                  <td className="border px-6 py-2 text-center">{row.NAME}</td>
-                  <td className="border px-6 py-2">{row.DESCRIPTION}</td>
-                  <td className="border px-6 py-2 text-center">Rs.{row.PRICE}</td>
-                  {row.STATUS === 1 ? (
-                    <td className="border px-6 text-center">
-                      <span className="text-white bg-green-600 py-2 px-4 rounded-2xl">
-                        Active
-                      </span>
+              </thead>
+              <tbody className="text-gray-800">
+                {productData.length === 0 && (
+                  <tr>
+                    <td colSpan="9" className="text-center py-4">
+                      <img
+                        src={Nodata}
+                        style={{
+                          width: "150px",
+                          margin: "0 auto",
+                          padding: "20px",
+                        }}
+                      />
+                      No data found!
                     </td>
-                  ) : (
-                    <td className="border px-6 py-2 text-center">
-                      <span className="text-white bg-red-600 py-2  px-4 rounded-2xl">
-                        Inactive
-                      </span>
+                  </tr>
+                )}
+                {productData.map((row, index) => (
+                  <tr key={index}>
+                    <td className="border px-6 py-2 w-24">
+                      <img
+                        src={`http://localhost:8080/images/${row.IMAGE}`}
+                        alt="Preview"
+                        className="w-12 h-12 rounded-full object-cover"
+                      />
                     </td>
-                  )}
-                  <td className="border px-6 py-4 flex justify-center items-center">
-                    <button
-                      className="text-blue-600 hover:text-blue-800"
-                      onClick={() => handleEdit(row)}
-                    >
-                      <FaEdit />
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                    <td className="border px-6 py-2 w-64 text-center">
+                      {row.CATAGORY_CODE}
+                    </td>
+                    <td className="border px-6 py-2 w-64 text-center">
+                      {row.SUB_CATAGORY_CODE}
+                    </td>
+                    <td className="border px-6 py-2 w-64 text-center">
+                      {row.PRODUCT_CODE}
+                    </td>
+                    <td className="border px-6 py-2 text-center">{row.NAME}</td>
+                    <td className="border px-6 py-2">{row.DESCRIPTION}</td>
+                    <td className="border px-6 py-2 text-center">Rs.{row.PRICE}</td>
+                    {row.STATUS === 1 ? (
+                      <td className="border px-6 text-center">
+                        <span className="text-white bg-green-600 py-2 px-4 rounded-2xl">
+                          Active
+                        </span>
+                      </td>
+                    ) : (
+                      <td className="border px-6 py-2 text-center">
+                        <span className="text-white bg-red-600 py-2  px-4 rounded-2xl">
+                          Inactive
+                        </span>
+                      </td>
+                    )}
+                    <td className="border px-6 py-4 flex justify-center items-center">
+                      <button
+                        className="text-blue-600 hover:text-blue-800"
+                        onClick={() => handleEdit(row)}
+                      >
+                        <FaEdit />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
         <CommonPagination
           totalPages={totalPages}

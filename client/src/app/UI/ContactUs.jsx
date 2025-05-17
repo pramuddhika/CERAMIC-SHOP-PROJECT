@@ -157,63 +157,65 @@ const contactUs = () => {
           </div>
         )}
 
-        <div className="card-body overflow-auto flex justify-center">
-          <table
-            id="stock-table"
-            className="border text-sm table-fixed w-full overflow-auto"
-          >
-            <thead className="bg-slate-400">
-              <tr className="pl-2 text-center">
-                <th className="border py-2 min-w-[200px]">Name</th>
-                <th className="border py-2 min-w-[200px]">Email</th>
-                <th className="border py-2 min-w-[480px]">Message</th>
-                <th className="border py-2 min-w-[480px]">Reply</th>
-                <th className="border py-2 min-w-[80px]">Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {receivedData?.length > 0 ? (
-                receivedData?.map((item, index) => (
-                  <tr key={item.RECEIVED_ID || index} className="text-center">
-                    <td className="border py-2">{item.FULL_NAME}</td>
-                    <td className="border py-2">{item.EMAIL}</td>
-                    <td className="border py-3">Rs. {item.MESSAGE}</td>
+        <div className="card-body overflow-x-auto">
+          <div className="min-w-full">
+            <table
+              id="stock-table"
+              className="w-full text-sm"
+            >
+              <thead className="bg-slate-400">
+                <tr className="pl-2 text-center">
+                  <th className="border py-2 min-w-[200px]">Name</th>
+                  <th className="border py-2 min-w-[200px]">Email</th>
+                  <th className="border py-2 min-w-[480px]">Message</th>
+                  <th className="border py-2 min-w-[480px]">Reply</th>
+                  <th className="border py-2 min-w-[80px]">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {receivedData?.length > 0 ? (
+                  receivedData?.map((item, index) => (
+                    <tr key={item.RECEIVED_ID || index} className="text-center">
+                      <td className="border py-2">{item.FULL_NAME}</td>
+                      <td className="border py-2">{item.EMAIL}</td>
+                      <td className="border py-3">{item.MESSAGE}</td>
 
-                    <td className="border py-2">
-                      {item.Reply_MESSAGE ? (
-                        <span className="">{item.Reply_MESSAGE}</span>
-                      ) : (
-                        <span className="text-red-500">Not replied</span>
-                      )}
-                    </td>
-                    <td className="border py-2">
-                      <button
-                        className="border-none text-slate-500 hover:text-slate-800"
-                        disabled={item.Reply_MESSAGE}
-                        onClick={() => {
-                          setSelectedItem(item);
-                          setIsModalOpen(true);
-                        }}
-                      >
-                        <FaEdit />
-                      </button>
+                      <td className="border py-2">
+                        {item.Reply_MESSAGE ? (
+                          <span className="">{item.Reply_MESSAGE}</span>
+                        ) : (
+                          <span className="text-red-500">Not replied</span>
+                        )}
+                      </td>
+                      <td className="border py-2">
+                        <button
+                          className="border-none text-slate-500 hover:text-slate-800"
+                          disabled={item.Reply_MESSAGE}
+                          onClick={() => {
+                            setSelectedItem(item);
+                            setIsModalOpen(true);
+                          }}
+                        >
+                          <FaEdit />
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="6" className="text-center py-4">
+                      <img
+                        src={Nodata}
+                        alt="No data"
+                        className="w-32 h-52 mx-auto"
+                      />
+                      <p className="text-lg text-gray-500">No data found</p>
                     </td>
                   </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan="6" className="text-center py-4">
-                    <img
-                      src={Nodata}
-                      alt="No data"
-                      className="w-32 h-52 mx-auto"
-                    />
-                    <p className="text-lg text-gray-500">No data found</p>
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
         <CommonPagination
           totalPages={totalPages}

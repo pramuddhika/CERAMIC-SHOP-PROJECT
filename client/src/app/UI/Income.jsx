@@ -273,82 +273,84 @@ const Income = () => {
           </div>
         )}
 
-        <div className="card-body overflow-auto flex justify-center">
-          <table
-            id="stock-table"
-            className="border text-sm table-fixed w-full overflow-auto"
-          >
-            <thead className="bg-slate-400">
-              <tr className="pl-2 text-center">
-                <th className="border py-2 min-w-[150px]">Order Id</th>
-                <th className="border py-2 min-w-[150px]">Order Status</th>
-                <th className="border py-2 min-w-[170px]">Order Date</th>
-                <th className="border py-2 min-w-[150px]">Order Value</th>
-                <th className="border py-2 min-w-[170px]">Last Payment Date</th>
-                <th className="border py-2 min-w-[150px]">Paid Value</th>
-                <th className="border py-2 min-w-[150px]">Payment Type</th>
-                <th className="border py-2 min-w-[150px]">Payment Status</th>
-                <th className="border py-2 min-w-[100px]">Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {paymentData?.length > 0 ? (
-                paymentData?.map((item, index) => (
-                  <tr key={item.RECEIVED_ID || index} className="text-center">
-                    <td className="border py-2">{item.ORDER_ID}</td>
-                    <td className="border py-2">{item.STATUS}</td>
-                    <td className="border py-3">
-                      {moment(item.DATE).format("YYYY-MM-DD")}
-                    </td>
-                    <td className="border py-2">Rs. {item.VALUE}</td>
-                    <td className="border py-3">
-                      {moment(item.PAYMENT_DATE).format("YYYY-MM-DD")}
-                    </td>
-                    <td className="border py-2">Rs. {item.PAID_VALUE}</td>
-                    <td className="border py-2">{item.PATMENT_TYPE}</td>
-                    <td className="border py-2">
-                      <span
-                        className={
-                          item.PAYMENT_STATUS === "complete"
-                            ? "text-green-500"
-                            : ""
-                        }
-                      >
-                        {item.PAYMENT_STATUS}
-                      </span>
-                    </td>
-                    <td className="border py-2">
-                      <button
-                        className={`border-none text-slate-500 ${
-                          item.PAYMENT_STATUS === "complete"
-                            ? "cursor-not-allowed"
-                            : "hover:text-slate-800"
-                        }`}
-                        disabled={item.PAYMENT_STATUS === "complete"}
-                        onClick={() => {
-                          setSelectedItem(item);
-                          setIsModalOpen(true);
-                        }}
-                      >
-                        <FaEdit />
-                      </button>
+        <div className="card-body overflow-x-auto">
+          <div className="min-w-full">
+            <table
+              id="stock-table"
+              className="w-full text-sm"
+            >
+              <thead className="bg-slate-400">
+                <tr className="pl-2 text-center">
+                  <th className="border py-2 min-w-[150px]">Order Id</th>
+                  <th className="border py-2 min-w-[150px]">Order Status</th>
+                  <th className="border py-2 min-w-[170px]">Order Date</th>
+                  <th className="border py-2 min-w-[150px]">Order Value</th>
+                  <th className="border py-2 min-w-[170px]">Last Payment Date</th>
+                  <th className="border py-2 min-w-[150px]">Paid Value</th>
+                  <th className="border py-2 min-w-[150px]">Payment Type</th>
+                  <th className="border py-2 min-w-[150px]">Payment Status</th>
+                  <th className="border py-2 min-w-[100px]">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {paymentData?.length > 0 ? (
+                  paymentData?.map((item, index) => (
+                    <tr key={item.RECEIVED_ID || index} className="text-center">
+                      <td className="border py-2">{item.ORDER_ID}</td>
+                      <td className="border py-2">{item.STATUS}</td>
+                      <td className="border py-3">
+                        {moment(item.DATE).format("YYYY-MM-DD")}
+                      </td>
+                      <td className="border py-2">Rs. {item.VALUE}</td>
+                      <td className="border py-3">
+                        {moment(item.PAYMENT_DATE).format("YYYY-MM-DD")}
+                      </td>
+                      <td className="border py-2">Rs. {item.PAID_VALUE}</td>
+                      <td className="border py-2">{item.PATMENT_TYPE}</td>
+                      <td className="border py-2">
+                        <span
+                          className={
+                            item.PAYMENT_STATUS === "complete"
+                              ? "text-green-500"
+                              : ""
+                          }
+                        >
+                          {item.PAYMENT_STATUS}
+                        </span>
+                      </td>
+                      <td className="border py-2">
+                        <button
+                          className={`border-none text-slate-500 ${
+                            item.PAYMENT_STATUS === "complete"
+                              ? "cursor-not-allowed"
+                              : "hover:text-slate-800"
+                          }`}
+                          disabled={item.PAYMENT_STATUS === "complete"}
+                          onClick={() => {
+                            setSelectedItem(item);
+                            setIsModalOpen(true);
+                          }}
+                        >
+                          <FaEdit />
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="9" className="text-center py-4">
+                      <img
+                        src={Nodata}
+                        alt="No data"
+                        className="w-32 h-52 mx-auto"
+                      />
+                      <p className="text-lg text-gray-500">No data found</p>
                     </td>
                   </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan="9" className="text-center py-4">
-                    <img
-                      src={Nodata}
-                      alt="No data"
-                      className="w-32 h-52 mx-auto"
-                    />
-                    <p className="text-lg text-gray-500">No data found</p>
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
         <CommonPagination
           totalPages={totalPages}
