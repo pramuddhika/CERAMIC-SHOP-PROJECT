@@ -111,6 +111,7 @@ const Use = () => {
             setTimeout(() => {
               setFieldValue("material", null);
             }, 0);
+            fetchMaterialUsageData(currentPage, itemsPerPage, filterData)
           } catch (error) {
             toast.error(error?.response?.data?.error);
             console.error(error);

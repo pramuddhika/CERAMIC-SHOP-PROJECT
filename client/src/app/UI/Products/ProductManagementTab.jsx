@@ -73,14 +73,16 @@ const ProductManagementTab = () => {
     }
   };
 
-  const fetchSubCategoryData = async () => { 
+  const fetchSubCategoriesByCategory = async (categoryId) => {
     try {
-      const response = await axios.get("/api/productdata/get/subcategoryList");
+      const response = await axios.get(
+        `/api/productdata/get/category/${categoryId}`
+      );
       setSubCategoryData(response.data);
     } catch (error) {
       console.log("Error:", error);
     }
-  }
+  };
 
   const fetchProductData = async (page, limit) => {
     setIsLoading(true);
@@ -100,7 +102,6 @@ const ProductManagementTab = () => {
   useEffect(() => {
     getNewId();
     fetchCategoryList();
-    fetchSubCategoryData();
     fetchProductData(currentPage, itemsPerPage);
   }, [currentPage, itemsPerPage]);
 
@@ -189,6 +190,16 @@ const ProductManagementTab = () => {
     if (file) {
       setSelectedImage(URL.createObjectURL(file));
       setSelectedFile(file);
+    }
+  };
+
+  const handleCategoryChange = (e) => {
+    const categoryId = e.target.value;
+    formik.setFieldValue("category", categoryId);
+    formik.setFieldValue("subcategory", ""); // Reset subcategory
+    setSubCategoryData([]); // Clear existing subcategories
+    if (categoryId) {
+      fetchSubCategoriesByCategory(categoryId);
     }
   };
 
@@ -377,7 +388,7 @@ const ProductManagementTab = () => {
                             className="w-full border rounded px-3 py-2 focus:outline-none"
                             style={{ width: "100%" }}
                             value={formik.values.category}
-                            onChange={formik.handleChange}
+                            onChange={handleCategoryChange}
                           >
                             <option value="">Select Category</option>
                             {categoryList.map((category) => (

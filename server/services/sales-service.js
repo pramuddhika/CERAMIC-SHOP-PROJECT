@@ -171,48 +171,89 @@ export const getOrderDataService = async (
 };
 
 //update order data
-export const updateOrderDataService = async (orderId, orderStatus, orderUpdate) => {
+export const updateOrderDataService = async (
+  orderId,
+  orderStatus,
+  orderUpdate = []              // [{ productCode, addedQuantity }]
+) => {
   return new Promise((resolve, reject) => {
-    const updateOrderSql = `UPDATE orders SET STATUS = ? WHERE ORDER_ID = ?`;
-    const updateOrderDataSql = `UPDATE order_data SET COMPLETED_QUANTITY = COMPLETED_QUANTITY + ? WHERE ORDER_ID = ? AND PRODUCT_CODE = ?`;
-    const updateProductionSql = `UPDATE production SET UPDATE_DATE = ?, QUANTITY = QUANTITY - ? WHERE PRODUCT_CODE = ?`;
-
-    // Update order status
-    db.query(updateOrderSql, [orderStatus, orderId], (err) => {
-      if (err) {
-        return reject({ message: "Error updating order status!", error: err });
-      }
-
-      // Update order_data and production tables
-      const updatePromises = orderUpdate.map((item) => {
-        return new Promise((res, rej) => {
-          db.query(
-            updateOrderDataSql,
-            [item.addedQuantity, orderId, item.productCode],
-            (err) => {
-              if (err) {
-                return rej(err);
-              }
-
-              db.query(updateProductionSql, [new Date(), item.addedQuantity, item.productCode], (err) => {
-                if (err) {
-                  return rej(err);
-                }
-                res();
+    /* ---------- 1) Check stock for every product ---------- */
+    const stockSql =
+      "SELECT QUANTITY FROM production WHERE PRODUCT_CODE = ?";
+    const stockChecks = orderUpdate.map(
+      (item) =>
+        new Promise((res, rej) => {
+          db.query(stockSql, [item.productCode], (err, rows) => {
+            if (err)
+              return rej({ message: "Stock check failed!", error: err });
+            if (!rows.length || rows[0].QUANTITY < item.addedQuantity)
+              return rej({
+                message: `Not enough quantity for product ${item.productCode}`,
               });
-            }
-          );
-        });
-      });
-
-      Promise.all(updatePromises)
-        .then(() => {
-          resolve({ message: "Order data updated successfully!" });
+            res();
+          });
         })
-        .catch((err) => {
-          reject({ message: "Error updating order data!", error: err });
-        });
-    });
+    );
+
+    /* Wait for ALL stock checks to finish */
+    Promise.all(stockChecks)
+      .then(() => {
+        /* ---------- 2) Update order status once ---------- */
+        db.query(
+          "UPDATE orders SET STATUS = ? WHERE ORDER_ID = ?",
+          [orderStatus, orderId],
+          (err) => {
+            if (err)
+              return reject({
+                message: "Error updating order status!",
+                error: err,
+              });
+
+            /* ---------- 3) Update order_data & production rows ---------- */
+            const now = new Date();
+            const orderDataSql = `
+              UPDATE order_data
+                 SET COMPLETED_QUANTITY = COMPLETED_QUANTITY + ?
+               WHERE ORDER_ID = ? AND PRODUCT_CODE = ?`;
+            const prodSql = `
+              UPDATE production
+                 SET UPDATE_DATE = ?, QUANTITY = QUANTITY - ?
+               WHERE PRODUCT_CODE = ?`;
+
+            const lineUpdates = orderUpdate.map(
+              (item) =>
+                new Promise((res, rej) => {
+                  db.query(
+                    orderDataSql,
+                    [item.addedQuantity, orderId, item.productCode],
+                    (err) => {
+                      if (err) return rej(err);
+                      db.query(
+                        prodSql,
+                        [now, item.addedQuantity, item.productCode],
+                        (err) => (err ? rej(err) : res())
+                      );
+                    }
+                  );
+                })
+            );
+
+            Promise.all(lineUpdates)
+              .then(() =>
+                resolve({ message: "Order data updated successfully!" })
+              )
+              .catch((err) =>
+                reject({
+                  message: "Error updating order data!",
+                  error: err,
+                })
+              );
+          }
+        );
+      })
+      .catch(reject); // stock check failure
   });
 };
+
+
 
