@@ -95,28 +95,86 @@ export const editProjectcreationDataService = async (
   id
 ) => {
   return new Promise((resolve, reject) => {
-    const query = `UPDATE product_stock_stages SET STAGE = '${stage}', DAMAGE_COUNT = '${damage_count}', QUANTITY = '${quantity}', UPDATE_DATE = '${updated_date}' WHERE ID = '${id}'`;
-    const query3 =`UPDATE production p 
-     JOIN product_stock_stages ps ON p.PRODUCT_CODE = ps.PRODUCT_CODE
-     SET p.QUANTITY = (ps.QUANTITY - ps.DAMAGE_COUNT),
-     p.UPDATE_DATE = NOW() WHERE ps.STAGE = (
-      SELECT MAX(ss.STOCK_STAGE_TAG) 
-      FROM stock_stages ss 
-      WHERE ps.PRODUCT_CODE = p.PRODUCT_CODE);`;
+    // Get current stage and max stage
+    const getCurrentStageQuery = `
+      SELECT pss.STAGE as currentStage,
+             (SELECT MAX(STOCK_STAGE_TAG) FROM stock_stages) as maxStage
+      FROM product_stock_stages pss
+      WHERE pss.ID = ?
+    `;
 
-    db.query(query, (err) => {
+    // Update product_stock_stages
+    const updateStageQuery = `
+      UPDATE product_stock_stages 
+      SET STAGE = ?,
+          DAMAGE_COUNT = DAMAGE_COUNT + ?,
+          QUANTITY = ?,
+          UPDATE_DATE = ?
+      WHERE ID = ?
+    `;
+
+    // Update production based on scenario
+    const updateProductionQuery = `
+      UPDATE production 
+      SET QUANTITY = CASE 
+        -- Max to Max: Only subtract damage count
+        WHEN ? = ? AND ? = ? THEN QUANTITY - ?
+        -- Non-max to Max: Add new quantity minus total damage
+        ELSE QUANTITY + ? - ?
+      END,
+      UPDATE_DATE = ?
+      WHERE PRODUCT_CODE = ?
+    `;
+
+    // Execute queries in sequence
+    db.query(getCurrentStageQuery, [id], (err, stageResult) => {
       if (err) {
-        reject({ message: "Something went wrong, Please try again!" });
-      } else {
-        resolve({ message: "Project creation data updated successfully" });
+        reject({ message: "Failed to get stage information" });
+        return;
       }
-    });
-    db.query(query3, (err) => {
-      if (err) {
-        reject({ message: "Something went wrong, Please try again!" });
-      } else {
-        resolve({ message: "Project creation data updated successfully" });
-      }
+
+      const { currentStage, maxStage } = stageResult[0];
+      const isTransitionToMax = currentStage !== maxStage && stage === maxStage;
+      const isAlreadyMax = currentStage === maxStage && stage === maxStage;
+
+      // First update product_stock_stages
+      db.query(updateStageQuery, 
+        [stage, damage_count, quantity, updated_date, id], 
+        (err) => {
+          if (err) {
+            reject({ message: "Failed to update stage data" });
+            return;
+          }
+
+          // If moving to max stage or already at max stage, update production
+          if (isTransitionToMax || isAlreadyMax) {
+            db.query(updateProductionQuery, 
+              [
+                currentStage, maxStage, // For checking if Max to Max
+                stage, maxStage,        // For checking new stage is max
+                damage_count,           // For damage count reduction
+                quantity,               // For adding new quantity
+                damage_count,           // For subtracting damage from new quantity
+                updated_date,
+                product_code
+              ], 
+              (err) => {
+                if (err) {
+                  reject({ message: "Failed to update production data" });
+                  return;
+                }
+                resolve({ 
+                  message: "Product creation and production data updated successfully" 
+                });
+              }
+            );
+          } else {
+            resolve({ 
+              message: "Product creation data updated successfully" 
+            });
+          }
+        }
+      );
     });
   });
 };
