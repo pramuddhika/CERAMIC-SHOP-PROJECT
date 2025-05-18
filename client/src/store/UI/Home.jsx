@@ -15,7 +15,7 @@ const Home = () => {
     const fetchProducts = async (page, limit) => {
       try {
         const response = await axios.get(
-          `/api/productdata/get/shop/product?page${page}=&limit=${limit}`
+          `/api/productdata/get/shop/product?page=${page}&limit=${limit}`
         );
         setProducts(response.data.data);
         setTotalPages(response?.data?.totalPages);
