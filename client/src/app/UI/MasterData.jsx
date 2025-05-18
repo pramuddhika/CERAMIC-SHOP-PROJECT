@@ -272,7 +272,6 @@ const Masterdata = () => {
                           onChange={(e) =>
                             setFieldValue("description", e.target.value)
                           }
-                          disabled={isEditing}
                         ></textarea>
                         {touched.description && errors.description && (
                           <div className="text-red-500 text-sm mb-3">

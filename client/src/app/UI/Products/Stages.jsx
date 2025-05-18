@@ -387,7 +387,6 @@ const Stages = () => {
                             const newDamage = parseInt(e.target.value, 10) || 0;
                             setFieldValue("damage_count", newDamage);
                             setTotalDamageCount(
-                              (productcreationdata?.DAMAGE_COUNT || 0) +
                                 newDamage
                             );
                           }}
